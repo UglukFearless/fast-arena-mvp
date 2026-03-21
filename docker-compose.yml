@@ -1,0 +1,71 @@
+version: "3.9"
+
+volumes:
+  local_postgres_data: {}
+
+services:
+  fa_postgres:
+    container_name: fa_postgres
+    image: postgres:${POSTGRES_VERSION}
+    environment:
+      - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}'
+    restart: unless-stopped
+    networks:
+      - postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+        interval: 5s
+        timeout: 10s
+        retries: 120
+
+  pgadmin:
+    container_name: fa_pgadmin_container
+    image: dpage/pgadmin4:${PGADMIN_VERSION}
+    environment:
+      PGADMIN_DEFAULT_EMAIL: '${PGADMIN_DEFAULT_EMAIL}'
+      PGADMIN_DEFAULT_PASSWORD: '${PGADMIN_DEFAULT_PASSWORD}'
+      PGADMIN_CONFIG_SERVER_MODE: '${PGADMIN_CONFIG_SERVER_MODE}'
+    ports:
+      - '${PGADMIN_PORT}:80'
+    restart: unless-stopped
+    networks:
+      - internet
+      - postgres
+  
+  app:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    container_name: fastarena
+    image: fastarena:${FASTARENA_BACKEND_VERSION}
+    environment:
+      - ConnectionStrings__Default=Server=${DB_HOST};Port=${POSTGRES_PORT};UserId=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB};
+      - ReverseProxy__Clusters__frontend_cluster__Destinations__main__Address=http://fastarena-front:${FRONTEND_PORT}
+    ports:
+      - '${APP_HTTP_PORT}:80'
+      - '${APP_HTTPS_PORT}:443'
+    depends_on:
+        fa_postgres:
+            condition: service_healthy
+    networks:
+      - internet
+      - postgres
+
+  fastarena-front:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    container_name: fastarena-front
+    image: fastarena-front:${FASTARENA_FRONTEND_VERSION}
+    networks:
+      - postgres
+
+networks:
+  internet:
+    name: internet
+    driver: bridge
+  postgres:
+    name: postgres
+    driver: bridge
