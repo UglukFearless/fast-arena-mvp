@@ -15,7 +15,7 @@ internal static class UserProfile
         {
             Id = userDal.Id,
             Login = userDal.Login,
-            Password = userDal.Password,
+            PasswordHash = userDal.PasswordHash,
             SelectedHeroId = userDal.SelectedHeroId,
         };
     }

@@ -1,5 +1,6 @@
 ﻿using FastArena.Core.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,9 +12,12 @@ namespace FastArena.WebApi.Providers;
 public class AuthProvider
 {
     private readonly IConfigurationSection _configuration;
-    public AuthProvider(IConfiguration configuration)
+    private readonly PepperedPasswordHasher _passwordHasher;
+
+    public AuthProvider(IConfiguration configuration, PepperedPasswordHasher passwordHasher)
     {
         _configuration = configuration.GetSection("AuthOptions");
+        _passwordHasher = passwordHasher;
     }
 
     public string GetTokenForUser(User user)
@@ -33,6 +37,17 @@ public class AuthProvider
                 );
         var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
         return encodedJwt;
+    }
+
+    public string GetHashForPassword(string password)
+    {
+        var hash = _passwordHasher.HashPassword(password);
+        return hash;
+    }
+
+    public bool VerificatePassword(string password, string storedHash)
+    {
+        return _passwordHasher.VerificatePassword(password, storedHash);
     }
 
     private ClaimsIdentity GetIdentity(string login, Guid id)

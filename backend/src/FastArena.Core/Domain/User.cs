@@ -8,7 +8,7 @@ public class User
 
     public required string Login { get; set; }
 
-    public required string Password { get; set; }
+    public required string PasswordHash { get; set; }
 
     public Guid? SelectedHeroId { get; set; }
 

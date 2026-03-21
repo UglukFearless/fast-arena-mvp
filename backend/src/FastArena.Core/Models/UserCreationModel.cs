@@ -1,3 +1,3 @@
 ﻿namespace FastArena.Core.Models;
 
-public record UserCreationModel(string Login, string Password);
+public record UserCreationModel(string Login, string PasswordHash);

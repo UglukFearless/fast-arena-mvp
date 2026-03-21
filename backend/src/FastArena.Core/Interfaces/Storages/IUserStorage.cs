@@ -6,7 +6,7 @@ namespace FastArena.Core.Interfaces.Storages;
 public interface IUserStorage
 {
     Task<User> CreateAsync(UserCreationModel model);
-    Task<User> GetByLoginAndPasswordAsync(string login, string password);
+    Task<User> GetByLoginAsync(string login);
     Task<User> GetAsync(Guid id);
     Task SelectHeroAsync(Guid id, Guid heroId);
     Task UnselectHeroAsync(Guid id);

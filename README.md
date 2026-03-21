@@ -6,7 +6,7 @@
 
 ## Технологии
 
-- Backend: .NET 8 (ASP.NET Core, EF Core, PostgreSQL)
+- Backend: .NET 10 (ASP.NET Core, EF Core, PostgreSQL)
 - Frontend: Vue 3 + TypeScript + Pinia + Vue Router
 - Инфраструктура: Docker Compose
 

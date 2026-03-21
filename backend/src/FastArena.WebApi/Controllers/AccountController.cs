@@ -31,9 +31,9 @@ public class AccountController : ControllerBase
         {
             return BadRequest($"Invalid registration data: {errorText}");
         }
+        var passwordHash = _authProvider.GetHashForPassword(password);
 
-
-        var user = await _userService.CreateAsyc(login, password);
+        var user = await _userService.CreateAsync(login, passwordHash);
         var token = _authProvider.GetTokenForUser(user);
 
         var response = new AuthResultDto(token, UserProfile.Map(user));
@@ -47,16 +47,45 @@ public class AccountController : ControllerBase
         var login = authModel.Login.Trim();
         var password = authModel.Password.Trim();
 
-        var user = await _userService.GetByLoginAndPasswordAsync(login, password);
+        if (!IsValidLoginData(login, password, out string errorText))
+        {
+            return BadRequest($"Invalid login data: {errorText}");
+        }
 
+        var user = await _userService.GetByLoginAsync(login);
         if (user == null)
         {
             return Unauthorized("Login or password is wrong.");
         }
+
+        var isPasswordCorrect = _authProvider.VerificatePassword(password, user.PasswordHash);
+        if (!isPasswordCorrect)
+        {
+            return Unauthorized("Login or password is wrong.");
+        }
+
         var token = _authProvider.GetTokenForUser(user);
 
         var response = new AuthResultDto(token, UserProfile.Map(user));
         return Ok(response);
+    }
+
+    private bool IsValidLoginData(string login, string password, out string errorText)
+    {
+        if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+        {
+            errorText = "Login or Password is null or white space.";
+            return false;
+        }
+
+        if (login.Contains(' ') || password.Contains(' '))
+        {
+            errorText = "Login or Password contains space symbols.";
+            return false;
+        }
+
+        errorText = null;
+        return true;
     }
 
     private bool IsValidRegistrationData(string login, string password, out string errorText)

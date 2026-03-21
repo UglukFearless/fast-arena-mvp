@@ -9,7 +9,7 @@ public class UserDal
     [MaxLength(128)]
     public required string Login { get; set; }
 
-    public required string Password { get; set; }
+    public required string PasswordHash { get; set; }
 
     public Guid? SelectedHeroId { get; set; }
 

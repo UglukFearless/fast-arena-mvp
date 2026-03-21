@@ -22,7 +22,7 @@ public class UserStorage : IUserStorage
         {
             Id = Guid.NewGuid(),
             Login = model.Login,
-            Password = model.Password,
+            PasswordHash = model.PasswordHash,
         };
         _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
@@ -30,9 +30,9 @@ public class UserStorage : IUserStorage
         return UserProfile.Map(newUser);
     }
 
-    public async Task<User> GetByLoginAndPasswordAsync(string login, string password)
+    public async Task<User> GetByLoginAsync(string login)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
         return UserProfile.Map(user);
     }
 
