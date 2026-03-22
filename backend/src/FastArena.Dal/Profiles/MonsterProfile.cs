@@ -20,7 +20,7 @@ internal class MonsterProfile
             BaseHealth = dal.BaseHealth,
             RankLevel = dal.RankLevel,
             HealthPerLevel = dal.HealthPerLevel,
-            PortraitId = dal.PortraitId,
+            PortraitId = dal.PortraitId.Value,
             Portrait = deep ? PortraitProfile.Map(dal.Portrait) : null,
         };
 

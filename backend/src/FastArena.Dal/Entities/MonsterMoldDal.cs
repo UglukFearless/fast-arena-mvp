@@ -11,6 +11,6 @@ public class MonsterMoldDal
     public int BaseHealth { get; set; } = 100;
     public int HealthPerLevel { get; set; } = 10;
     public MonsterSex Sex { get; set; } = MonsterSex.NONE;
-    public Guid PortraitId { get; set; }
+    public Guid? PortraitId { get; set; }
     public PortraitDal? Portrait { get; set; }
 }

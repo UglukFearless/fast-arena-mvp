@@ -54,7 +54,9 @@ const props = defineProps({
     }
 
     &__portraite {
-        width: 48px;
+        width: 84px;
+        border: 2px solid black;
+        box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, .2);
     }
 
     &__name {

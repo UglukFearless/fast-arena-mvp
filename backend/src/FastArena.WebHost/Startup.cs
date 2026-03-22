@@ -1,4 +1,5 @@
 ﻿using FastArena.WebHost.Configs;
+using FastArena.WebHost.Services.Seeders;
 using System.Text.Json.Serialization;
 
 
@@ -21,6 +22,11 @@ public class Startup
         services.AddStorages();
         services.AddAppServices();
         services.AddProviders();
+
+        services.AddScoped<PortraitSeeder>();
+        services.AddScoped<MonsterSeeder>();
+        services.AddScoped<EntityLinker>();
+        services.AddScoped<SeederRunner>();
 
         services.AddCors(options =>
         {
@@ -45,10 +51,8 @@ public class Startup
         services.AddSwaggerCongigurations();
     }
 
-    public void Configure(WebApplication app)
+public void Configure(WebApplication app)
     {
-        app.UseDeveloperExceptionPage();
-
         app.AddSwaggerConfigurations();
 
         app.UseHttpsRedirection();
@@ -65,5 +69,18 @@ public class Startup
             endpoints.MapControllers();
             endpoints.AddFrontendProxyRouting();
         });
+
+        // Seed data
+        SeedData(app);
+    }
+
+    private void SeedData(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var seederRunner = scope.ServiceProvider.GetRequiredService<SeederRunner>();
+        var env = app.Environment;
+        
+        var wwwrootPath = Path.Combine(env.ContentRootPath, "wwwroot");
+        seederRunner.RunAsync(wwwrootPath).GetAwaiter().GetResult();
     }
 }

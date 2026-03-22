@@ -12,6 +12,10 @@ public static class DataBaseConfig
         {
             throw new ArgumentNullException(nameof(defaultConnectionString));
         }
-        return services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(defaultConnectionString));
+        
+        //services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(defaultConnectionString));
+        services.AddDbContextFactory<ApplicationContext>(options => options.UseNpgsql(defaultConnectionString));
+        
+        return services;
     }
 }
