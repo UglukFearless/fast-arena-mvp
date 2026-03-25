@@ -109,7 +109,7 @@ public class StatisticService : IStatisticService
         List<Hero> heroes;
         if (owner == HeroOwnerParam.MINE)
         {
-            heroes = (await _heroService.GetAllByUserIdAsync(userId)).ToList();
+            heroes = (await _heroService.GetAllWithInfoByUserIdAsync(userId)).ToList();
         }
         else
         {

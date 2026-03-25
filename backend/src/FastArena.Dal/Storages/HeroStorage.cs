@@ -1,5 +1,4 @@
-﻿using FastArena.Core.Domain;
-using FastArena.Core.Domain.Heroes;
+﻿using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Interfaces.Storages;
 using FastArena.Core.Models;
 using FastArena.Dal.Entities;

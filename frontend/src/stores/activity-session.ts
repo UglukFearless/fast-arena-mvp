@@ -1,4 +1,4 @@
-import { ActivityActionType, ActivitySessionClient, ActivitySessionDto } from "@/api/clients";
+import { ActivitySessionClient, ActivitySessionDto } from "@/api/clients";
 import actionRouteService from "@/services/action-route-service";
 import { ApiSettings } from "@/utils/constants";
 import authFetch from "@/utils/http-helper";

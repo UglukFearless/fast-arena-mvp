@@ -42,7 +42,9 @@ public class Startup
 
         services.AddEndpointsApiExplorer();
         services.AddControllers().AddJsonOptions(x =>
-                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+        {
+            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        });
         services.AddRouting(options => options.LowercaseUrls = true);
 
         services.AddFrontendProxy(_configuration);

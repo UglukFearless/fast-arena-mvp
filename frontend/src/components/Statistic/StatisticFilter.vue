@@ -5,6 +5,7 @@
             <option 
                 class="statistic-filter__option"
                 v-for="option in filter.options" 
+                :key="option.label"
                 :value="option.value">
                 {{ option.label }}
             </option>
@@ -14,23 +15,48 @@
 
 <script lang="ts" setup>
 import { PropType } from 'vue';
+import { StatisticFilter, StatisticFilterValue } from '@/model/StatisticFilter';
 
 const props = defineProps({
     filter: {
         required: true,
-        type: Object as PropType<any>,
+        type: Object as PropType<StatisticFilter>,
     }
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+    (event: 'update:modelValue', value: StatisticFilterValue): void;
+}>();
 
-function updateValue(filterValue: string | number) {
-    if (typeof filterValue === 'string') {
-        filterValue = Number.parseInt(filterValue);
-    }
+function updateValue(filterValue: StatisticFilterValue) {
     emit('update:modelValue', filterValue);
 }
 </script>
 
 <style lang="scss" scoped>
+
+.statistic-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &__title {
+        font-weight: 700;
+    }
+
+    &__select {
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 2px solid #444;
+        background-color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+
+        &:focus {
+            outline: none;
+            border-color: #000;
+        }
+    }
+}
+
 </style>
