@@ -1,2 +1,4 @@
+@echo off
+set SCRIPT_DIR=%~dp0
 
-dotnet run --project C:\git\Colizei\fast-arena\backend\src\FastArena.ApiClientGenerator http://localhost:5204/swagger/FastArenaAPI/swagger.json C:\git\Colizei\fast-arena\backend\src\FastArena.ApiClientGenerator\client-build\api-clients.ts ts
+dotnet run --project "%SCRIPT_DIR%FastArena.ApiClientGenerator.csproj" "http://localhost:8100/swagger/FastArenaAPI/swagger.json" "%SCRIPT_DIR%client-build\api-clients.ts" ts

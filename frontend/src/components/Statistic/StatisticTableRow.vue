@@ -2,7 +2,10 @@
     <div class="statistic-table-row">
         <div class="statistic-table-row__hero">
             <div>
-                <img :src="row.portraitUrl" />
+                <img v-if="!row.isAlive"
+                    class="statistic-table-row__skull" 
+                    src="@/assets/gui/death-skull.svg" />
+                <img class="statistic-table-row__portrait" :src="row.portraitUrl" />
             </div>
             <span>
                 {{ row.heroName }}
@@ -46,11 +49,19 @@ const props = defineProps({
         font-weight: 700;
         display: flex;
         align-items: center;
+        position: relative;
         gap: 8px;
-        
-        img {
-            width: 64px;
-        }
+    }
+
+    &__skull {
+        width: 24px;
+        position: absolute;
+        left: 3px;
+        top: 3px;
+    }
+    
+    &__portrait {
+        width: 64px;
     }
 
     &__value {

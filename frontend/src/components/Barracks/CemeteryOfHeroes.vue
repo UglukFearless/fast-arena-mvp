@@ -30,6 +30,8 @@ const deadHeroes = computed(() => heroStore.deadHeroes);
     &__content-wrapper {
         display: flex;
         flex-wrap: wrap;
+        max-width: 1280px;
+        margin: 0 auto;
     }
 }
 </style>

@@ -5,7 +5,7 @@ import { useActivitySessionStore } from '@/stores/activity-session';
 
 export function getRoutePathByActionType(type: ActivityActionType): string {
   switch (type) {
-    case 0:
+    case ActivityActionType.MONSTER_FIGHT:
         return '/fight';
       default:
         throw Error('Unknown type of activity action ' + type);

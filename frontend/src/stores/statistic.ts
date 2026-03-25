@@ -9,14 +9,15 @@ import {
 import { ApiSettings } from "@/utils/constants";
 import authFetch from "@/utils/http-helper";
 import { defineStore } from "pinia";
+import { StatisticFiltersState } from "@/model/StatisticFilter";
 
 
 export const useStatisticStore = defineStore('statistic', {
     state: () => ({
         data: null as StatisticDataDto | null,
-        parameter: undefined as Parameter | undefined,
-        aliveParam: undefined as HeroAliveParam | undefined,
-        ownerParam: undefined as HeroOwnerParam | undefined,
+        parameter: Parameter.WINS as Parameter | undefined,
+        aliveParam: HeroAliveParam.ALL as HeroAliveParam | undefined,
+        ownerParam: HeroOwnerParam.ANY as HeroOwnerParam | undefined,
         desc: true,
     }),
     getters: {
@@ -34,7 +35,7 @@ export const useStatisticStore = defineStore('statistic', {
         },
     },
     actions: {
-        async init() {
+        async fetchData() {
             const statisticClient = new StatisticClient(
                 ApiSettings.BaseUrl,
                 authFetch,
@@ -46,17 +47,19 @@ export const useStatisticStore = defineStore('statistic', {
                 this.desc,
             );
         },
+        async init() {
+            await this.fetchData();
+        },
         async update() {
-            const statisticClient = new StatisticClient(
-                ApiSettings.BaseUrl,
-                authFetch,
-            );
-            this.data = await statisticClient.get(
-                this.parameter,
-                this.aliveParam,
-                this.ownerParam,
-                this.desc,
-            );
+            await this.fetchData();
+        },
+        async applyFilters(filters: StatisticFiltersState) {
+            this.parameter = filters.parameter;
+            this.aliveParam = filters.aliveParam;
+            this.ownerParam = filters.ownerParam;
+            this.desc = filters.desc;
+
+            await this.fetchData();
         },
         async setParameter(parameter: Parameter) {
             this.parameter = parameter;
@@ -65,7 +68,7 @@ export const useStatisticStore = defineStore('statistic', {
             this.aliveParam = aliveParam;
         },
         async setOwnerParam(ownerParam: HeroOwnerParam) {
-            this.ownerParam = ownerParam
+            this.ownerParam = ownerParam;
         },
         async setDesc(desc: boolean) {
             this.desc = desc;
