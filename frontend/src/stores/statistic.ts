@@ -11,14 +11,21 @@ import authFetch from "@/utils/http-helper";
 import { defineStore } from "pinia";
 import { StatisticFiltersState } from "@/model/StatisticFilter";
 
+const defaultStatisticFiltersState: StatisticFiltersState = {
+    parameter: Parameter.WINS,
+    aliveParam: HeroAliveParam.ALL,
+    ownerParam: HeroOwnerParam.ANY,
+    desc: true,
+};
+
 
 export const useStatisticStore = defineStore('statistic', {
     state: () => ({
         data: null as StatisticDataDto | null,
-        parameter: Parameter.WINS as Parameter | undefined,
-        aliveParam: HeroAliveParam.ALL as HeroAliveParam | undefined,
-        ownerParam: HeroOwnerParam.ANY as HeroOwnerParam | undefined,
-        desc: true,
+        parameter: defaultStatisticFiltersState.parameter as Parameter | undefined,
+        aliveParam: defaultStatisticFiltersState.aliveParam as HeroAliveParam | undefined,
+        ownerParam: defaultStatisticFiltersState.ownerParam as HeroOwnerParam | undefined,
+        desc: defaultStatisticFiltersState.desc,
     }),
     getters: {
         rows: (state): StatisticDataRowDto[] => {
@@ -48,6 +55,15 @@ export const useStatisticStore = defineStore('statistic', {
             );
         },
         async init() {
+            await this.fetchData();
+        },
+        async resetAndFetch() {
+            this.data = null;
+            this.parameter = defaultStatisticFiltersState.parameter;
+            this.aliveParam = defaultStatisticFiltersState.aliveParam;
+            this.ownerParam = defaultStatisticFiltersState.ownerParam;
+            this.desc = defaultStatisticFiltersState.desc;
+
             await this.fetchData();
         },
         async update() {

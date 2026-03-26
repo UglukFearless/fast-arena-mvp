@@ -11,4 +11,12 @@
 import BaseLayout from '@/layouts/BaseLayout.vue';
 import StatisticFiltersBlock from '@/components/Statistic/StatisticFiltersBlock.vue';
 import StatisticTable from '@/components/Statistic/StatisticTable.vue';
+import { useStatisticStore } from '@/stores/statistic';
+import { onMounted } from 'vue';
+
+const statisticStore = useStatisticStore();
+
+onMounted(async () => {
+    await statisticStore.resetAndFetch();
+});
 </script>

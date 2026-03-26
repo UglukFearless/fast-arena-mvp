@@ -16,8 +16,6 @@ import StatisticTableRow from '@/components/Statistic/StatisticTableRow.vue';
 
 const statisticStore = useStatisticStore();
 
-statisticStore.init();
-
 const rows = computed(() => statisticStore.rows);
 </script>
 
