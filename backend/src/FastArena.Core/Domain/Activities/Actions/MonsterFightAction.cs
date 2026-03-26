@@ -44,13 +44,13 @@ public class MonsterFightAction : ActivityAction
         switch (dangerLevel)
         {
             case ActivityDangerLevel.LOW:
-                resultLevel = level + random.Next(-7, 1);
+                resultLevel = level + random.Next(-7, 2);
                 break;
             case ActivityDangerLevel.MEDIUM:
-                resultLevel = level + random.Next(-3, 3);
+                resultLevel = level + random.Next(-3, 4);
                 break;
             case ActivityDangerLevel.HIGH:
-                resultLevel = level + random.Next(-2, 6);
+                resultLevel = level + random.Next(-2, 7);
                 break;
         }
 

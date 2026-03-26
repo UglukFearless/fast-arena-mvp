@@ -154,8 +154,8 @@ public class MonsterFightService : IMonsterFightService
         var lastState = GetTheLastState(monsterFight);
         var lastStateValue = lastState.Value;
         var rnd = new Random();
-        var heroDiceRoll = rnd.Next(1, 6);
-        var monsterDiceRoll = rnd.Next(1, 6);
+        var heroDiceRoll = rnd.Next(1, 7);
+        var monsterDiceRoll = rnd.Next(1, 7);
 
         var diceRollBalance = heroDiceRoll - monsterDiceRoll;
         var abilityBalance = (int)((lastStateValue.HeroAbility - lastStateValue.MonsterAbility) / 3);
@@ -189,7 +189,7 @@ public class MonsterFightService : IMonsterFightService
         var hitZone = HitZone.HEAD;
         if (strikeStrength > 0)
         {
-            var zoneDiceRoll = rnd.Next(1, 6);
+            var zoneDiceRoll = rnd.Next(1, 7);
             if (zoneDiceRoll != 6)
             {
                 switch (zoneDiceRoll)
@@ -213,7 +213,7 @@ public class MonsterFightService : IMonsterFightService
             } 
             else
             {
-                zoneDiceRoll = rnd.Next(1, 6);
+                zoneDiceRoll = rnd.Next(1, 7);
                 switch (zoneDiceRoll)
                 {
                     case 1:
