@@ -38,7 +38,7 @@
             <AppButton @click="selectHero">
                 Выбрать
             </AppButton>
-            <AppButton>
+            <AppButton @click="goInfo(hero.id)">
                 Инфо
             </AppButton>
         </div>
@@ -63,6 +63,10 @@ const heroStore = useHeroStore();
 
 async function selectHero() {
     await heroStore.select(props.hero.id as string);
+}
+
+function goInfo(heroId: string) {
+    console.log('Go to hero info with id', heroId);
 }
 
 const progress = computed(() => {
@@ -120,8 +124,10 @@ const heroGold = computed(() => {
     }
 
     &__portrait {
-        width: 64px;
+        width: 84px;
         margin: 0 12px;
+        border: 1px solid black;
+        box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, .2);
     }
 
     &__props {

@@ -27,7 +27,7 @@ const selectedHero = computed(() => heroStore.selectedHero);
     }
 
     &__image {
-        width: 64px;
+        width: 84px;
         margin: 0 12px;
     }
 
