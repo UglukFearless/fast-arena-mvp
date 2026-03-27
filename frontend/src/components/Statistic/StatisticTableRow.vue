@@ -14,15 +14,21 @@
         <div class="statistic-table-row__value">
             <span>{{ row.value + ' ' + symbols }}</span>
         </div>
+        <div class="statistic-table-row__actions">
+            <AppButton @click="goToHeroInfo">Инфо</AppButton>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { StatisticDataRowDto } from '@/api/clients';
+import AppButton from '@/components/shared/buttons/AppButton.vue';
 import { useStatisticStore } from '@/stores/statistic';
 import { computed, PropType } from 'vue';
+import { useRouter } from 'vue-router';
 
 const statisticStore = useStatisticStore();
+const router = useRouter();
 const symbols = computed(() => statisticStore.valueSymbols);
 
 const props = defineProps({
@@ -31,6 +37,15 @@ const props = defineProps({
         type: Object as PropType<StatisticDataRowDto>,
     }
 });
+
+function goToHeroInfo() {
+    router.push({
+        name: 'hero-info',
+        params: {
+            id: props.row.heroId,
+        }
+    });
+}
 
 </script>
 
@@ -71,6 +86,14 @@ const props = defineProps({
         font-size: 24px;
         align-items: center;
         display: flex;
+    }
+
+    &__actions {
+        flex: 0 0 140px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 

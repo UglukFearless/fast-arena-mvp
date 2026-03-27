@@ -15,7 +15,7 @@ export class AccountClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     registration(registrationModel: RegistrationModel): Promise<AuthResultDto> {
@@ -100,7 +100,7 @@ export class ActivityClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     get(): Promise<ActivityDto[]> {
@@ -144,7 +144,7 @@ export class ActivitySessionClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     start(activityId: string | undefined): Promise<ActivitySessionDto> {
@@ -225,7 +225,7 @@ export class HealthClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     ping(): Promise<string> {
@@ -302,7 +302,7 @@ export class HeroClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     create(model: HeroCreationModel): Promise<HeroDto> {
@@ -487,6 +487,42 @@ export class HeroClient {
         }
         return Promise.resolve<FileResponse>(null as any);
     }
+
+    getInfo(id: string): Promise<HeroInfoDto> {
+        let url_ = this.baseUrl + "/api/hero/info/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetInfo(_response);
+        });
+    }
+
+    protected processGetInfo(response: Response): Promise<HeroInfoDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as HeroInfoDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<HeroInfoDto>(null as any);
+    }
 }
 
 export class MonsterFightClient {
@@ -496,7 +532,7 @@ export class MonsterFightClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     get(): Promise<MonsterFightDto> {
@@ -577,7 +613,7 @@ export class PortraitClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     getAllForHeroes(): Promise<PortraitDto[]> {
@@ -621,7 +657,7 @@ export class StatisticClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     get(parameter: Parameter | undefined, aliveParam: HeroAliveParam | undefined, ownerParam: HeroOwnerParam | undefined, desc: boolean | undefined): Promise<StatisticDataDto> {
@@ -681,7 +717,7 @@ export class UserClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:5204";
+        this.baseUrl = baseUrl ?? "http://localhost:8100";
     }
 
     getInfo(): Promise<UserInfoDto> {
@@ -848,6 +884,18 @@ export interface HeroCreationModel {
     portraitId: string;
 }
 
+export interface HeroInfoDto {
+    id: string;
+    name: string;
+    sex: HeroSex;
+    level: number;
+    portraitUrl: string | undefined;
+    isAlive: HeroAliveState;
+    maxHealth: number;
+    maxAbility: number;
+    results: MonsterFightResultDto[];
+}
+
 export interface MonsterFightDto {
     hero: HeroDto;
     monster: MonsterDto;
@@ -911,6 +959,7 @@ export interface StatisticDataDto {
 }
 
 export interface StatisticDataRowDto {
+    heroId: string;
     heroName: string;
     portraitUrl: string;
     value: number;

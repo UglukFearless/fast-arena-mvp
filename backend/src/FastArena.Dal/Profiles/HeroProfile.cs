@@ -24,7 +24,7 @@ internal static class HeroProfile
             MaxHealth = heroDal.MaxHealth,
             UserId = heroDal.UserId,
             Items = deep ? HeroItemCellProfiles.Map(heroDal.Items?.ToList(), true) : new List<HeroItemCell>(),
-            Results = deep ? MonsterFightProfile.Map(heroDal.Results?.ToList()) : new List<MonsterFightResult>(),
+            Results = deep ? MonsterFightProfile.Map(heroDal.Results?.ToList(), true) : new List<MonsterFightResult>(),
         };
 
         return hero;

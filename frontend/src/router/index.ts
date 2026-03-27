@@ -82,6 +82,15 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: true 
     },
   },
+  {
+    path: '/hero-info/:id',
+    name: 'hero-info',
+    component: () => import('@/pages/HeroInfo.vue'),
+    meta: {
+      requiresAnonimous: false,
+      requiresAuth: true
+    },
+  },
 ];
 
 const router = createRouter({

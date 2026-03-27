@@ -1,5 +1,6 @@
 ﻿
 using FastArena.Core.Domain.MondterFights;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FastArena.Dal.Entities;
 
@@ -16,6 +17,7 @@ public class MonsterFightResultDal
     public Guid MonsterPortraitId { get; set; }
     public Guid MonsterMoldId { get; set; }
 
+    
     public PortraitDal Portrait { get; set; }
     public HeroDal Hero { get; set; }
     public MonsterMoldDal MonsterMold { get; set; }

@@ -61,7 +61,7 @@ internal class MonsterFightProfile
             HeroId = model.HeroId,
             Order = model.Order,
             Type = model.Type,
-            Monster = deep ? MonsterProfile.Map(model.Monster) : null,
+            Monster = deep ? MonsterProfile.Map(model.Monster, true) : null,
         };
 
         return domain;

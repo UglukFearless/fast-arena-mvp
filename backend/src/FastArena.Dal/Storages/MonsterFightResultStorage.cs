@@ -26,9 +26,10 @@ public class MonsterFightResultStorage : IMonsterFightResultStorage
             HeroId = model.HeroId,
             Order = (lastOrder + 1),
             Type = model.Type,
+            MonsterId = model.Monster.Id,
             MonsterName = model.Monster.Name,
             MonsterMaxHealth = model.Monster.MaxHealth,
-            MonsterLevel = model.Monster.MaxHealth,
+            MonsterLevel = model.Monster.Level,
             MonsterPortraitId = model.Monster.Portrait.Id,
             MonsterMoldId = model.Monster.MonsterMoldId,
         };

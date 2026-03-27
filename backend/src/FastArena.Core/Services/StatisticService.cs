@@ -81,6 +81,7 @@ public class StatisticService : IStatisticService
     {
         return new StatisticDataRow
         {
+            HeroId = h.Id,
             HeroName = h.Name,
             IsAlive = h.IsAlive == HeroAliveState.ALIVE,
             PortraitUrl = h.Portrait.Url,

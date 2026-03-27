@@ -20,21 +20,21 @@ import { useStatisticStore } from '@/stores/statistic';
 const statisticStore = useStatisticStore();
 
 const filters: StatisticFilter[] = [
-    new StatisticFilter('parameter', 'Параметр:', Parameter.WINS, [
+    new StatisticFilter('parameter', 'Параметр:', statisticStore.parameter as Parameter, [
         { value: Parameter.WINS, label: 'Количество побед' },
         { value: Parameter.GOLD, label: 'Богатство' },
         { value: Parameter.LEVEL, label: 'Опыт' },
     ]),
-    new StatisticFilter('aliveParam', 'Жив/мёртв:', HeroAliveParam.ALL, [
+    new StatisticFilter('aliveParam', 'Жив/мёртв:', statisticStore.aliveParam as HeroAliveParam, [
         { value: HeroAliveParam.ALL, label: 'Все' },
         { value: HeroAliveParam.ALIVE, label: 'Живые' },
         { value: HeroAliveParam.DEAD, label: 'Мёртвые' },
     ]),
-    new StatisticFilter('ownerParam', 'Хозяин:', HeroOwnerParam.ANY, [
+    new StatisticFilter('ownerParam', 'Хозяин:', statisticStore.ownerParam as HeroOwnerParam, [
         { value: HeroOwnerParam.ANY, label: 'Все' },
         { value: HeroOwnerParam.MINE, label: 'Мои' },
     ]),
-    new StatisticFilter('desc', 'Порядок:', true, [
+    new StatisticFilter('desc', 'Порядок:', statisticStore.desc, [
         { value: false, label: 'По возрастанию' },
         { value: true, label: 'По убыванию' },
     ]),

@@ -49,6 +49,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import AppButton from '../shared/buttons/AppButton.vue';
 import { useHeroStore } from '@/stores/hero';
 import { HeroLevelProgressDto, ItemType, MonsterFightResultType } from '@/api/clients';
@@ -60,6 +61,7 @@ defineProps({
 });
 
 const heroStore = useHeroStore();
+const router = useRouter();
 const selectedHero = computed(() => heroStore.selectedHero);
 
 async function removeSelectedHero() {
@@ -67,7 +69,12 @@ async function removeSelectedHero() {
 }
 
 function goInfo(heroId: string) {
-    console.log('Go to hero info with id', heroId);
+    router.push({
+        name: 'hero-info',
+        params: {
+            id: heroId,
+        }
+    });
 }
 
 const progress = computed(() => {

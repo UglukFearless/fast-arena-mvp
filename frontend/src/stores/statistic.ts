@@ -13,7 +13,7 @@ import { StatisticFiltersState } from "@/model/StatisticFilter";
 
 const defaultStatisticFiltersState: StatisticFiltersState = {
     parameter: Parameter.WINS,
-    aliveParam: HeroAliveParam.ALL,
+    aliveParam: HeroAliveParam.ALIVE,
     ownerParam: HeroOwnerParam.ANY,
     desc: true,
 };
@@ -76,18 +76,6 @@ export const useStatisticStore = defineStore('statistic', {
             this.desc = filters.desc;
 
             await this.fetchData();
-        },
-        async setParameter(parameter: Parameter) {
-            this.parameter = parameter;
-        },
-        async setAliveParam(aliveParam: HeroAliveParam) {
-            this.aliveParam = aliveParam;
-        },
-        async setOwnerParam(ownerParam: HeroOwnerParam) {
-            this.ownerParam = ownerParam;
-        },
-        async setDesc(desc: boolean) {
-            this.desc = desc;
         },
     }
 });

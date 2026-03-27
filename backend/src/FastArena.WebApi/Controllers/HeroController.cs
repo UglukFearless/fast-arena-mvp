@@ -1,4 +1,5 @@
-﻿using FastArena.Core.Exceptions;
+﻿using FastArena.Core.Domain.Heroes;
+using FastArena.Core.Exceptions;
 using FastArena.Core.Interfaces.App;
 using FastArena.WebApi.Dtos;
 using FastArena.WebApi.Models;
@@ -83,6 +84,22 @@ public class HeroController : ControllerBase
         catch (ActionDeniedException ex)
         {
             return Conflict(ex.Message);
+        }
+    }
+
+    [Authorize]
+    [HttpGet("info/{id}")]
+    public async Task<ActionResult<HeroInfoDto>> GetInfo(Guid id)
+    {
+        try
+        {
+            var userId = AuthProvider.GetCurrentUserIdFromAccessor(_httpContextAccessor);
+            var hero = await _heroService.GetAsync(id);
+            return Ok(HeroInfoProfile.Map(hero, true));
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return NotFound("Hero is not found.");
         }
     }
 }

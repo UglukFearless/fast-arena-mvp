@@ -38,6 +38,7 @@ internal class StatisticProfile
 
         return new StatisticDataRowDto
         {
+            HeroId = model.HeroId,
             HeroName = model.HeroName,
             PortraitUrl = model.PortraitUrl,
             IsAlive = model.IsAlive,

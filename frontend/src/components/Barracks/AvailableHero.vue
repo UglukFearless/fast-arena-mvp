@@ -48,6 +48,7 @@
 <script setup lang="ts">
 import { HeroDto, HeroLevelProgressDto, ItemType, MonsterFightResultType } from "@/api/clients";
 import { computed, PropType } from "vue";
+import { useRouter } from "vue-router";
 
 import AppButton from '../shared/buttons/AppButton.vue';
 import { useHeroStore } from "@/stores/hero";
@@ -60,13 +61,19 @@ const props = defineProps({
 });
 
 const heroStore = useHeroStore();
+const router = useRouter();
 
 async function selectHero() {
     await heroStore.select(props.hero.id as string);
 }
 
 function goInfo(heroId: string) {
-    console.log('Go to hero info with id', heroId);
+    router.push({
+        name: 'hero-info',
+        params: {
+            id: heroId,
+        }
+    });
 }
 
 const progress = computed(() => {
