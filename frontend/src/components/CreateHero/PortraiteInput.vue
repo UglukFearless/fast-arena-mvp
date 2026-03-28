@@ -1,6 +1,9 @@
 <template>
     <button class="portrait-input__button" @click="openPortraitSelector($event)">
-        <img class="portrait-input__image" :src="heroPortraitUrl" />
+        <img 
+            class="portrait-input__image"
+            :class="{ selected: !!props.modelValue }"
+            :src="heroPortraitUrl" />
     </button>
     
     <div v-if="modalShow" class="portrait-input__modal-section">
@@ -10,7 +13,7 @@
             </span>
             <div class="portrait-input__modal-content">
                 <img v-for="portrait in allPortraits" 
-                    class="portrait-input__modal-image" 
+                    class="portrait-input__modal-image"
                     @click="updateValue(portrait.id as string)" 
                     :src="portrait.url" />
             </div>
@@ -69,10 +72,18 @@ function updateValue(portraitId: string) {
         flex: 1;
         cursor: pointer;
         max-width: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 4px 12px;
     }
 
     &__image {
-        max-width: 64px;
+        max-width: 84px;
+
+        &.selected {
+            border: 2px solid black;
+        }
     }
 
     &__modal-section {
@@ -94,7 +105,7 @@ function updateValue(portraitId: string) {
         padding: 22px;
         box-shadow: 0px 0px 8px rgba(155, 155, 155, 0.4);
         border-radius: 8px;
-        max-width: 480px;
+        max-width: 504px;
         min-height: 128px;
         width: 100vw;
         display: flex;
@@ -118,9 +129,10 @@ function updateValue(portraitId: string) {
     }
 
     &__modal-image {
-        width: 64px;
+        width: 84px;
         cursor: pointer;
         margin: 4px;
+        border: 2px solid black;
     }
 }
 </style>

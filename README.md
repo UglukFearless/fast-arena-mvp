@@ -47,6 +47,18 @@ npm install
 npm run serve
 ```
 
+## Документация
+
+| Файл | Содержание |
+|---|---|
+| [`docs/domain.md`](docs/domain.md) | Предметная область: сущности, правила, игровой цикл |
+| [`docs/architecture.md`](docs/architecture.md) | Структура кода: backend, frontend, потоки данных |
+| [`docs/code-style.md`](docs/code-style.md) | Проектные правила оформления кода |
+| [`docs/roadmap.md`](docs/roadmap.md) | Долгосрочные направления развития |
+| [`docs/todo.md`](docs/todo.md) | Текущие задачи |
+
+**Для AI-агентов:** точка входа — [`docs/ai/index.md`](docs/ai/index.md).
+
 ## Статус
 
 MVP/исследовательский прототип.
