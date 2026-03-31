@@ -16,12 +16,15 @@ namespace FastArena.WebApi.Controllers;
 public class HeroController : ControllerBase
 {
     private IHeroService _heroService;
+    private IHeroInfoService _heroInfoService;
     private IHttpContextAccessor _httpContextAccessor;
 
     public HeroController(IHeroService heroService,
+        IHeroInfoService heroInfoService,
         IHttpContextAccessor httpContextAccessor)
     {
         _heroService = heroService;
+        _heroInfoService = heroInfoService;
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -94,8 +97,8 @@ public class HeroController : ControllerBase
         try
         {
             var userId = AuthProvider.GetCurrentUserIdFromAccessor(_httpContextAccessor);
-            var hero = await _heroService.GetAsync(id);
-            return Ok(HeroInfoProfile.Map(hero, true));
+            var info = await _heroInfoService.GetAsync(id, userId);
+            return Ok(HeroInfoProfile.Map(info));
         }
         catch (EntityNotFoundException ex)
         {

@@ -8,6 +8,7 @@ public static class ServiceConfig
     public static IServiceCollection AddAppServices(this IServiceCollection services)
     {
         services.AddScoped<IHeroService, HeroService>();
+        services.AddScoped<IHeroInfoService, HeroInfoService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IPortraitService, PortraitService>();
         services.AddScoped<IActivityStateService, ActivityStateService>();

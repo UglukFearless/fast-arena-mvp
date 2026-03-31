@@ -15,6 +15,7 @@
 
         <template v-else-if="heroInfo">
             <HeroInfoCard :hero="heroInfo" />
+            <HeroInventory :hero="heroInfo" />
             <HeroFightHistory :results="heroInfo.results" />
         </template>
     </section>
@@ -28,6 +29,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import HeroFightHistory from './HeroFightHistory.vue';
 import HeroInfoCard from './HeroInfoCard.vue';
+import HeroInventory from './HeroInventory.vue';
 
 const route = useRoute();
 const router = useRouter();

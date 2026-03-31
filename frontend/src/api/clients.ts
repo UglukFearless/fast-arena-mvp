@@ -852,6 +852,11 @@ export interface ItemDto {
 
 export enum ItemType {
     MONEY = 0,
+    POTION = 1,
+    WEAPON = 2,
+    SHIELD = 3,
+    ARMOR = 4,
+    OTHER = 5,
 }
 
 export interface MonsterFightResultDto {
@@ -893,6 +898,9 @@ export interface HeroInfoDto {
     isAlive: HeroAliveState;
     maxHealth: number;
     maxAbility: number;
+    isInventoryVisible: boolean;
+    moneyAmount: number;
+    items: HeroItemCellDto[];
     results: MonsterFightResultDto[];
 }
 

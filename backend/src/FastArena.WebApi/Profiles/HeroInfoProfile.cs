@@ -1,28 +1,29 @@
-﻿using FastArena.Core.Domain.Heroes;
+﻿using FastArena.Core.Models;
 using FastArena.WebApi.Dtos;
 
 namespace FastArena.WebApi.Profiles;
 
 public class HeroInfoProfile
 {
-    public static HeroInfoDto Map(Hero hero, bool deep = false)
+    public static HeroInfoDto Map(HeroInfoModel info)
     {
-        if (hero == null)
+        if (info == null)
             return null;
 
         return new HeroInfoDto
         {
-            Id = hero.Id,
-            Name = hero.Name,
-            Sex = hero.Sex,
-            Level = hero.Level,
-            PortraitUrl = hero.Portrait?.Url,
-            MaxHealth = hero.MaxHealth,
-            MaxAbility = hero.MaxHealth / 10,
-            IsAlive = hero.IsAlive,
-            Results = deep ? MonsterFightProfile.Map(hero.Results, true) : new List<MonsterFightResultDto>(),
+            Id = info.Hero.Id,
+            Name = info.Hero.Name,
+            Sex = info.Hero.Sex,
+            Level = info.Hero.Level,
+            PortraitUrl = info.Hero.Portrait?.Url,
+            MaxHealth = info.Hero.MaxHealth,
+            MaxAbility = info.Hero.MaxHealth / 10,
+            IsAlive = info.Hero.IsAlive,
+            IsInventoryVisible = info.IsInventoryVisible,
+            MoneyAmount = info.MoneyAmount,
+            Items = HeroItemCellProfile.Map(info.InventoryItems, true),
+            Results = MonsterFightProfile.Map(info.Hero.Results, true) ?? new List<MonsterFightResultDto>(),
         };
     }
-
-    public static List<HeroInfoDto> Map(List<Hero> heroes, bool deep = false) => heroes?.ConvertAll(h => Map(h, deep));
 }
