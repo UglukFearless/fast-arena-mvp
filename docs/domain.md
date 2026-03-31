@@ -39,6 +39,12 @@ Fast Arena MVP is a browser game prototype about short combat runs, hero growth,
 - Represents authentication and ownership of game progress.
 - Connects a user to one or more gameplay objects.
 
+### Item
+
+- An object that exists in the game world and can be held by a hero.
+- Has a name, description, base cost, and an image.
+- Belongs to one of several types that define how it behaves.
+
 ## Core Domain Loop
 
 1. A user enters the game and authenticates.
@@ -79,6 +85,19 @@ Fast Arena MVP is a browser game prototype about short combat runs, hero growth,
 - Gold will later be spent on consumables and equipment.
 - Current hard penalty: permanent death.
 - Additional debuffs may be added later.
+
+### Item Types
+
+- **Money** — currency used for purchases. Gold is the only money item.
+- **Potion** — consumable used during combat. Restores HP or temporarily modifies combat characteristics.
+- **Weapon** — equippable item that modifies attack damage or attack power.
+- **Shield** — equippable item that provides a chance to block incoming attacks.
+- **Armor** — equippable protective item. Reserved for future use.
+- **Other** — loot and collectibles with no active effect. Sold for gold.
+
+Items also carry two behavioral flags:
+- `CanBeFolded` — stackable in a single inventory cell (e.g. gold, loot drops).
+- `CanBeEquipped` — can be actively equipped or used by the hero (e.g. potions, weapons, shields).
 
 ### Activities Outside Arena
 

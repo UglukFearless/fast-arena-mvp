@@ -23,7 +23,8 @@ The backend solution is located under `backend/src/` and is split into several p
 ### FastArena.Dal
 
 - Entity Framework Core data access.
-- Database context, initialization, mappings, and storage implementations.
+- Database context, mappings, and storage implementations.
+- Schema is defined in `ApplicationContext`. Base data is seeded at runtime by `FastArena.WebHost` seeders, not by EF `HasData`.
 
 ### FastArena.WebApi
 
@@ -34,6 +35,8 @@ The backend solution is located under `backend/src/` and is split into several p
 
 - Application startup and runtime configuration.
 - Hosts the web application.
+- `Services/Seeders/` contains runtime seeders that populate base data on first startup: portraits, monsters, and items.
+- `wwwroot/assets/` serves static files: `portraits/`, `creatures/`, `items/`.
 
 ### FastArena.ApiClientGenerator
 

@@ -14,10 +14,7 @@ This document tracks short-horizon tasks. It should stay compact and operational
 
 ### Next Goal: Hero Inventory
 
-- [ ] Rework item seed.
-	- Regenerate item images.
-	- Place item images on backend-hosted assets.
-	- Expand item list: keep gold, add health potions first, add weapons next, add armor and special items later.
+- [x] Rework item seed. All items seeded via runtime `ItemSeeder`; images served from backend `wwwroot/assets/items/`.
 - [ ] Add an Inventory button for the selected hero.
 - [ ] Implement inventory page.
 	- Initial scope: potion usage flow.
