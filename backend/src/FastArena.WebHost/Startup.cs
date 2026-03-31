@@ -26,6 +26,7 @@ public class Startup
         services.AddScoped<PortraitSeeder>();
         services.AddScoped<MonsterSeeder>();
         services.AddScoped<EntityLinker>();
+        services.AddScoped<ItemSeeder>();
         services.AddScoped<SeederRunner>();
 
         services.AddCors(options =>

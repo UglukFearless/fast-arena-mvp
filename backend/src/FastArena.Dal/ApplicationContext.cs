@@ -75,7 +75,7 @@ public class ApplicationContext : DbContext
             .WithMany()
             .HasForeignKey(mfr => mfr.MonsterMoldId);
 
-        new DbInitializer(modelBuilder).Seed();
+        new DbInitializer().Seed();
     }
 
     public DbSet<UserDal> Users { get; set; }

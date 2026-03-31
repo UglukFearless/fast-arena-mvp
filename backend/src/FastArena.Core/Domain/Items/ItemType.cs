@@ -3,4 +3,9 @@
 public enum ItemType
 {
     MONEY,
+    POTION,
+    WEAPON,
+    SHIELD,
+    ARMOR,
+    OTHER
 }
