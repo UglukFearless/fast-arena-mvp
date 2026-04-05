@@ -99,6 +99,11 @@ Items also carry two behavioral flags:
 - `CanBeFolded` — stackable in a single inventory cell (e.g. gold, loot drops).
 - `CanBeEquipped` — can be actively equipped or used by the hero (e.g. potions, weapons, shields).
 
+### Inventory Visibility Rules (Current MVP)
+
+- Dead owned hero inventory is available only in read-only mode.
+- Inventory of a foreign hero is not available.
+
 ### Activities Outside Arena
 
 - At the current stage, there are no activities outside arena combat.

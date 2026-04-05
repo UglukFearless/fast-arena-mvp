@@ -27,6 +27,12 @@ Canonical business knowledge lives in human documentation under `docs/`.
 2. Read `docs/todo.md`.
 3. Read `docs/domain.md` to validate product meaning.
 
+### Documentation Updates
+
+1. Read `docs/ai/doc-writing-boundaries.md`.
+2. Read target canonical doc (`docs/domain.md`, `docs/todo.md`, `docs/architecture.md`, etc.).
+3. Keep updates proportional to the target document scope.
+
 ### Environment And Runtime Commands
 
 1. Read `docs/ai/commands.md`.
@@ -36,6 +42,7 @@ Canonical business knowledge lives in human documentation under `docs/`.
 
 - Treat `docs/domain.md` as source of truth for product semantics.
 - Treat `docs/code-style.md` as source of truth for project-specific style rules.
+- Treat `docs/ai/doc-writing-boundaries.md` as source of truth for documentation granularity and chat boundaries.
 - Do not invent business rules that are absent from docs.
 - If docs are ambiguous, ask for clarification before changing behavior.
 - Keep outputs consistent with current MVP scope.
