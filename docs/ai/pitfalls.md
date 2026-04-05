@@ -13,8 +13,8 @@ This file captures frequent mistakes and constraints relevant to this project.
 
 ## Documentation Boundaries
 
-- Canonical meaning belongs in `docs/domain.md` and `docs/architecture.md`.
-- `docs/ai/*` should route and constrain, not duplicate product documentation.
+- Single source of truth for documentation granularity and chat boundaries: `docs/ai/doc-writing-boundaries.md`.
+- `docs/ai/pitfalls.md` should not duplicate those rules.
 
 ## Maintenance
 

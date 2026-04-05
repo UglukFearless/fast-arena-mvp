@@ -14,6 +14,7 @@ It routes you to the right documentation based on task type.
 | Project-specific code style | [`docs/code-style.md`](../docs/code-style.md) |
 | Long-term direction | [`docs/roadmap.md`](../docs/roadmap.md) |
 | Current tasks | [`docs/todo.md`](../docs/todo.md) |
+| Documentation boundaries and granularity | [`docs/ai/doc-writing-boundaries.md`](../docs/ai/doc-writing-boundaries.md) |
 | Commands and pitfalls | [`docs/ai/commands.md`](../docs/ai/commands.md), [`docs/ai/pitfalls.md`](../docs/ai/pitfalls.md) |
 
 ## Constraints

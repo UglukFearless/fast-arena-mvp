@@ -12,5 +12,8 @@ public class HeroInfoDto
     public HeroAliveState IsAlive { get; set; }
     public int MaxHealth { get; set; }
     public int MaxAbility { get; set; }
+    public bool IsInventoryVisible { get; set; }
+    public int MoneyAmount { get; set; }
+    public List<HeroItemCellDto> Items { get; set; } = new List<HeroItemCellDto>();
     public List<MonsterFightResultDto> Results { get; set; } = new List<MonsterFightResultDto>();
 }

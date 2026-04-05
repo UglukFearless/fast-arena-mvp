@@ -15,11 +15,8 @@ This document tracks short-horizon tasks. It should stay compact and operational
 ### Next Goal: Hero Inventory
 
 - [x] Rework item seed. All items seeded via runtime `ItemSeeder`; images served from backend `wwwroot/assets/items/`.
-- [ ] Add an Inventory button for the selected hero.
-- [ ] Implement inventory page.
-	- Initial scope: potion usage flow.
-	- Next scope: equip weapon.
-	- Later scope: equip armor.
+- [x] Inventory with items is integrated into `HeroInfo`.
+- [ ] Define and implement item acquisition path for heroes.
 
 ## Task Format
 
