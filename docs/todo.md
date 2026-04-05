@@ -16,7 +16,7 @@ This document tracks short-horizon tasks. It should stay compact and operational
 
 - [x] Rework item seed. All items seeded via runtime `ItemSeeder`; images served from backend `wwwroot/assets/items/`.
 - [x] Inventory with items is integrated into `HeroInfo`.
-- [ ] Define and implement item acquisition path for heroes.
+- [x] Define and implement item acquisition path for heroes. Shop implemented: hero can buy and sell items; transactions confirmed atomically.
 
 ## Task Format
 

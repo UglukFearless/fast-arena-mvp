@@ -91,6 +91,15 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: true
     },
   },
+  {
+    path: '/shop',
+    name: 'shop',
+    component: () => import('@/pages/Shop.vue'),
+    meta: {
+      requiresAnonimous: false,
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = createRouter({

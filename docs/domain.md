@@ -104,10 +104,13 @@ Items also carry two behavioral flags:
 - Dead owned hero inventory is available only in read-only mode.
 - Inventory of a foreign hero is not available.
 
-### Activities Outside Arena
+### Shop
 
-- At the current stage, there are no activities outside arena combat.
-- A shop is planned later for consumables and equipment.
+- Heroes can buy and sell items at the shop.
+- Purchases are paid with gold; selling items adds gold to the shop balance.
+- A transaction bundles sell and buy selections into a single confirmed deal.
+- The hero's gold balance changes by the net result of the transaction.
+- Items that are not stackable (`CanBeFolded = false`) occupy individual cells and cannot be accumulated.
 
 ## Change Policy
 

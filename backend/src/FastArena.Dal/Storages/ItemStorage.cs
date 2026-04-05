@@ -17,4 +17,21 @@ public class ItemStorage : IItemStorage
         var baseManeyItem = await _context.Items.FirstAsync(i => i.Type == ItemType.MONEY && i.BaseCost == 1);
         return ItemProfiles.Map(baseManeyItem);
     }
+
+
+    public async Task<IEnumerable<Item>> GetByTypeAsync(ItemType type)
+    {
+        var items = await _context.Items
+            .Where(i => i.Type == type)
+            .ToListAsync();
+        return items.Select(i => ItemProfiles.Map(i)).ToList();
+    }
+
+    public async Task<List<Item>> GetByIdsAsync(ICollection<Guid> ids)
+    {
+        var items = await _context.Items
+            .Where(i => ids.Contains(i.Id))
+            .ToListAsync();
+        return items.Select(i => ItemProfiles.Map(i)).ToList();
+    }
 }

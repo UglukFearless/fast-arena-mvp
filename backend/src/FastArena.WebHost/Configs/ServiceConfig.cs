@@ -20,6 +20,7 @@ public static class ServiceConfig
         services.AddScoped<IMonsterFightResultService, MonsterFightResultService>();
         services.AddScoped<IItemService, ItemService>();
         services.AddScoped<IStatisticService, StatisticService>();
+        services.AddScoped<IShopService, ShopService>();
 
         return services;
     }

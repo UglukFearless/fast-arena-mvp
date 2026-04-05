@@ -30,6 +30,23 @@ docker compose up --build
 
 После старта приложение поднимется на портах, указанных в `.env`.
 
+#### Пересборка и форс-рестарт
+
+Всё (все сервисы):
+```bash
+docker compose up -d --build --force-recreate
+```
+
+Только бэкенд:
+```bash
+docker compose up -d --build --force-recreate app
+```
+
+Только фронтенд:
+```bash
+docker compose up -d --build --force-recreate fastarena-front
+```
+
 ### Вариант 2: локальный запуск по частям
 
 Backend:

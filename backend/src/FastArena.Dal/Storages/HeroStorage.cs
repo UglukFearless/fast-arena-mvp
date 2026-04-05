@@ -1,4 +1,5 @@
 ﻿using FastArena.Core.Domain.Heroes;
+using FastArena.Core.Domain.Items;
 using FastArena.Core.Interfaces.Storages;
 using FastArena.Core.Models;
 using FastArena.Dal.Entities;
@@ -76,60 +77,82 @@ public class HeroStorage : IHeroStorage
     {
         var heroDal = await GetWithItemsAsync(heroId);
 
-        var foldedItems = items.Where(gi => gi.Item.CanBeFolded);
-        var notFoldedItems = items.Where(gi => !gi.Item.CanBeFolded);
-
-        foreach(var foldedItem in foldedItems)
-        {
-            var existItem = heroDal.Items.FirstOrDefault(i => i.ItemId == foldedItem.Item.Id);
-            if (existItem != null)
-            {
-                existItem.Amount += foldedItem.Amount;
-            }
-            else
-            {
-                _context.HeroItemCells.Add(new HeroItemCellDal
-                {
-                    Id = Guid.NewGuid(),
-                    HeroId = heroId,
-                    ItemId = foldedItem.Item.Id,
-                    Amount = foldedItem.Amount,
-                });
-            }
-        }
-
-        foreach(var notFoldedItem in notFoldedItems)
-        {
-            if (notFoldedItem.Amount == 1)
-            {
-                _context.HeroItemCells.Add(new HeroItemCellDal
-                {
-                    Id = Guid.NewGuid(),
-                    HeroId = heroId,
-                    ItemId = notFoldedItem.Item.Id,
-                    Amount = 1,
-                });
-            } 
-            else
-            {
-                for (int i = 0; i < notFoldedItem.Amount; i++)
-                {
-                    _context.HeroItemCells.Add(new HeroItemCellDal
-                    {
-                        Id = Guid.NewGuid(),
-                        HeroId = heroId,
-                        ItemId = notFoldedItem.Item.Id,
-                        Amount = 1,
-                    });
-                }
-            }
-        }
+        AddItemsToHero(heroDal, items);
 
         await _context.SaveChangesAsync();
 
         var newItems = await _context.HeroItemCells.Where(ic => ic.HeroId == heroId).Include(ic => ic.Item).ToListAsync();
 
         return HeroItemCellProfiles.Map(newItems, true);
+    }
+
+    public async Task ExchangeHeroItemsAsync(
+        Guid heroId,
+        ICollection<HeroItemTakeRequest> itemsToTake,
+        ICollection<GivenItem> itemsToGive,
+        int moneyToTake,
+        int moneyToGive)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var heroDal = await GetWithItemsAsync(heroId);
+
+        foreach (var itemToTake in itemsToTake)
+        {
+            var heroItemCell = heroDal.Items.FirstOrDefault(i => i.Id == itemToTake.HeroItemCellId);
+            if (heroItemCell == null)
+            {
+                throw new InvalidOperationException("Hero item is missing during transaction application.");
+            }
+
+            heroItemCell.Amount -= itemToTake.Quantity;
+            if (heroItemCell.Amount <= 0)
+            {
+                heroDal.Items.Remove(heroItemCell);
+                _context.HeroItemCells.Remove(heroItemCell);
+            }
+        }
+
+        var moneyCell = heroDal.Items.FirstOrDefault(i => i.Item != null && i.Item.Type == ItemType.MONEY);
+        if (moneyToTake > 0)
+        {
+            if (moneyCell == null || moneyCell.Amount < moneyToTake)
+            {
+                throw new InvalidOperationException("Hero does not have enough money during transaction application.");
+            }
+
+            moneyCell.Amount -= moneyToTake;
+            if (moneyCell.Amount <= 0)
+            {
+                heroDal.Items.Remove(moneyCell);
+                _context.HeroItemCells.Remove(moneyCell);
+                moneyCell = null;
+            }
+        }
+
+        if (moneyToGive > 0)
+        {
+            if (moneyCell != null)
+            {
+                moneyCell.Amount += moneyToGive;
+            }
+            else
+            {
+                var moneyItem = await _context.Items.FirstAsync(i => i.Type == ItemType.MONEY && i.BaseCost == 1);
+                _context.HeroItemCells.Add(new HeroItemCellDal
+                {
+                    Id = Guid.NewGuid(),
+                    HeroId = heroId,
+                    ItemId = moneyItem.Id,
+                    Amount = moneyToGive,
+                });
+            }
+        }
+
+        AddItemsToHero(heroDal, itemsToGive);
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
     public async Task<Hero> UpdateHeroAsync(Hero hero)
@@ -149,6 +172,49 @@ public class HeroStorage : IHeroStorage
     }
 
     #region private methods
+    private void AddItemsToHero(HeroDal heroDal, ICollection<GivenItem> items)
+    {
+        var foldedItems = items.Where(gi => gi.Item.CanBeFolded);
+        var notFoldedItems = items.Where(gi => !gi.Item.CanBeFolded);
+
+        foreach (var foldedItem in foldedItems)
+        {
+            var existItem = heroDal.Items.FirstOrDefault(i => i.ItemId == foldedItem.Item.Id);
+            if (existItem != null)
+            {
+                existItem.Amount += foldedItem.Amount;
+            }
+            else
+            {
+                var newItemCell = new HeroItemCellDal
+                {
+                    Id = Guid.NewGuid(),
+                    HeroId = heroDal.Id,
+                    ItemId = foldedItem.Item.Id,
+                    Amount = foldedItem.Amount,
+                };
+                heroDal.Items.Add(newItemCell);
+                _context.HeroItemCells.Add(newItemCell);
+            }
+        }
+
+        foreach (var notFoldedItem in notFoldedItems)
+        {
+            for (int i = 0; i < notFoldedItem.Amount; i++)
+            {
+                var newItemCell = new HeroItemCellDal
+                {
+                    Id = Guid.NewGuid(),
+                    HeroId = heroDal.Id,
+                    ItemId = notFoldedItem.Item.Id,
+                    Amount = 1,
+                };
+                heroDal.Items.Add(newItemCell);
+                _context.HeroItemCells.Add(newItemCell);
+            }
+        }
+    }
+
     private async Task<HeroDal> GetWithItemsAsync(Guid id)
     {
         var hero = await _context.Heroes.Include(h => h.Items).ThenInclude(ic => ic.Item).FirstAsync(h => h.Id == id);

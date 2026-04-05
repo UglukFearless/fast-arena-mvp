@@ -76,6 +76,7 @@ The frontend is a Vue 3 application with TypeScript, Pinia, and Vue Router.
 - Hero creation and portrait selection.
 - Mapping depth and nested response models.
 - Statistics derived from stored fight data.
+- Shop transaction flow: sell/buy selections confirmed atomically via `POST /api/shop/transaction`.
 
 ## Change Policy
 

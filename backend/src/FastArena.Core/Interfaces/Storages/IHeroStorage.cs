@@ -1,4 +1,5 @@
 ﻿using FastArena.Core.Domain.Heroes;
+using FastArena.Core.Domain.Items;
 using FastArena.Core.Models;
 
 namespace FastArena.Core.Interfaces.Storages;
@@ -11,5 +12,11 @@ public interface IHeroStorage
     Task<Hero> GetAsync(Guid id);
     Task<Hero> CreateAsync(HeroCreationModel model);
     Task<List<HeroItemCell>> GiveItemsToHeroAsync(Guid heroId, ICollection<GivenItem> items);
+    Task ExchangeHeroItemsAsync(
+        Guid heroId,
+        ICollection<HeroItemTakeRequest> itemsToTake,
+        ICollection<GivenItem> itemsToGive,
+        int moneyToTake,
+        int moneyToGive);
     Task<Hero> UpdateHeroAsync(Hero hero);
 }

@@ -20,6 +20,8 @@
                     :key="cell.key"
                     class="hero-inventory__cell"
                     :class="{ 'hero-inventory__cell_placeholder': cell.isPlaceholder }"
+                    @mouseenter="onCellMouseEnter(cell)"
+                    @mouseleave="onCellMouseLeave()"
                 >
                     <template v-if="!cell.isPlaceholder">
                         <img
@@ -28,7 +30,11 @@
                             :alt="cell.item.item.name"
                         />
                         <span class="hero-inventory__item-name">{{ cell.item.item.name }}</span>
-                        <span class="hero-inventory__item-amount">x{{ cell.item.amount }}</span>
+                        <span v-if="cell.item.item.canBeFolded" class="hero-inventory__item-amount">x{{ cell.item.amount }}</span>
+
+                        <div v-if="tooltipCellKey === cell.key" class="hero-inventory__tooltip">
+                            {{ cell.item.item.description }}
+                        </div>
                     </template>
                 </article>
             </div>
@@ -49,7 +55,7 @@
 
 <script setup lang="ts">
 import { HeroAliveState, HeroInfoDto, HeroItemCellDto, ItemType } from '@/api/clients';
-import { computed, PropType } from 'vue';
+import { computed, onUnmounted, PropType, ref } from 'vue';
 
 type FilledGridCell = {
     key: string;
@@ -85,6 +91,34 @@ const moneyIcon = computed(() => {
     return moneyItem?.item?.itemImage || '';
 });
 
+const tooltipCellKey = ref<string | null>(null);
+let tooltipTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearTooltipTimer() {
+    if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+        tooltipTimer = null;
+    }
+}
+
+function onCellMouseEnter(cell: GridCell) {
+    clearTooltipTimer();
+
+    if (cell.isPlaceholder) {
+        tooltipCellKey.value = null;
+        return;
+    }
+
+    tooltipTimer = setTimeout(() => {
+        tooltipCellKey.value = cell.key;
+    }, 1000);
+}
+
+function onCellMouseLeave() {
+    clearTooltipTimer();
+    tooltipCellKey.value = null;
+}
+
 const gridCells = computed<GridCell[]>(() => {
     const minCells = GRID_COLUMNS * MIN_GRID_ROWS;
     const itemCells: GridCell[] = inventoryItems.value.map(i => ({
@@ -103,6 +137,10 @@ const gridCells = computed<GridCell[]>(() => {
     }));
 
     return [...itemCells, ...placeholders];
+});
+
+onUnmounted(() => {
+    clearTooltipTimer();
 });
 </script>
 
@@ -159,6 +197,7 @@ const gridCells = computed<GridCell[]>(() => {
     }
 
     &__cell {
+        position: relative;
         width: 100%;
         min-height: 64px;
         background: #dce4ef;
@@ -199,6 +238,22 @@ const gridCells = computed<GridCell[]>(() => {
         font-size: 12px;
         font-weight: 700;
         color: #0e223a;
+    }
+
+    &__tooltip {
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        bottom: calc(100% + 8px);
+        z-index: 5;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: #1b2736;
+        color: #f3f7fc;
+        font-size: 12px;
+        line-height: 1.35;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        min-width: 200px;
     }
 
     &__money {
