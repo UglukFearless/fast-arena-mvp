@@ -9,13 +9,14 @@ Canonical business knowledge lives in human documentation under `docs/`.
 
 ### Domain Or Business Rules
 
-1. Read `docs/domain.md`.
+1. Read `docs/domain.md` (index) and the relevant sub-page(s) under `docs/domain/`.
 2. If implementation details are needed, read `docs/architecture.md`.
 3. For near-term execution context, read `docs/todo.md`.
+4. If domain information is missing or ambiguous, follow `docs/ai/domain-gaps.md`.
 
 ### Feature Implementation
 
-1. Read `docs/domain.md`.
+1. Read `docs/domain.md` (index) and the relevant sub-page(s) under `docs/domain/`.
 2. Read `docs/architecture.md`.
 3. Read `docs/code-style.md`.
 4. Read `docs/todo.md`.

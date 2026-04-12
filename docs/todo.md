@@ -18,6 +18,12 @@ This document tracks short-horizon tasks. It should stay compact and operational
 - [x] Inventory with items is integrated into `HeroInfo`.
 - [x] Define and implement item acquisition path for heroes. Shop implemented: hero can buy and sell items; transactions confirmed atomically.
 
+### Next Goal: Item Effects, Pockets, and Combat Usage
+
+- [ ] Introduce item effect/parameter model and storage for consumable/support items (potions included).
+- [ ] Add hero equipment system with 3 pockets for support items.
+- [ ] Implement item usage flow in fight: consume equipped item, apply effect, persist battle state updates.
+
 ## Task Format
 
 When adding new tasks, prefer this structure:
