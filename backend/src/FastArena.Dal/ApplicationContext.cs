@@ -46,6 +46,17 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<ItemDal>()
             .HasMany(i => i.HeroItems);
 
+        modelBuilder.Entity<ItemDal>()
+            .HasMany(i => i.Effects)
+            .WithOne(e => e.Item)
+            .HasForeignKey(e => e.ItemId);
+
+        modelBuilder.Entity<EffectDefinitionDal>()
+            .HasIndex(e => e.ItemId);
+
+        modelBuilder.Entity<EffectDefinitionDal>()
+            .HasIndex(e => new { e.ItemId, e.Type });
+
         modelBuilder.Entity<HeroItemCellDal>()
             .HasOne(ic => ic.Hero)
             .WithMany(h => h.Items)
@@ -81,6 +92,7 @@ public class ApplicationContext : DbContext
     public DbSet<PortraitDal> Portraits { get; set; }
     public DbSet<PortraitTagDal> PortraitTags { get; set; }
     public DbSet<ItemDal> Items { get; set; }
+    public DbSet<EffectDefinitionDal> EffectDefinitions { get; set; }
     public DbSet<HeroItemCellDal> HeroItemCells { get; set; }
     public DbSet<MonsterMoldDal> MonsterMolds { get; set; }
     public DbSet<MonsterFightResultDal> MonsterFightResults { get; set; }

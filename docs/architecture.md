@@ -25,6 +25,7 @@ The backend solution is located under `backend/src/` and is split into several p
 - Entity Framework Core data access.
 - Database context, mappings, and storage implementations.
 - Schema is defined in `ApplicationContext`. Base data is seeded at runtime by `FastArena.WebHost` seeders, not by EF `HasData`.
+- Item effect definitions are stored in DAL and linked to items (item-owned effect records).
 
 ### FastArena.WebApi
 
@@ -77,6 +78,31 @@ The frontend is a Vue 3 application with TypeScript, Pinia, and Vue Router.
 - Mapping depth and nested response models.
 - Statistics derived from stored fight data.
 - Shop transaction flow: sell/buy selections confirmed atomically via `POST /api/shop/transaction`.
+- Staged effect system rollout:
+	- implemented: effect definition persistence and seed data,
+	- pending: runtime effect execution pipeline in fight lifecycle.
+
+## Implementation Notes: Effect System
+
+Current technical status:
+
+- Effect definitions are persisted as item-owned records in DAL and are exposed through API item DTO mapping.
+- Seed includes potion effect definitions for healing, ability override, and strike power bonus.
+- Current persisted effect parameters include:
+	- type,
+	- duration rounds,
+	- magnitude,
+	- min/max value bounds,
+	- chance percent,
+	- condition type,
+	- target type,
+	- priority,
+	- optional next effect definition id.
+
+Scope boundary for current phase:
+
+- Implemented: definition model, storage mapping, and seed data.
+- Not implemented yet: runtime active-effect lifecycle, event/phase dispatch, per-effect handlers, and stacking execution rules.
 
 ## Change Policy
 

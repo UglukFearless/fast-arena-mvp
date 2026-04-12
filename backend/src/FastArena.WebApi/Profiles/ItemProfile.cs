@@ -22,6 +22,7 @@ internal static class ItemProfile
             CanBeFolded = item.CanBeFolded,
             BaseCost = item.BaseCost,
             Type = item.Type,
+            Effects = item.Effects != null ? EffectDefinitionProfile.Map(item.Effects) : null,
         };
 
         return dto;

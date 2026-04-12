@@ -20,6 +20,7 @@ internal static class ItemProfiles
             CanBeFolded = dal.CanBeFolded,
             BaseCost = dal.BaseCost,
             Type = dal.Type,
+            Effects = dal.Effects != null ? EffectDefinitionProfiles.Map(dal.Effects.ToList()) : null,
         };
 
         return item;

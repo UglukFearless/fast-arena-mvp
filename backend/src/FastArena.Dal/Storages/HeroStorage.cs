@@ -40,6 +40,7 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Portrait)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -53,6 +54,7 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Portrait)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -66,6 +68,7 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Portrait)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -217,7 +220,11 @@ public class HeroStorage : IHeroStorage
 
     private async Task<HeroDal> GetWithItemsAsync(Guid id)
     {
-        var hero = await _context.Heroes.Include(h => h.Items).ThenInclude(ic => ic.Item).FirstAsync(h => h.Id == id);
+        var hero = await _context.Heroes
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
+            .FirstAsync(h => h.Id == id);
         return hero;
     }
     #endregion private methods

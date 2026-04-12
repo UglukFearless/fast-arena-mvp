@@ -42,6 +42,7 @@ Canonical business knowledge lives in human documentation under `docs/`.
 ## Working Rules
 
 - Treat `docs/domain.md` as source of truth for product semantics.
+- Keep `docs/domain.md` and `docs/domain/*` business-only; put implementation details into `docs/architecture.md`.
 - Treat `docs/code-style.md` as source of truth for project-specific style rules.
 - Treat `docs/ai/doc-writing-boundaries.md` as source of truth for documentation granularity and chat boundaries.
 - Do not invent business rules that are absent from docs.

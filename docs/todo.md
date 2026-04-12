@@ -9,7 +9,7 @@ This document tracks short-horizon tasks. It should stay compact and operational
 ### Documentation
 
 - [ ] Finalize the structure of project documentation.
-- [ ] Fill `docs/domain.md` with concrete business rules.
+- [x] Fill `docs/domain.md` with concrete business rules.
 - [ ] Fill `docs/architecture.md` with codebase-specific examples.
 
 ### Next Goal: Hero Inventory
@@ -20,7 +20,7 @@ This document tracks short-horizon tasks. It should stay compact and operational
 
 ### Next Goal: Item Effects, Pockets, and Combat Usage
 
-- [ ] Introduce item effect/parameter model and storage for consumable/support items (potions included).
+- [x] Introduce item effect/parameter model and storage for consumable/support items (potions included).
 - [ ] Add hero equipment system with 3 pockets for support items.
 - [ ] Implement item usage flow in fight: consume equipped item, apply effect, persist battle state updates.
 

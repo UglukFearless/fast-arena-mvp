@@ -967,6 +967,7 @@ export interface ItemDto {
     canBeEquipped: boolean;
     canBeFolded: boolean;
     type: ItemType;
+    effects: EffectDefinitionDto[] | undefined;
 }
 
 export enum ItemType {
@@ -976,6 +977,38 @@ export enum ItemType {
     SHIELD = 3,
     ARMOR = 4,
     OTHER = 5,
+}
+
+export interface EffectDefinitionDto {
+    id: string;
+    type: EffectType;
+    durationRounds: number;
+    magnitude: number;
+    minValue: number;
+    maxValue: number;
+    chancePercent: number;
+    conditionType: EffectConditionType;
+    targetType: EffectTargetType;
+    priority: number;
+    nextEffectDefinitionId: string | undefined;
+}
+
+export enum EffectType {
+    HEAL_HP = 0,
+    OVERRIDE_ABILITY_TO_MAX = 1,
+    STRIKE_POWER_BONUS = 2,
+}
+
+export enum EffectConditionType {
+    ALWAYS = 0,
+    ON_SUCCESSFUL_STRIKE = 1,
+}
+
+export enum EffectTargetType {
+    SELF = 0,
+    OPPONENT = 1,
+    BOTH = 2,
+    CONTEXT_VALUE = 3,
 }
 
 export interface MonsterFightResultDto {
