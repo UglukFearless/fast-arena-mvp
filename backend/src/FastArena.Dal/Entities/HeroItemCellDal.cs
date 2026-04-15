@@ -9,4 +9,5 @@ public class HeroItemCellDal
 
     public ItemDal? Item { get; set; }
     public HeroDal? Hero { get; set; }
+    public ICollection<HeroEquippedSlotDal> EquippedSlots { get; set; } = new List<HeroEquippedSlotDal>();
 }

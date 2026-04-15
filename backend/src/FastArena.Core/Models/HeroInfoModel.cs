@@ -8,4 +8,5 @@ public class HeroInfoModel
     public bool IsInventoryVisible { get; set; }
     public int MoneyAmount { get; set; }
     public List<HeroItemCell> InventoryItems { get; set; } = new List<HeroItemCell>();
+    public List<HeroEquippedSlot> PocketSlots { get; set; } = new List<HeroEquippedSlot>();
 }

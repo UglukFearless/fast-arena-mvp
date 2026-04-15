@@ -106,8 +106,14 @@ Armor may mitigate damage by two mechanisms:
 
 - Before a fight, the hero places usable items into pocket slots.
 - Pockets are the only inventory slots accessible during combat and travel.
-- Current planned pocket count: 3.
-- Pocket count may change later.
+- Current MVP pocket count: 3.
+- If all pockets are occupied, placing another usable item into pockets is denied.
+
+#### Slot Compatibility (MVP Baseline)
+
+- Equippable items have predefined allowed equipment slots.
+- Potions are compatible with pocket slots.
+- Other equippable categories may have a single deterministic slot set, but use the same compatibility concept.
 
 #### Using An Item In Combat
 

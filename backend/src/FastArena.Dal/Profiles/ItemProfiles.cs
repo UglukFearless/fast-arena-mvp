@@ -21,6 +21,7 @@ internal static class ItemProfiles
             BaseCost = dal.BaseCost,
             Type = dal.Type,
             Effects = dal.Effects != null ? EffectDefinitionProfiles.Map(dal.Effects.ToList()) : null,
+            AllowedSlots = dal.AllowedSlots != null ? ItemAllowedSlotProfiles.Map(dal.AllowedSlots.ToList()) : null,
         };
 
         return item;

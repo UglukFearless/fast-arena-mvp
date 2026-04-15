@@ -8,6 +8,7 @@ public static class StorageConfig
     public static IServiceCollection AddStorages(this IServiceCollection services)
     {
         services.AddScoped<IHeroStorage, HeroStorage>();
+        services.AddScoped<IHeroEquipmentStorage, HeroEquipmentStorage>();
         services.AddScoped<IUserStorage, UserStorage>();
         services.AddScoped<IPortraitStorage, PortraitStorage>();
         services.AddScoped<IItemStorage, ItemStorage>();

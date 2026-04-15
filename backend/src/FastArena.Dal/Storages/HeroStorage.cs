@@ -21,6 +21,7 @@ public class HeroStorage : IHeroStorage
         var newHero = HeroProfile.Map(model);
         _context.Heroes.Add(newHero);
         await _context.SaveChangesAsync();
+
         return HeroProfile.Map(newHero);
     }
 
@@ -41,6 +42,13 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.AllowedSlots)
+            .Include(h => h.EquippedSlots)
+            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.Effects)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -55,6 +63,13 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.AllowedSlots)
+            .Include(h => h.EquippedSlots)
+            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.Effects)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -68,6 +83,13 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Portrait)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.AllowedSlots)
+            .Include(h => h.EquippedSlots)
+            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
             .ThenInclude(i => i!.Effects)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
@@ -224,8 +246,16 @@ public class HeroStorage : IHeroStorage
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.AllowedSlots)
+            .Include(h => h.EquippedSlots)
+            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.Effects)
             .FirstAsync(h => h.Id == id);
         return hero;
     }
+
     #endregion private methods
 }

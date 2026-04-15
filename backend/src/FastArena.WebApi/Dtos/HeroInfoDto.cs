@@ -15,5 +15,6 @@ public class HeroInfoDto
     public bool IsInventoryVisible { get; set; }
     public int MoneyAmount { get; set; }
     public List<HeroItemCellDto> Items { get; set; } = new List<HeroItemCellDto>();
+    public List<HeroPocketSlotDto> Pockets { get; set; } = new List<HeroPocketSlotDto>();
     public List<MonsterFightResultDto> Results { get; set; } = new List<MonsterFightResultDto>();
 }

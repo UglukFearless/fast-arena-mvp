@@ -10,33 +10,26 @@
         </p>
 
         <template v-else>
-            <p v-if="!inventoryItems.length" class="hero-inventory__state-card">
-                У героя пока нет предметов в инвентаре.
+            <p v-if="actionMessage" class="hero-inventory__state-card" :class="{ 'hero-inventory__state-card_error': actionMessageIsError }">
+                {{ actionMessage }}
             </p>
 
-            <div class="hero-inventory__grid">
-                <article
-                    v-for="cell in gridCells"
-                    :key="cell.key"
-                    class="hero-inventory__cell"
-                    :class="{ 'hero-inventory__cell_placeholder': cell.isPlaceholder }"
-                    @mouseenter="onCellMouseEnter(cell)"
-                    @mouseleave="onCellMouseLeave()"
-                >
-                    <template v-if="!cell.isPlaceholder">
-                        <img
-                            class="hero-inventory__item-image"
-                            :src="cell.item.item.itemImage"
-                            :alt="cell.item.item.name"
-                        />
-                        <span class="hero-inventory__item-name">{{ cell.item.item.name }}</span>
-                        <span v-if="cell.item.item.canBeFolded" class="hero-inventory__item-amount">x{{ cell.item.amount }}</span>
+            <div class="hero-inventory__layout">
+                <HeroInventoryPockets
+                    :pockets="hero.pockets"
+                    :is-read-only="isReadOnly"
+                    :is-acting="isActing"
+                    :active-pocket-slot="activePocketSlot"
+                    @pocket-click="onPocketClick"
+                />
 
-                        <div v-if="tooltipCellKey === cell.key" class="hero-inventory__tooltip">
-                            {{ cell.item.item.description }}
-                        </div>
-                    </template>
-                </article>
+                <HeroInventoryBackpack
+                    :inventory-items="inventoryItems"
+                    :is-read-only="isReadOnly"
+                    :is-acting="isActing"
+                    :active-inventory-cell-id="activeInventoryCellId"
+                    @item-click="onInventoryItemClick"
+                />
             </div>
 
             <div class="hero-inventory__money">
@@ -47,31 +40,21 @@
                     alt="Монеты"
                 />
                 <span v-else class="hero-inventory__money-icon hero-inventory__money-icon_fallback">¤</span>
-                <span class="hero-inventory__money-value">{{ hero.moneyAmount }}</span>
+                <span class="hero-inventory__money-value">
+                    {{ hero.moneyAmount }}
+                </span>
             </div>
         </template>
     </section>
 </template>
 
 <script setup lang="ts">
-import { HeroAliveState, HeroInfoDto, HeroItemCellDto, ItemType } from '@/api/clients';
-import { computed, onUnmounted, PropType, ref } from 'vue';
-
-type FilledGridCell = {
-    key: string;
-    isPlaceholder: false;
-    item: HeroItemCellDto;
-};
-
-type PlaceholderGridCell = {
-    key: string;
-    isPlaceholder: true;
-};
-
-type GridCell = FilledGridCell | PlaceholderGridCell;
-
-const GRID_COLUMNS = 6;
-const MIN_GRID_ROWS = 3;
+import { ApiException, EquipmentSlotType, HeroAliveState, HeroEquipmentClient, HeroInfoDto, HeroItemCellDto, HeroPocketSlotDto, ItemType } from '@/api/clients';
+import HeroInventoryBackpack from '@/components/HeroInfo/HeroInventoryBackpack.vue';
+import HeroInventoryPockets from '@/components/HeroInfo/HeroInventoryPockets.vue';
+import { ApiSettings } from '@/utils/constants';
+import authFetch from '@/utils/http-helper';
+import { computed, PropType, ref } from 'vue';
 
 const props = defineProps({
     hero: {
@@ -80,7 +63,15 @@ const props = defineProps({
     },
 });
 
+const emit = defineEmits(['equipped', 'unequipped']);
+const heroEquipmentClient = new HeroEquipmentClient(ApiSettings.BaseUrl, authFetch);
+
 const isReadOnly = computed(() => props.hero.isAlive === HeroAliveState.DEAD);
+const isActing = ref(false);
+const activeInventoryCellId = ref<string | null>(null);
+const activePocketSlot = ref<EquipmentSlotType | null>(null);
+const actionMessage = ref('');
+const actionMessageIsError = ref(false);
 
 const inventoryItems = computed(() => {
     return props.hero.items.filter(i => i.item && i.item.type !== ItemType.MONEY);
@@ -91,57 +82,70 @@ const moneyIcon = computed(() => {
     return moneyItem?.item?.itemImage || '';
 });
 
-const tooltipCellKey = ref<string | null>(null);
-let tooltipTimer: ReturnType<typeof setTimeout> | null = null;
-
-function clearTooltipTimer() {
-    if (tooltipTimer) {
-        clearTimeout(tooltipTimer);
-        tooltipTimer = null;
-    }
+function setActionMessage(message: string, isError: boolean) {
+    actionMessage.value = message;
+    actionMessageIsError.value = isError;
 }
-
-function onCellMouseEnter(cell: GridCell) {
-    clearTooltipTimer();
-
-    if (cell.isPlaceholder) {
-        tooltipCellKey.value = null;
+async function onInventoryItemClick(item: HeroItemCellDto) {
+    const targetPocket = props.hero.pockets.find(p => !p.item);
+    if (!targetPocket) {
+        setActionMessage('Все карманы заняты.', true);
         return;
     }
 
-    tooltipTimer = setTimeout(() => {
-        tooltipCellKey.value = cell.key;
-    }, 1000);
+    isActing.value = true;
+    activeInventoryCellId.value = item.id;
+    activePocketSlot.value = null;
+    setActionMessage('', false);
+
+    try {
+        await heroEquipmentClient.equip({ heroItemCellId: item.id });
+        emit('equipped', {
+            heroItemCellId: item.id,
+            slot: targetPocket.slot,
+        });
+    } catch (error) {
+        setActionMessage(getErrorMessage(error, 'Не удалось экипировать предмет.'), true);
+    } finally {
+        isActing.value = false;
+        activeInventoryCellId.value = null;
+    }
 }
 
-function onCellMouseLeave() {
-    clearTooltipTimer();
-    tooltipCellKey.value = null;
+async function onPocketClick(pocket: HeroPocketSlotDto) {
+    if (!pocket.item || isReadOnly.value || isActing.value) {
+        return;
+    }
+
+    isActing.value = true;
+    activeInventoryCellId.value = null;
+    activePocketSlot.value = pocket.slot;
+    setActionMessage('', false);
+
+    try {
+        await heroEquipmentClient.unequip({ slot: pocket.slot });
+        emit('unequipped', {
+            slot: pocket.slot,
+        });
+    } catch (error) {
+        setActionMessage(getErrorMessage(error, 'Не удалось снять предмет.'), true);
+    } finally {
+        isActing.value = false;
+        activePocketSlot.value = null;
+    }
 }
 
-const gridCells = computed<GridCell[]>(() => {
-    const minCells = GRID_COLUMNS * MIN_GRID_ROWS;
-    const itemCells: GridCell[] = inventoryItems.value.map(i => ({
-        key: i.id,
-        isPlaceholder: false,
-        item: i,
-    }));
+function getErrorMessage(error: unknown, fallback: string) {
+    if (ApiException.isApiException(error)) {
+        return error.response || error.message || fallback;
+    }
 
-    if (itemCells.length >= minCells)
-        return itemCells;
+    if (error instanceof Error) {
+        return error.message || fallback;
+    }
 
-    const placeholdersCount = minCells - itemCells.length;
-    const placeholders: GridCell[] = Array.from({ length: placeholdersCount }, (_, index) => ({
-        key: `placeholder-${index}`,
-        isPlaceholder: true,
-    }));
-
-    return [...itemCells, ...placeholders];
-});
-
-onUnmounted(() => {
-    clearTooltipTimer();
-});
+    return fallback;
+}
 </script>
 
 <style lang="scss" scoped>
@@ -149,6 +153,13 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    &__layout {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
 
     &__header {
         display: flex;
@@ -178,82 +189,11 @@ onUnmounted(() => {
         border-radius: 12px;
         box-shadow: 0px 0px 8px rgba(155, 155, 155, 0.4);
         padding: 16px;
-    }
 
-    &__grid {
-        display: grid;
-        grid-template-columns: repeat(6, 72px);
-        gap: 8px;
-        width: fit-content;
-        max-width: 100%;
-
-        @media (max-width: 960px) {
-            grid-template-columns: repeat(4, 72px);
+        &_error {
+            color: #992b2b;
+            border: 1px solid #d1a3a3;
         }
-
-        @media (max-width: 680px) {
-            grid-template-columns: repeat(3, 64px);
-        }
-    }
-
-    &__cell {
-        position: relative;
-        width: 100%;
-        min-height: 64px;
-        background: #dce4ef;
-        border-radius: 8px;
-        box-shadow: inset 0 0 0 1px rgba(12, 23, 38, 0.25), 0px 1px 4px rgba(12, 23, 38, 0.35);
-        border: 1px solid #1c2d42;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 3px;
-        padding: 6px;
-
-        &_placeholder {
-            background: #cdd7e4;
-            border-color: #344a63;
-            border-style: dashed;
-            box-shadow: inset 0 0 0 1px rgba(28, 45, 66, 0.2);
-        }
-    }
-
-    &__item-image {
-        width: 28px;
-        height: 28px;
-        object-fit: contain;
-    }
-
-    &__item-name {
-        text-align: center;
-        font-size: 11px;
-        line-height: 1.2;
-        font-weight: 600;
-        color: #13253b;
-        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
-    }
-
-    &__item-amount {
-        font-size: 12px;
-        font-weight: 700;
-        color: #0e223a;
-    }
-
-    &__tooltip {
-        position: absolute;
-        left: 6px;
-        right: 6px;
-        bottom: calc(100% + 8px);
-        z-index: 5;
-        padding: 8px 10px;
-        border-radius: 8px;
-        background: #1b2736;
-        color: #f3f7fc;
-        font-size: 12px;
-        line-height: 1.35;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        min-width: 200px;
     }
 
     &__money {

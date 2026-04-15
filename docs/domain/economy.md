@@ -12,6 +12,7 @@
 - A transaction bundles sell and buy selections into a single confirmed deal.
 - The hero's gold balance changes by the net result of the transaction.
 - Items that are not stackable (`CanBeFolded = false`) occupy individual cells and cannot be accumulated.
+- Equipped items are excluded from the shop selling list.
 
 ## Change Policy
 

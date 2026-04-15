@@ -13,4 +13,5 @@ public class Item
     public bool CanBeFolded { get; set; }
     public ItemType Type { get; set; }
     public List<EffectDefinition>? Effects { get; set; }
+    public List<ItemAllowedSlot>? AllowedSlots { get; set; }
 }

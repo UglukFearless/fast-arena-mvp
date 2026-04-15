@@ -57,9 +57,16 @@ public class ShopService : IShopService
     public async Task<List<ShopHeroItem>> GetHeroItemsAsync(Guid userId)
     {
         var hero = await EnsureShopAccessibleAsync(userId);
+        var equippedCellIds = hero.EquippedSlots?
+            .Where(s => s.HeroItemCellId.HasValue)
+            .Select(s => s.HeroItemCellId!.Value)
+            .ToHashSet()
+            ?? new HashSet<Guid>();
 
         return hero.Items?
-            .Where(i => i.Item != null && i.Item.Type != ItemType.MONEY)
+            .Where(i => i.Item != null
+                && i.Item.Type != ItemType.MONEY
+                && !equippedCellIds.Contains(i.Id))
             .Select(i => new ShopHeroItem
             {
                 HeroItemCellId = i.Id,
@@ -103,6 +110,11 @@ public class ShopService : IShopService
             .Where(i => i.Item != null)
             .ToDictionary(i => i.Id)
             ?? new Dictionary<Guid, Domain.Heroes.HeroItemCell>();
+        var equippedCellIds = hero.EquippedSlots?
+            .Where(s => s.HeroItemCellId.HasValue)
+            .Select(s => s.HeroItemCellId!.Value)
+            .ToHashSet()
+            ?? new HashSet<Guid>();
 
         foreach (var sellItem in sellItems)
         {
@@ -119,6 +131,11 @@ public class ShopService : IShopService
             if (heroItemCell.Amount < sellItem.Quantity)
             {
                 throw new ActionDeniedException("Hero does not have enough quantity of one of the selected items.");
+            }
+
+            if (equippedCellIds.Contains(sellItem.HeroItemCellId))
+            {
+                throw new ActionDeniedException("Equipped items cannot be sold.");
             }
         }
 
