@@ -21,7 +21,9 @@ This document tracks short-horizon tasks. It should stay compact and operational
 ### Next Goal: Item Effects, Pockets, and Combat Usage
 
 - [x] Introduce item effect/parameter model and storage for consumable/support items (potions included).
-- [ ] Add hero equipment system with 3 pockets for support items.
+- [x] Add hero equipment system with 3 pockets for support items.
+- [ ] Finalize domain rules for in-fight item usage and effect timing/stacking semantics.
+- [ ] Finalize architecture contract for unified effect hooks and effect-type handlers.
 - [ ] Implement item usage flow in fight: consume equipped item, apply effect, persist battle state updates.
 
 ## Task Format

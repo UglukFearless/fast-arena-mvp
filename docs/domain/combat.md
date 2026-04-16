@@ -90,26 +90,26 @@ Examples:
 
 ## Round Lifecycle For Effect Processing
 
-This section defines key round phases as a design baseline for item and status effects.
-Phases marked **[Planned]** are not yet implemented.
+This section defines business phases where active effects may influence a round.
+The phase names are domain-oriented and describe gameplay semantics.
+Phases or rules marked **[Planned]** are intentionally kept as navigation markers for upcoming behavior.
 
 ### Phase A: Round Start
 
 - Available hero actions while both participants are alive:
 	- attack,
-	- use combat item (planned).
+	- use combat item **[Planned]**.
 - Once HP reaches 0, combat round action is no longer available and combat goes to finalization.
-- Active timed effects have their duration decremented at round start. **[Planned]**
+- Active effects are normalized at round start according to their stacking rules. **[Planned]**
 - If item usage is chosen:
-	- Apply instant effects (e.g. HP restore) before any dice rolls.
-	- Apply persistent effect registration (e.g. Ability override, strike power bonus).
-	- Remove the consumed item from the pocket.
-	- Proceed to Phase B in passive mode (hero does not attack this round).
+	- item effects start influencing the round before initiative,
+	- consumed item is removed from pocket,
+	- hero enters passive mode for this round (hero does not attack). **[Planned]**
 
 ### Phase B: Strike Claim
 
 - Resolve initiative rolls (`d6` each) and base strike power by difference.
-- Determine effective Ability for both sides: use Ability override value if active, otherwise `floor(currentHP / 10)`. **[Override resolution Planned]**
+- Determine effective Ability for both sides: use override value if an active effect requires it, otherwise `floor(currentHP / 10)`. **[Planned]**
 - Apply Ability-derived advantage mitigation.
 - If hero is in passive mode this round due to item usage: hero's roll is used only for defense; a higher hero roll does not result in a strike.
 - If resulting strike power is less than 1 (or hero is passive and opponent does not hit), the round ends as a draw.
@@ -146,9 +146,15 @@ Phases marked **[Planned]** are not yet implemented.
 ### Phase G: Commit And Round End
 
 - Apply final damage to target HP.
-- Recalculate Ability for both participants from updated HP.
-- On-hit or post-hit timed effects apply here. **[Planned]**
+- Recalculate base Ability for both participants from updated HP.
+- Apply post-hit and end-of-round effects that are tied to this phase. **[Planned]**
+- Produce final round projection for UI from effective values, including active overrides. **[Planned]**
 - Check death condition and decide whether combat continues.
+
+### Fight Finalization
+
+- If one participant is dead, the fight enters finalization.
+- Finalization resolves fight outcome, rewards/penalties, and history-relevant result.
 
 ## Fight Result
 

@@ -102,14 +102,16 @@ Armor may mitigate damage by two mechanisms:
 
 ### Usable Items And Pockets (Planned, Not Implemented)
 
+Planned labels in this section are intentionally kept as temporary navigation markers.
+
 #### Pockets
 
 - Before a fight, the hero places usable items into pocket slots.
 - Pockets are the only inventory slots accessible during combat and travel.
-- Current MVP pocket count: 3.
+- Current pocket count: 3.
 - If all pockets are occupied, placing another usable item into pockets is denied.
 
-#### Slot Compatibility (MVP Baseline)
+#### Slot Compatibility
 
 - Equippable items have predefined allowed equipment slots.
 - Potions are compatible with pocket slots.
@@ -131,6 +133,11 @@ Combat effects have three properties:
 - **Application time** — when in the round lifecycle the effect is applied.
 - **Duration** — number of rounds the effect is active. The round of use counts as round 1.
 - **Target** — what characteristic or mechanic the effect modifies.
+
+Application time and duration are different dimensions:
+
+- Application time defines the phase where an effect can influence combat state.
+- Duration defines how long that effect remains active across rounds.
 
 #### Effect Types (Generalized)
 
@@ -167,11 +174,10 @@ Combat effects are defined by domain type plus parameters from data storage.
 #### Effect Stacking
 
 - Multiple active effects of the same type are allowed.
-- Each use starts an independent countdown from round 1.
-- Example: hero uses an effect item in round 2 and again in round 3.
-	- After round 3: first effect is in round 2 of 3, second is in round 1 of 3.
-- For characteristic override effects, stacking can be technically allowed while producing the same effective value.
-- Exact stacking composition policy for numerically stacking effects is defined by effect-type rules.
+- Repeated usage of the same effect type is resolved by that effect type's stacking rule.
+- Repeated usage of the same effect type always produces one aggregated active effect for that type.
+- If effects are merged, merged parameters (for example magnitude and remaining rounds) are determined by the same effect-type rule.
+- The round of usage still counts as round 1 for the resulting active effect lifecycle.
 
 #### Future Effect Categories
 
