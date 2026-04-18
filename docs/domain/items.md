@@ -128,63 +128,7 @@ Planned labels in this section are intentionally kept as temporary navigation ma
 
 #### Effect Model
 
-Combat effects have three properties:
-
-- **Application time** — when in the round lifecycle the effect is applied.
-- **Duration** — number of rounds the effect is active. The round of use counts as round 1.
-- **Target** — what characteristic or mechanic the effect modifies.
-
-Application time and duration are different dimensions:
-
-- Application time defines the phase where an effect can influence combat state.
-- Duration defines how long that effect remains active across rounds.
-
-#### Effect Types (Generalized)
-
-Combat effects are defined by domain type plus parameters from data storage.
-
-1. Resource modification effects
-
-- Change resource values such as HP.
-- Typical timing: immediate, before initiative roll of the same round.
-- Typical parameters: target resource, amount, clamp rules.
-
-2. Characteristic override effects
-
-- Temporarily replace a calculated characteristic with an override value.
-- Current known case: Ability override to hero maximum (`floor(MaxHP / 10)`) regardless of current HP.
-- Typical parameters: characteristic name, override rule/value, duration.
-
-3. Characteristic modifier effects
-
-- Additive or multiplicative change to a calculated combat value.
-- Current known case: strike power bonus on successful attack.
-- Typical parameters: affected value, operation type, magnitude, duration, trigger conditions.
-
-4. Triggered probability effects (future)
-
-- Activate on specific combat events with configured probability.
-- Typical parameters: trigger event, probability, payload effect.
-
-5. Meta-economy effects (future)
-
-- Affect non-damage combat outputs (for example reward quality/amount).
-- Typical parameters: affected reward channel, operation type, magnitude, duration.
-
-#### Effect Stacking
-
-- Multiple active effects of the same type are allowed.
-- Repeated usage of the same effect type is resolved by that effect type's stacking rule.
-- Repeated usage of the same effect type always produces one aggregated active effect for that type.
-- If effects are merged, merged parameters (for example magnitude and remaining rounds) are determined by the same effect-type rule.
-- The round of usage still counts as round 1 for the resulting active effect lifecycle.
-
-#### Future Effect Categories
-
-- Passive trigger effects (no explicit use action):
-	- Example: charm that passively reduces chance of a lethal blow.
-	- Example: charm that increases loot reward on victory.
-- These require a passive slot or always-on pocket mechanic to be designed separately.
+Effects applied by items follow the shared effect model. See [`docs/domain/effects.md`](effects.md).
 
 ## Change Policy
 

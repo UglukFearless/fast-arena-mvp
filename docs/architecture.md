@@ -26,6 +26,7 @@ The backend solution is located under `backend/src/` and is split into several p
 - Database context, mappings, and storage implementations.
 - Schema is defined in `ApplicationContext`. Base data is seeded at runtime by `FastArena.WebHost` seeders, not by EF `HasData`.
 - Item effect definitions are stored in DAL and linked to items (item-owned effect records).
+- **MVP migration policy:** EF migrations are not used. Schema changes are applied by recreating the database manually. Do not generate or run migration commands.
 
 ### FastArena.WebApi
 
@@ -70,6 +71,10 @@ The frontend is a Vue 3 application with TypeScript, Pinia, and Vue Router.
 - Domain rules should stay primarily in backend core logic.
 - Frontend should reflect server state and provide interaction flow.
 - Mapping between DAL entities, domain models, and API DTOs is a critical seam.
+
+## Decisions
+
+For a log of tactical technical decisions and their rationale, see `docs/decisions.md`.
 
 ## Hotspots
 

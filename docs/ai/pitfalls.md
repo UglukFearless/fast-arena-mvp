@@ -6,6 +6,7 @@ This file captures frequent mistakes and constraints relevant to this project.
 
 ## Known Pitfalls
 
+- **Always read `docs/ai/pitfalls.md` at the start of any task.** Known constraints live here; skipping this causes repeated mistakes.
 - Do not treat roadmap items as current implementation facts.
 - Do not infer gameplay mechanics beyond `docs/domain.md`.
 - Mapping depth can affect nested response fields; verify related mappings when changing DTO shaping.
