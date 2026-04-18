@@ -14,19 +14,22 @@ public class HeroService : IHeroService
     private readonly IItemStorage _itemStorage;
     private readonly IHeroProgressService _heroProgressService;
     private readonly IActivityStateService _activityStateService;
+    private readonly IHeroEquipmentStorage _heroEquipmentStorage;
 
     public HeroService(
         IHeroStorage heroStorage, 
         IUserStorage userStorage,
         IItemStorage itemStorage,
         IHeroProgressService heroProgressService,
-        IActivityStateService activityStateService)
+        IActivityStateService activityStateService,
+        IHeroEquipmentStorage heroEquipmentStorage)
     {
         _heroStorage = heroStorage;
         _userStorage = userStorage;
         _itemStorage = itemStorage;
         _heroProgressService = heroProgressService;
         _activityStateService = activityStateService;
+        _heroEquipmentStorage = heroEquipmentStorage;
     }
 
     public async Task<Hero> CreateAsync(HeroCreationModel model)
@@ -81,6 +84,11 @@ public class HeroService : IHeroService
     public async Task GiveItemsToHeroAsync(Guid heroId, ICollection<GivenItem> items)
     {
         await _heroStorage.GiveItemsToHeroAsync(heroId, items);
+    }
+
+    public async Task<HeroItemCell> ConsumePocketItemForFightAsync(Guid heroId, Guid heroItemCellId)
+    {
+        return await _heroEquipmentStorage.ConsumePocketItemAsync(heroId, heroItemCellId);
     }
 
     public async Task IncreaseExperienceAsync(int experience, Guid heroId)

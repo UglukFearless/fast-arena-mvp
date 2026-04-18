@@ -45,8 +45,11 @@ internal class MonsterFightProfile
             MonsterHealth = monsterFightActionState.MonsterHealth,
             MonsterAbility = monsterFightActionState.MonsterAbility,
             MonsterDiceRoll = monsterFightActionState.MonsterDiceRoll,
+            StrikeStrength = monsterFightActionState.StrikeStrength,
             Result = monsterFightActionState.Result,
             ActVariants = monsterFightActionState.ActVariants,
+            ActiveEffects = monsterFightActionState.ActiveEffects,
+            PocketItems = HeroItemCellProfile.Map(monsterFightActionState.PocketItems, true),
         };
     }
 

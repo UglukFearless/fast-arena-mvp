@@ -16,5 +16,6 @@ public interface IHeroService
     Task<Hero> GetAsync(Guid id);
     Task KillTheHeroAsync(Guid id);
     Task GiveItemsToHeroAsync(Guid heroId, ICollection<GivenItem> items);
+    Task<HeroItemCell> ConsumePocketItemForFightAsync(Guid heroId, Guid heroItemCellId);
     Task IncreaseExperienceAsync(int experience, Guid heroId);
 }

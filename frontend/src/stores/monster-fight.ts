@@ -93,7 +93,12 @@ export const useMonsterFight = defineStore('monster-fight', {
         async doAction(code: HeroActVariant, router: Router) {
             try {
                 const monsterFightClient = new MonsterFightClient(ApiSettings.BaseUrl, authFetch);
-                const roundResult = await monsterFightClient.doHeroAction(code);
+                const roundResult = await monsterFightClient.doHeroAction({
+                    actVariant: code,
+                    actionData: {
+                        usedPocketItemCellId: undefined,
+                    },
+                });
 
                 if (!roundResult.shoudGoNext) {
                     this.monsterFight!.state[roundResult.stateOrder!] = roundResult.state!;

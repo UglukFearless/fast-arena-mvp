@@ -663,17 +663,17 @@ export class MonsterFightClient {
         return Promise.resolve<MonsterFightDto>(null as any);
     }
 
-    doHeroAction(actVariant: HeroActVariant | undefined): Promise<MonsterFightRoundResultDto> {
-        let url_ = this.baseUrl + "/api/monsterfight/do?";
-        if (actVariant === null)
-            throw new Error("The parameter 'actVariant' cannot be null.");
-        else if (actVariant !== undefined)
-            url_ += "actVariant=" + encodeURIComponent("" + actVariant) + "&";
+    doHeroAction(model: MonsterFightDoActionDto): Promise<MonsterFightRoundResultDto> {
+        let url_ = this.baseUrl + "/api/monsterfight/do";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(model);
+
         let options_: RequestInit = {
+            body: content_,
             method: "POST",
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
@@ -1187,8 +1187,11 @@ export interface MonsterFightActionStateDto {
     monsterHealth: number;
     monsterAbility: number;
     monsterDiceRoll: number | undefined;
+    strikeStrength: number;
     result: MonsterFightActionStateResult | undefined;
     actVariants: HeroActVariant[];
+    activeEffects: ActiveEffect[];
+    pocketItems: HeroItemCellDto[];
 }
 
 export interface MonsterFightActionStateResult {
@@ -1205,6 +1208,21 @@ export enum MonsterFightActionStateResultType {
 export enum HeroActVariant {
     ATTACK = 0,
     FINALIZE = 1,
+    USE_ITEM = 2,
+}
+
+export interface ActiveEffect {
+    definitionId: string;
+    type: EffectType;
+    remainingRounds: number;
+    magnitude: number;
+    minValue: number;
+    maxValue: number;
+    chancePercent: number;
+    conditionType: EffectConditionType;
+    targetType: EffectTargetType;
+    priority: number;
+    stackCount: number;
 }
 
 export interface MonsterFightRewardDto {
@@ -1221,6 +1239,15 @@ export interface MonsterFightRoundResultDto {
     stateOrder: number | undefined;
     state: MonsterFightActionStateDto | undefined;
     reward: MonsterFightRewardDto | undefined;
+}
+
+export interface MonsterFightDoActionDto {
+    actVariant: HeroActVariant;
+    actionData: MonsterFightDoActionDataDto;
+}
+
+export interface MonsterFightDoActionDataDto {
+    usedPocketItemCellId: string | undefined;
 }
 
 export interface PortraitDto {

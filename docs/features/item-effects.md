@@ -45,8 +45,8 @@ Phase names mirror `docs/domain/combat.md` domain phases:
 - `OnRoundStart` — normalize active effects; apply resource modification effects (e.g. heal potion).
 - `OnStrikeClaimed` — apply ability override effects (Phase B).
 - `OnPowerModifiers` — apply strike power bonus effects (Phase E).
-- `OnUnitDamageModifiers` — apply unit-damage modifier effects (Phase F).
-- `OnRoundEnd` — decrement remaining rounds; remove expired effects (Phase G).
+- `OnRoundEnd` — apply end-of-round hooks and decrement remaining rounds (Phase G).
+- Expired effects are removed at the beginning of the next round (`OnRoundStart` normalization step), so an effect that reached `0` this round is still visible in the produced state snapshot.
 
 ### Handler Registry
 
@@ -61,25 +61,33 @@ Phase names mirror `docs/domain/combat.md` domain phases:
 - Effect definition schema persisted in DAL; fields include Type, DurationRounds, Magnitude, MinValue, MaxValue, ChancePercent, ConditionType, TargetType, Priority, NextEffectDefinitionId.
 - Potion seed baseline: heal 60 (100% chance), ability override to max for 3 rounds, strike power bonus +2 for 3 rounds.
 
-### Phase 2 — Domain Rules Finalization ⏳
+### Phase 2 — Domain Rules Finalization ✅
 
-- Finalize in-fight item usage rules (timing, passive mode, draw condition when passive and opponent does not hit).
-- Finalize stacking semantics per effect type.
-- Outcome: `docs/domain/items.md` and `docs/domain/combat.md` reflect complete rules with no remaining ambiguity.
+- ✅ In-fight item usage rules documented: timing, passive mode, draw condition when passive and opponent does not hit (see `docs/domain/combat.md` Phases A–G and `docs/domain/items.md` Usable Items section).
+- ✅ Stacking semantics per effect type finalized (see `docs/domain/effects.md`).
+- ✅ Outcome: `docs/domain/items.md` and `docs/domain/combat.md` and `docs/domain/effects.md` reflect complete rules with no remaining ambiguity.
 
-### Phase 3 — Architecture Contract ⏳
+### Phase 3 — Architecture Contract ✅
 
-- Define `ActiveEffect` in `FastArena.Core/Models/`.
-- Define `IEffectHandler` interface and hook method signatures in `FastArena.Core/Interfaces/`.
-- Define `EffectHandlerRegistry` (maps `EffectType` → `IEffectHandler`).
-- No fight service wiring yet; just interfaces and data models.
+- ✅ Define `ActiveEffect` in `FastArena.Core/Domain/Effects/ActiveEffect.cs`.
+- ✅ Align handlers to operate directly on fight state values, avoiding ad-hoc context objects.
+- ✅ Define `IEffectHandler` interface in `FastArena.Core/Interfaces/Effects/IEffectHandler.cs` with hooks: `OnRoundStart`, `OnStrikeClaimed`, `OnPowerModifiers`, `OnRoundEnd`, `Stack()`.
+- ✅ Define `EffectHandlerRegistry` in `FastArena.Core/Services/Effects/EffectHandlerRegistry.cs` (maps `EffectType` → `IEffectHandler`).
 
-### Phase 4 — Fight Service Wiring ⏳
+### Phase 4 — Fight Service Wiring ✅
 
-- Instantiate `ActiveEffect` when hero chooses item use at Phase A.
-- Dispatch hooks through registry at the correct fight phases.
-- Remove pocket item on use; update inventory.
-- Decrement and expire effects at round end.
+- ✅ Instantiate `ActiveEffect` when hero chooses item use at Phase A.
+- ✅ Dispatch hooks through registry at the correct fight phases.
+- ✅ Remove pocket item on use; update inventory.
+- ✅ Decrement effect durations at round end and cleanup expired effects at the start of the next round.
+
+### Phase 6 — Backend Test Coverage ✅
+
+- ✅ Unit tests grouped under `backend/src/FastArena.Core.Tests/Unit/`:
+	- `Effects/` — handlers and handler registry behavior.
+	- `Services/MonsterFight/` — lifecycle semantics inside fight service helpers.
+- ✅ Service-level integration scenario grouped under `backend/src/FastArena.Core.Tests/Integration/Services/MonsterFight/`.
+- ✅ Current suite validates item-use state transition, pocket consumption, effect activation, and lifecycle invariants.
 
 ### Phase 5 — Frontend Integration ⏳
 
