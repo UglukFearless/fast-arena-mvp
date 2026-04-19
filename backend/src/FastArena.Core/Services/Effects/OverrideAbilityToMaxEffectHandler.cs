@@ -25,7 +25,10 @@ public class OverrideAbilityToMaxEffectHandler : IEffectHandler
     
     public void OnPowerModifiers(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
     
-    public void OnRoundEnd(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
+    public void OnRoundEnd(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster)
+    {
+        state.HeroAbility = hero.MaxHealth / 10;
+    }
     
     public ActiveEffect Stack(ActiveEffect existing, EffectDefinition newDefinition)
     {

@@ -13,6 +13,7 @@ This file captures frequent mistakes and constraints relevant to this project.
 - Keep MVP assumptions explicit; future ideas are not current behavior.
 - **Do NOT generate, run, or commit EF migrations.** Migrations are disabled in MVP. Schema changes go directly in `ApplicationContext.OnModelCreating()`. See `docs/architecture.md` for the MVP migration policy.
 - Schema changes are applied by manually recreating the database locally. Do not auto-drop, auto-create, or auto-reset the database.
+- Domain docs (`docs/domain/*`) must stay business-only: do not include implementation identifiers (enum names, DTO/type names, field/property names).
 
 ## Documentation Boundaries
 

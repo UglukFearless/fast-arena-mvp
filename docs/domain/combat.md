@@ -98,18 +98,18 @@ Phases or rules marked **[Planned]** are intentionally kept as navigation marker
 
 - Available hero actions while both participants are alive:
 	- attack,
-	- use combat item **[Planned]**.
+	- use combat item.
 - Once HP reaches 0, combat round action is no longer available and combat goes to finalization.
-- Active effects are normalized at round start according to their stacking rules. **[Planned]**
+- Active effects are normalized at round start according to their stacking rules.
 - If item usage is chosen:
 	- item effects start influencing the round before initiative,
 	- consumed item is removed from pocket,
-	- hero enters passive mode for this round (hero does not attack). **[Planned]**
+	- hero enters passive mode for this round (hero does not attack).
 
 ### Phase B: Strike Claim
 
 - Resolve initiative rolls (`d6` each) and base strike power by difference.
-- Determine effective Ability for both sides: use override value if an active effect requires it, otherwise `floor(currentHP / 10)`. **[Planned]**
+- Determine effective Ability for both sides: use override value if an active effect requires it, otherwise `floor(currentHP / 10)`.
 - Apply Ability-derived advantage mitigation.
 - If hero is in passive mode this round due to item usage: hero's roll is used only for defense; a higher hero roll does not result in a strike.
 - If resulting strike power is less than 1 (or hero is passive and opponent does not hit), the round ends as a draw.
@@ -147,8 +147,8 @@ Phases or rules marked **[Planned]** are intentionally kept as navigation marker
 
 - Apply final damage to target HP.
 - Recalculate base Ability for both participants from updated HP.
-- Apply post-hit and end-of-round effects that are tied to this phase. **[Planned]**
-- Produce final round projection for UI from effective values, including active overrides. **[Planned]**
+- Apply post-hit and end-of-round effects that are tied to this phase.
+- Produce final round projection for UI from effective values, including active overrides.
 - Check death condition and decide whether combat continues.
 
 ### Fight Finalization

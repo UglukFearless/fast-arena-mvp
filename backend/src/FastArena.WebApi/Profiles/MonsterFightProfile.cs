@@ -48,7 +48,7 @@ internal class MonsterFightProfile
             StrikeStrength = monsterFightActionState.StrikeStrength,
             Result = monsterFightActionState.Result,
             ActVariants = monsterFightActionState.ActVariants,
-            ActiveEffects = monsterFightActionState.ActiveEffects,
+            ActiveEffects = ActiveEffectProfile.Map(monsterFightActionState.ActiveEffects),
             PocketItems = HeroItemCellProfile.Map(monsterFightActionState.PocketItems, true),
         };
     }

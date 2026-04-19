@@ -1190,7 +1190,7 @@ export interface MonsterFightActionStateDto {
     strikeStrength: number;
     result: MonsterFightActionStateResult | undefined;
     actVariants: HeroActVariant[];
-    activeEffects: ActiveEffect[];
+    activeEffects: ActiveEffectDto[];
     pocketItems: HeroItemCellDto[];
 }
 
@@ -1211,9 +1211,10 @@ export enum HeroActVariant {
     USE_ITEM = 2,
 }
 
-export interface ActiveEffect {
+export interface ActiveEffectDto {
     definitionId: string;
     type: EffectType;
+    imageUrl: string | undefined;
     remainingRounds: number;
     magnitude: number;
     minValue: number;

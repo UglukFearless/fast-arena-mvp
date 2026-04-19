@@ -92,8 +92,10 @@ Phase names mirror `docs/domain/combat.md` domain phases:
 ### Phase 5 — Frontend Integration ⏳
 
 - Extend fight round DTO with active effect state (type, remaining rounds) visible to UI.
+- Extend active effect DTO with a temporary `imageUrl` field for frontend rendering, resolved by backend from the current effect source.
 - Update frontend to show used item and active effect indicators.
-- Active effect indicators use the source item's icon (potion icon for MVP). Per-effect-type icons are a future enhancement.
+- Current icon strategy is temporary: active effect indicators use item-source icons.
+- Future rework required: move to dedicated effect icons, or derive icon resolution from effect source/type through an explicit resolver policy.
 
 ## Rejected Paths
 

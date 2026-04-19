@@ -1,4 +1,4 @@
-import { HeroActVariant, MonsterFightActionStateDto, MonsterFightActionStateResult, MonsterFightClient, MonsterFightDto } from "@/api/clients";
+import { ActiveEffectDto, HeroActVariant, MonsterFightActionStateDto, MonsterFightActionStateResult, MonsterFightClient, MonsterFightDoActionDataDto, MonsterFightDto } from "@/api/clients";
 import { ApiSettings } from "@/utils/constants";
 import authFetch from "@/utils/http-helper";
 import { defineStore } from "pinia";
@@ -13,6 +13,11 @@ export interface CharInfo {
     ability: number
     portraitUrl: string,
 };
+
+export interface MonsterFightHeroActionPayload {
+    actVariant: HeroActVariant;
+    actionData?: MonsterFightDoActionDataDto;
+}
 
 
 const activitySessionStore = useActivitySessionStore();
@@ -79,6 +84,9 @@ export const useMonsterFight = defineStore('monster-fight', {
                 .map(s => (s[1].result as MonsterFightActionStateResult).resultText)
                 .reverse();
         },
+        heroActiveEffects(): ActiveEffectDto[] {
+            return this.currentState?.activeEffects ?? [];
+        },
     },
     actions: {
         async getCurrent() {
@@ -90,14 +98,12 @@ export const useMonsterFight = defineStore('monster-fight', {
                 throw e;
             }
         },
-        async doAction(code: HeroActVariant, router: Router) {
+        async doAction(payload: MonsterFightHeroActionPayload, router: Router) {
             try {
                 const monsterFightClient = new MonsterFightClient(ApiSettings.BaseUrl, authFetch);
                 const roundResult = await monsterFightClient.doHeroAction({
-                    actVariant: code,
-                    actionData: {
-                        usedPocketItemCellId: undefined,
-                    },
+                    actVariant: payload.actVariant,
+                    actionData: payload.actionData ?? { usedPocketItemCellId: undefined },
                 });
 
                 if (!roundResult.shoudGoNext) {

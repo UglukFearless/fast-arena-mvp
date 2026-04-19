@@ -8,6 +8,7 @@ public class ActiveEffect
 {
     public Guid DefinitionId { get; set; }
     public required EffectType Type { get; set; }
+    public string? SourceImageUrl { get; set; }
     public int RemainingRounds { get; set; }
     public int Magnitude { get; set; }
     public int MinValue { get; set; }

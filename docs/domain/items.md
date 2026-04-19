@@ -17,19 +17,22 @@
 
 ## Behavioral Flags
 
-- `CanBeFolded` — stackable in a single inventory cell (e.g. gold, loot drops).
-- `CanBeEquipped` — can be actively equipped or used by the hero (e.g. potions, weapons, shields).
+- Stackable items can be accumulated in one inventory cell (for example gold or simple loot).
+- Equippable items can be actively equipped or used by the hero (for example potions, weapons, shields).
 
 ## Combat Usage Status
 
 - Implemented (MVP now):
-	- Item taxonomy exists (`Money`, `Potion`, `Weapon`, `Shield`, `Armor`, `Other`).
-	- Behavioral flags exist (`CanBeFolded`, `CanBeEquipped`).
+	- Item taxonomy exists (money, potion, weapon, shield, armor, other).
+	- Behavioral flags for stacking and equipping exist.
+	- Hero pocket system (3 slots) for usable combat items.
+	- In-fight item usage action with pocket consumption.
+	- Runtime active-effect model with stacking and duration lifecycle.
 - Planned (not fully implemented yet):
-	- Distinct combat effects model for usable/equippable items.
-	- Equipment influence on combat characteristics.
-	- Equipment influence on outgoing and incoming damage.
-	- Full in-fight item usage flow and effect persistence.
+	- Weapon influence on outgoing damage.
+	- Shield influence on incoming damage.
+	- Armor influence on incoming damage.
+	- Extended equipment influence on combat characteristics.
 
 ## Combat Item Subdomains
 
@@ -100,9 +103,7 @@ Armor may mitigate damage by two mechanisms:
 - Example: strike power is 4, zone unit damage is 10, armor absorbs 2 per power -> `4 * (10 - 2) = 32` instead of 40.
 - Zone unit damage per 1 strike power cannot drop below 1.
 
-### Usable Items And Pockets (Planned, Not Implemented)
-
-Planned labels in this section are intentionally kept as temporary navigation markers.
+### Usable Items And Pockets (Implemented MVP)
 
 #### Pockets
 

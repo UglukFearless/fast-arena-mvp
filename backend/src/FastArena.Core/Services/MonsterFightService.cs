@@ -397,10 +397,11 @@ public class MonsterFightService : IMonsterFightService
         var newMonsterAbility = workingState.MonsterAbility;
 
         var damage = 0;
-        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER)
-            damage = lastState.Value.HeroHealth - newHeroHealth;
-        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
-            damage = lastState.Value.MonsterHealth - newMonsterHealth;
+        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER
+            || roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
+        {
+            damage = workingState.StrikeStrength * _damageMap[hitZone];
+        }
 
         var newState = new MonsterFightActionState
         {
@@ -520,6 +521,7 @@ public class MonsterFightService : IMonsterFightService
         {
             DefinitionId = e.DefinitionId,
             Type = e.Type,
+            SourceImageUrl = e.SourceImageUrl,
             RemainingRounds = e.RemainingRounds,
             Magnitude = e.Magnitude,
             MinValue = e.MinValue,
@@ -573,6 +575,7 @@ public class MonsterFightService : IMonsterFightService
                 {
                     DefinitionId = definition.Id,
                     Type = definition.Type,
+                    SourceImageUrl = consumedItem.Item?.ItemImage,
                     RemainingRounds = definition.DurationRounds,
                     Magnitude = definition.Magnitude,
                     MinValue = definition.MinValue,

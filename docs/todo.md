@@ -27,6 +27,9 @@ Implementation note: [`docs/features/item-effects.md`](features/item-effects.md)
 - [x] Finalize domain rules for in-fight item usage and effect timing/stacking semantics.
 - [x] Finalize architecture contract for unified effect hooks and effect-type handlers.
 - [x] Implement item usage flow in fight: consume equipped item, apply effect, persist battle state updates.
+- [x] Complete frontend fight integration for item usage (`USE_ITEM` action + pocket selection in combat).
+- [x] Show active effect indicators in fight UI (including temporary icon URL from backend contract).
+- [x] Synchronize domain docs with implemented item/effect combat behavior and keep planned markers only for truly pending mechanics.
 
 ## Task Format
 

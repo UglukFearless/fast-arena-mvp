@@ -1,6 +1,6 @@
 <template>
     <div class="chars-panel">
-        <CharPanel :char-info="heroInfo" />
+        <CharPanel :char-info="heroInfo" :active-effects="heroActiveEffects" />
         <CharPanel :char-info="monsterInfo" />
     </div>
 </template>
@@ -14,6 +14,7 @@ const monsterFightStore = useMonsterFight();
 
 const heroInfo = computed(() => monsterFightStore.heroInfo);
 const monsterInfo = computed(() => monsterFightStore.monsterInfo);
+const heroActiveEffects = computed(() => monsterFightStore.heroActiveEffects);
 
 </script>
 

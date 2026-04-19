@@ -1,6 +1,5 @@
 ﻿
 using FastArena.Core.Domain.Activities.Actions;
-using FastArena.Core.Domain.Effects;
 
 namespace FastArena.WebApi.Dtos;
 
@@ -15,6 +14,6 @@ public class MonsterFightActionStateDto
     public int StrikeStrength { get; set; }
     public MonsterFightActionStateResult? Result { get; set; }
     public HashSet<HeroActVariant> ActVariants { get; set; }
-    public List<ActiveEffect> ActiveEffects { get; set; } = new();
+    public List<ActiveEffectDto> ActiveEffects { get; set; } = new();
     public List<HeroItemCellDto> PocketItems { get; set; } = new();
 }
