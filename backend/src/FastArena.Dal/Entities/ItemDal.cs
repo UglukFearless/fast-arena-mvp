@@ -14,4 +14,6 @@ public class ItemDal
     public required ItemType Type { get; set; }
 
     public ICollection<HeroItemCellDal>? HeroItems { get; set; }
+    public ICollection<EffectDefinitionDal>? Effects { get; set; }
+    public ICollection<ItemAllowedSlotDal>? AllowedSlots { get; set; }
 }

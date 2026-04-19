@@ -1,3 +1,5 @@
+using FastArena.Core.Domain.Effects;
+using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.Items;
 using FastArena.Dal;
 using FastArena.Dal.Entities;
@@ -19,6 +21,13 @@ public class ItemSeeder
         if (await _context.Items.AnyAsync())
             return;
 
+        var healingPotionId = Guid.NewGuid();
+        var painkillerId = Guid.NewGuid();
+        var furyPotionId = Guid.NewGuid();
+        var oneHandSwordId = Guid.NewGuid();
+        var shieldId = Guid.NewGuid();
+        var twoHandSwordId = Guid.NewGuid();
+
         var items = new List<ItemDal>
         {
             new()
@@ -34,7 +43,7 @@ public class ItemSeeder
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = healingPotionId,
                 Name = "Лечебное зелье",
                 Description = "От этого точно станет лучше, если не схватить по рылу пока будешь пить. Восстанавливает 60 очков здоровья.",
                 BaseCost = 15,
@@ -42,10 +51,26 @@ public class ItemSeeder
                 CanBeEquipped = true,
                 CanBeFolded = false,
                 Type = ItemType.POTION,
+                Effects = new List<EffectDefinitionDal>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ItemId = healingPotionId,
+                        Type = EffectType.HEAL_HP,
+                        DurationRounds = 1,
+                        Magnitude = 60,
+                        MinValue = 60,
+                        MaxValue = 60,
+                        ChancePercent = 100,
+                        ConditionType = EffectConditionType.ALWAYS,
+                        TargetType = EffectTargetType.SELF,
+                    }
+                },
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = painkillerId,
                 Name = "Обезболивающий наркотик",
                 Description = "Восстанавливает мастерство до максимума на 3 хода. А ещё с него знатно прёт!",
                 BaseCost = 30,
@@ -53,17 +78,49 @@ public class ItemSeeder
                 CanBeEquipped = true,
                 CanBeFolded = false,
                 Type = ItemType.POTION,
+                Effects = new List<EffectDefinitionDal>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ItemId = painkillerId,
+                        Type = EffectType.OVERRIDE_ABILITY_TO_MAX,
+                        DurationRounds = 3,
+                        Magnitude = 0,
+                        MinValue = 0,
+                        MaxValue = 0,
+                        ChancePercent = 100,
+                        ConditionType = EffectConditionType.ALWAYS,
+                        TargetType = EffectTargetType.SELF,
+                    }
+                },
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = furyPotionId,
                 Name = "Зелье свирепости",
-                Description = "Делает все успешные атаки более смертоносными добавляя 1 единицу силы удара на 3 хода. Ещё орёшь, как дурной и ссышься.",
+                Description = "Делает все успешные атаки более смертоносными добавляя 2 единицы силы удара на 3 хода. Ещё орёшь, как дурной и ссышься.",
                 BaseCost = 30,
                 ItemImage = "/assets/items/posion_black.png",
                 CanBeEquipped = true,
                 CanBeFolded = false,
                 Type = ItemType.POTION,
+                Effects = new List<EffectDefinitionDal>
+                {
+                    new()
+                    {
+                        Id = Guid.NewGuid(),
+                        ItemId = furyPotionId,
+                        Type = EffectType.STRIKE_POWER_BONUS,
+                        DurationRounds = 3,
+                        Magnitude = 2,
+                        MinValue = 2,
+                        MaxValue = 2,
+                        ChancePercent = 100,
+                        ConditionType = EffectConditionType.ON_SUCCESSFUL_STRIKE,
+                        TargetType = EffectTargetType.SELF,
+                    }
+                },
             },
             new()
             {
@@ -78,7 +135,7 @@ public class ItemSeeder
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = oneHandSwordId,
                 Name = "Грубый одноручный меч",
                 Description = "Не такой грубый, как твой бывший. Добавлять 2 очка урона за каждую единицу силы нанесённого удара.",
                 BaseCost = 30,
@@ -89,7 +146,7 @@ public class ItemSeeder
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = shieldId,
                 Name = "Легкий деревянный щит",
                 Description = "Легкий и деревянный... и щит. Позволяет с вероятностью 20 процентов полностью заблокировать 2 пропущенных атаки. Ломается.",
                 BaseCost = 50,
@@ -100,7 +157,7 @@ public class ItemSeeder
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = twoHandSwordId,
                 Name = "Грубый двуручный меч",
                 Description = "Имено такой грубый, как твой бывший. Добавляет 1 единицу силы атаки при успешном ударе.",
                 BaseCost = 40,
@@ -287,7 +344,28 @@ public class ItemSeeder
             },
         };
 
+        var itemAllowedSlots = new List<ItemAllowedSlotDal>
+        {
+            new() { ItemId = healingPotionId, Slot = EquipmentSlotType.POCKET_1 },
+            new() { ItemId = healingPotionId, Slot = EquipmentSlotType.POCKET_2 },
+            new() { ItemId = healingPotionId, Slot = EquipmentSlotType.POCKET_3 },
+
+            new() { ItemId = painkillerId, Slot = EquipmentSlotType.POCKET_1 },
+            new() { ItemId = painkillerId, Slot = EquipmentSlotType.POCKET_2 },
+            new() { ItemId = painkillerId, Slot = EquipmentSlotType.POCKET_3 },
+
+            new() { ItemId = furyPotionId, Slot = EquipmentSlotType.POCKET_1 },
+            new() { ItemId = furyPotionId, Slot = EquipmentSlotType.POCKET_2 },
+            new() { ItemId = furyPotionId, Slot = EquipmentSlotType.POCKET_3 },
+
+            new() { ItemId = oneHandSwordId, Slot = EquipmentSlotType.RIGHT_HAND },
+            new() { ItemId = shieldId, Slot = EquipmentSlotType.LEFT_HAND },
+            new() { ItemId = twoHandSwordId, Slot = EquipmentSlotType.RIGHT_HAND },
+            new() { ItemId = twoHandSwordId, Slot = EquipmentSlotType.LEFT_HAND },
+        };
+
         _context.Items.AddRange(items);
+        _context.ItemAllowedSlots.AddRange(itemAllowedSlots);
         await _context.SaveChangesAsync();
     }
 }

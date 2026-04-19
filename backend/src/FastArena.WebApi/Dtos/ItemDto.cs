@@ -13,4 +13,5 @@ public class ItemDto
     public bool CanBeEquipped { get; set; }
     public bool CanBeFolded { get; set; }
     public ItemType Type { get; set; }
+    public List<EffectDefinitionDto>? Effects { get; set; }
 }

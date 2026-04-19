@@ -46,6 +46,12 @@ if (isInvalid) return null;
 - Comments inside code must be written in English.
 - Project documentation may be written in Russian.
 
+### Frontend Component Size
+
+- Avoid oversized Vue components that mix layout, interaction logic, and rendering details in one file.
+- When a component grows and starts handling multiple distinct UI blocks, split it into smaller focused components.
+- Keep balance: split for clarity, but do not fragment trivial markup into many micro-components.
+
 ## How To Extend This File
 
 When adding a new rule, prefer this format:

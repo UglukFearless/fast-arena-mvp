@@ -1,6 +1,9 @@
 ﻿
 namespace FastArena.Core.Domain.Activities.Actions;
 
+using FastArena.Core.Domain.Effects;
+using FastArena.Core.Domain.Heroes;
+
 public class MonsterFightActionState : ActivityActionState
 {
     public int HeroHealth { get; set; }
@@ -9,8 +12,11 @@ public class MonsterFightActionState : ActivityActionState
     public int MonsterHealth { get; set; }
     public int MonsterAbility { get; set;}
     public int? MonsterDiceRoll { get;set; }
+    public int StrikeStrength { get; set; }
     public MonsterFightActionStateResult? Result { get; set; }
     public HashSet<HeroActVariant> ActVariants { get; set; }
+    public List<ActiveEffect> ActiveEffects { get; set; } = new();
+    public List<HeroItemCell> PocketItems { get; set; } = new();
 }
 
 public class MonsterFightActionStateResult
@@ -30,4 +36,5 @@ public enum HeroActVariant
 {
     ATTACK,
     FINALIZE,
+    USE_ITEM,
 }

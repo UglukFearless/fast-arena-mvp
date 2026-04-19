@@ -1,5 +1,7 @@
 ﻿using FastArena.Core.Interfaces.App;
+using FastArena.Core.Interfaces.Effects;
 using FastArena.Core.Services;
+using FastArena.Core.Services.Effects;
 
 namespace FastArena.WebHost.Configs;
 
@@ -8,6 +10,7 @@ public static class ServiceConfig
     public static IServiceCollection AddAppServices(this IServiceCollection services)
     {
         services.AddScoped<IHeroService, HeroService>();
+        services.AddScoped<IHeroEquipmentService, HeroEquipmentService>();
         services.AddScoped<IHeroInfoService, HeroInfoService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IPortraitService, PortraitService>();
@@ -21,6 +24,10 @@ public static class ServiceConfig
         services.AddScoped<IItemService, ItemService>();
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IShopService, ShopService>();
+        services.AddSingleton<IEffectHandler, HealHpEffectHandler>();
+        services.AddSingleton<IEffectHandler, OverrideAbilityToMaxEffectHandler>();
+        services.AddSingleton<IEffectHandler, StrikePowerBonusEffectHandler>();
+        services.AddSingleton<EffectHandlerRegistry>();
 
         return services;
     }

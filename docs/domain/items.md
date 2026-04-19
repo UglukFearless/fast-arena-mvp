@@ -17,19 +17,22 @@
 
 ## Behavioral Flags
 
-- `CanBeFolded` — stackable in a single inventory cell (e.g. gold, loot drops).
-- `CanBeEquipped` — can be actively equipped or used by the hero (e.g. potions, weapons, shields).
+- Stackable items can be accumulated in one inventory cell (for example gold or simple loot).
+- Equippable items can be actively equipped or used by the hero (for example potions, weapons, shields).
 
 ## Combat Usage Status
 
 - Implemented (MVP now):
-	- Item taxonomy exists (`Money`, `Potion`, `Weapon`, `Shield`, `Armor`, `Other`).
-	- Behavioral flags exist (`CanBeFolded`, `CanBeEquipped`).
+	- Item taxonomy exists (money, potion, weapon, shield, armor, other).
+	- Behavioral flags for stacking and equipping exist.
+	- Hero pocket system (3 slots) for usable combat items.
+	- In-fight item usage action with pocket consumption.
+	- Runtime active-effect model with stacking and duration lifecycle.
 - Planned (not fully implemented yet):
-	- Distinct combat effects model for usable/equippable items.
-	- Equipment influence on combat characteristics.
-	- Equipment influence on outgoing and incoming damage.
-	- Full in-fight item usage flow and effect persistence.
+	- Weapon influence on outgoing damage.
+	- Shield influence on incoming damage.
+	- Armor influence on incoming damage.
+	- Extended equipment influence on combat characteristics.
 
 ## Combat Item Subdomains
 
@@ -100,14 +103,20 @@ Armor may mitigate damage by two mechanisms:
 - Example: strike power is 4, zone unit damage is 10, armor absorbs 2 per power -> `4 * (10 - 2) = 32` instead of 40.
 - Zone unit damage per 1 strike power cannot drop below 1.
 
-### Usable Items And Pockets (Planned, Not Implemented)
+### Usable Items And Pockets (Implemented MVP)
 
 #### Pockets
 
 - Before a fight, the hero places usable items into pocket slots.
 - Pockets are the only inventory slots accessible during combat and travel.
-- Current planned pocket count: 3.
-- Pocket count may change later.
+- Current pocket count: 3.
+- If all pockets are occupied, placing another usable item into pockets is denied.
+
+#### Slot Compatibility
+
+- Equippable items have predefined allowed equipment slots.
+- Potions are compatible with pocket slots.
+- Other equippable categories may have a single deterministic slot set, but use the same compatibility concept.
 
 #### Using An Item In Combat
 
@@ -120,59 +129,7 @@ Armor may mitigate damage by two mechanisms:
 
 #### Effect Model
 
-Combat effects have three properties:
-
-- **Application time** — when in the round lifecycle the effect is applied.
-- **Duration** — number of rounds the effect is active. The round of use counts as round 1.
-- **Target** — what characteristic or mechanic the effect modifies.
-
-#### Effect Types (Generalized)
-
-Combat effects are defined by domain type plus parameters from data storage.
-
-1. Resource modification effects
-
-- Change resource values such as HP.
-- Typical timing: immediate, before initiative roll of the same round.
-- Typical parameters: target resource, amount, clamp rules.
-
-2. Characteristic override effects
-
-- Temporarily replace a calculated characteristic with an override value.
-- Current known case: Ability override to hero maximum (`floor(MaxHP / 10)`) regardless of current HP.
-- Typical parameters: characteristic name, override rule/value, duration.
-
-3. Characteristic modifier effects
-
-- Additive or multiplicative change to a calculated combat value.
-- Current known case: strike power bonus on successful attack.
-- Typical parameters: affected value, operation type, magnitude, duration, trigger conditions.
-
-4. Triggered probability effects (future)
-
-- Activate on specific combat events with configured probability.
-- Typical parameters: trigger event, probability, payload effect.
-
-5. Meta-economy effects (future)
-
-- Affect non-damage combat outputs (for example reward quality/amount).
-- Typical parameters: affected reward channel, operation type, magnitude, duration.
-
-#### Effect Stacking
-
-- Multiple active effects of the same type are allowed.
-- Each use starts an independent countdown from round 1.
-- Example: hero uses an effect item in round 2 and again in round 3.
-	- After round 3: first effect is in round 2 of 3, second is in round 1 of 3.
-- For characteristic override effects, stacking can be technically allowed while producing the same effective value.
-- Exact stacking composition policy for numerically stacking effects is defined by effect-type rules.
-
-#### Future Effect Categories
-
-- Passive trigger effects (no explicit use action):
-	- Example: charm that passively reduces chance of a lethal blow.
-	- Example: charm that increases loot reward on victory.
-- These require a passive slot or always-on pocket mechanic to be designed separately.
+Effects applied by items follow the shared effect model. See [`docs/domain/effects.md`](effects.md).
 
 ## Change Policy
 

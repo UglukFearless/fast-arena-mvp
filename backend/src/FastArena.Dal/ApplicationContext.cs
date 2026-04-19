@@ -46,6 +46,25 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<ItemDal>()
             .HasMany(i => i.HeroItems);
 
+        modelBuilder.Entity<ItemDal>()
+            .HasMany(i => i.AllowedSlots)
+            .WithOne(s => s.Item)
+            .HasForeignKey(s => s.ItemId);
+
+        modelBuilder.Entity<ItemAllowedSlotDal>()
+            .HasKey(x => new { x.ItemId, x.Slot });
+
+        modelBuilder.Entity<ItemDal>()
+            .HasMany(i => i.Effects)
+            .WithOne(e => e.Item)
+            .HasForeignKey(e => e.ItemId);
+
+        modelBuilder.Entity<EffectDefinitionDal>()
+            .HasIndex(e => e.ItemId);
+
+        modelBuilder.Entity<EffectDefinitionDal>()
+            .HasIndex(e => new { e.ItemId, e.Type });
+
         modelBuilder.Entity<HeroItemCellDal>()
             .HasOne(ic => ic.Hero)
             .WithMany(h => h.Items)
@@ -58,6 +77,23 @@ public class ApplicationContext : DbContext
 
         modelBuilder.Entity<HeroItemCellDal>()
             .HasIndex(ic => ic.HeroId);
+
+        modelBuilder.Entity<HeroEquippedSlotDal>()
+            .HasKey(es => new { es.HeroId, es.Slot });
+
+        modelBuilder.Entity<HeroEquippedSlotDal>()
+            .HasOne(es => es.Hero)
+            .WithMany(h => h.EquippedSlots)
+            .HasForeignKey(es => es.HeroId);
+
+        modelBuilder.Entity<HeroEquippedSlotDal>()
+            .HasOne(es => es.HeroItemCell)
+            .WithMany(ic => ic.EquippedSlots)
+            .HasForeignKey(es => es.HeroItemCellId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<HeroEquippedSlotDal>()
+            .HasIndex(es => es.HeroItemCellId);
 
         modelBuilder.Entity<MonsterMoldDal>()
             .HasOne(mm => mm.Portrait);
@@ -81,7 +117,10 @@ public class ApplicationContext : DbContext
     public DbSet<PortraitDal> Portraits { get; set; }
     public DbSet<PortraitTagDal> PortraitTags { get; set; }
     public DbSet<ItemDal> Items { get; set; }
+    public DbSet<EffectDefinitionDal> EffectDefinitions { get; set; }
+    public DbSet<ItemAllowedSlotDal> ItemAllowedSlots { get; set; }
     public DbSet<HeroItemCellDal> HeroItemCells { get; set; }
+    public DbSet<HeroEquippedSlotDal> HeroEquippedSlots { get; set; }
     public DbSet<MonsterMoldDal> MonsterMolds { get; set; }
     public DbSet<MonsterFightResultDal> MonsterFightResults { get; set; }
 }

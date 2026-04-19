@@ -26,5 +26,6 @@ public class Hero
 
     public User? User { get; set; }
     public List<HeroItemCell>? Items { get; set; }
+    public List<HeroEquippedSlot>? EquippedSlots { get; set; }
     public List<MonsterFightResult>? Results { get; set; }
 }

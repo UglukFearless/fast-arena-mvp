@@ -3,10 +3,14 @@ using FastArena.Core.Domain;
 using FastArena.Core.Domain.Activities;
 using FastArena.Core.Domain.Activities.Actions;
 using FastArena.Core.Domain.Activities.Datas;
+using FastArena.Core.Domain.Effects;
 using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.MondterFights;
+using FastArena.Core.Domain.Monsters;
 using FastArena.Core.Exceptions;
 using FastArena.Core.Interfaces.App;
+using FastArena.Core.Models;
+using FastArena.Core.Services.Effects;
 
 namespace FastArena.Core.Services;
 
@@ -20,6 +24,7 @@ public class MonsterFightService : IMonsterFightService
     private readonly IActivityService _activityService;
     private readonly IActivitySessionService _activitySessionService;
     private readonly IItemService _itemService;
+    private readonly EffectHandlerRegistry _effectHandlerRegistry;
 
     private Dictionary<HitZone, int> _damageMap = new Dictionary<HitZone, int>
     {
@@ -66,7 +71,8 @@ public class MonsterFightService : IMonsterFightService
         IHeroProgressService heroProgressService,
         IActivityService activityService,
         IItemService itemService,
-        IActivitySessionService activitySessionService
+        IActivitySessionService activitySessionService,
+        EffectHandlerRegistry effectHandlerRegistry
         )
     {
         _userService = userService;
@@ -77,26 +83,27 @@ public class MonsterFightService : IMonsterFightService
         _activityService = activityService;
         _itemService = itemService;
         _activitySessionService = activitySessionService;
+        _effectHandlerRegistry = effectHandlerRegistry;
     }
 
-    public async Task<MonsterFightRoundResult> CalcRoundAsync(HeroActVariant heroActVariant, Guid userId)
+    public async Task<MonsterFightRoundResult> CalcRoundAsync(MonsterFightActionPayload payload, Guid userId)
     {
         var user = await _userService.GetAsync(userId);
         ValidateUser(userId, user);
-        var activityState = await _activityStateService.GetByHeroIdAsync(user.SelectedHeroId.Value);
+        var activityState = await _activityStateService.GetByHeroIdAsync(user.SelectedHeroId!.Value);
         ValidateActivityState(activityState);
 
-        return await ActRound(heroActVariant, activityState!);
+        return await ActRound(payload, activityState!);
     }
 
     private async Task<MonsterFightRoundResult> ActRound(
-        HeroActVariant heroActVariant, 
+        MonsterFightActionPayload payload,
         ActivitySession activityState
         )
     {
         var sessionLock = await _activityStateService.GetLockerForSessionIdAsync(activityState.Id);
         if (!await sessionLock.WaitAsync(0))
-            throw new ActionDeniedException($"The activity with id {activityState.Id} is already acting rifht now!");
+            throw new ActionDeniedException($"The activity with id {activityState.Id} is already acting right now!");
 
         var cleanTheLocker = false;
         var activityStateId = activityState.Id;
@@ -105,12 +112,15 @@ public class MonsterFightService : IMonsterFightService
         {
             var monsterFight = await BuildMonsterFight(activityState);
             var lastState = GetTheLastState(monsterFight);
-            ValidateActVariant(heroActVariant, lastState.Value);
+            ValidateActVariant(payload.ActVariant, lastState.Value);
             
-            switch (heroActVariant)
+            switch (payload.ActVariant)
             {
                 case HeroActVariant.ATTACK:
                     await DoAttack(monsterFight, activityState);
+                    break;
+                case HeroActVariant.USE_ITEM:
+                    await DoUseItemAndAttack(monsterFight, activityState, payload.ActionData);
                     break;
                 case HeroActVariant.FINALIZE:
                     await DoFinalize(monsterFight, activityState.Id);
@@ -151,43 +161,97 @@ public class MonsterFightService : IMonsterFightService
 
     private async Task DoAttack(MonsterFight monsterFight, ActivitySession activityState)
     {
+        await DoAttackInternal(monsterFight, activityState, isHeroPassive: false, consumedItem: null);
+    }
+
+    private async Task DoUseItemAndAttack(MonsterFight monsterFight, ActivitySession activityState, MonsterFightActionData? actionData)
+    {
+        if (actionData?.UsedPocketItemCellId == null)
+        {
+            throw new InvalidOperationException("usedPocketItemCellId is required for USE_ITEM action.");
+        }
+
+        var consumedItem = await _heroService.ConsumePocketItemForFightAsync(monsterFight.Hero.Id, actionData.UsedPocketItemCellId.Value);
+        await DoAttackInternal(monsterFight, activityState, isHeroPassive: true, consumedItem: consumedItem);
+    }
+
+    private async Task DoAttackInternal(
+        MonsterFight monsterFight,
+        ActivitySession activityState,
+        bool isHeroPassive,
+        HeroItemCell? consumedItem)
+    {
         var lastState = GetTheLastState(monsterFight);
         var lastStateValue = lastState.Value;
+
+        var workingState = new MonsterFightActionState
+        {
+            HeroHealth = lastStateValue.HeroHealth,
+            HeroAbility = lastStateValue.HeroAbility,
+            HeroDiceRoll = null,
+            MonsterHealth = lastStateValue.MonsterHealth,
+            MonsterAbility = lastStateValue.MonsterAbility,
+            MonsterDiceRoll = null,
+            StrikeStrength = 0,
+            Result = null,
+            ActVariants = new HashSet<HeroActVariant>(),
+            ActiveEffects = CloneActiveEffects(lastStateValue.ActiveEffects),
+            PocketItems = ClonePocketItems(lastStateValue.PocketItems),
+        };
+
+        CleanupExpiredEffects(workingState);
+
+        if (consumedItem != null)
+        {
+            ActivateItemEffects(workingState, consumedItem);
+            workingState.PocketItems = RemoveConsumedPocketItem(workingState.PocketItems, consumedItem.Id);
+        }
+
+        ApplyRoundStartEffects(workingState, monsterFight.Hero, monsterFight.Monster);
+
         var rnd = new Random();
         var heroDiceRoll = rnd.Next(1, 7);
         var monsterDiceRoll = rnd.Next(1, 7);
 
+        workingState.HeroDiceRoll = heroDiceRoll;
+        workingState.MonsterDiceRoll = monsterDiceRoll;
+
+        ApplyStrikeClaimedEffects(workingState, monsterFight.Hero, monsterFight.Monster);
+
         var diceRollBalance = heroDiceRoll - monsterDiceRoll;
-        var abilityBalance = (int)((lastStateValue.HeroAbility - lastStateValue.MonsterAbility) / 3);
+        var abilityBalance = (int)((workingState.HeroAbility - workingState.MonsterAbility) / 3);
         abilityBalance = Math.Abs(abilityBalance) > 3 ? (abilityBalance / Math.Abs(abilityBalance)) * 3 : abilityBalance;
 
         var roundResultType = MonsterFightActionStateResultType.DRAW;
-        var strikeStrength = 0;
+        workingState.StrikeStrength = 0;
 
         if (diceRollBalance < 0 && (diceRollBalance + abilityBalance) < 0)
         {
             roundResultType = MonsterFightActionStateResultType.STRIKE_BY_MONSTER;
-            strikeStrength = diceRollBalance;
+            workingState.StrikeStrength = diceRollBalance;
             if (abilityBalance > 0)
             {
-                strikeStrength += abilityBalance;
+                workingState.StrikeStrength += abilityBalance;
             }
-            strikeStrength = Math.Abs(strikeStrength);
+            workingState.StrikeStrength = Math.Abs(workingState.StrikeStrength);
         }
 
         if (diceRollBalance > 0 && (diceRollBalance + abilityBalance) > 0)
         {
-            roundResultType = MonsterFightActionStateResultType.STRIKE_BY_HERO;
-            strikeStrength = diceRollBalance;
-            if (abilityBalance < 0)
+            if (!isHeroPassive)
             {
-                strikeStrength += abilityBalance;
+                roundResultType = MonsterFightActionStateResultType.STRIKE_BY_HERO;
+                workingState.StrikeStrength = diceRollBalance;
+                if (abilityBalance < 0)
+                {
+                    workingState.StrikeStrength += abilityBalance;
+                }
+                workingState.StrikeStrength = Math.Abs(workingState.StrikeStrength);
             }
-            strikeStrength = Math.Abs(strikeStrength);
         }
 
         var hitZone = HitZone.HEAD;
-        if (strikeStrength > 0)
+        if (workingState.StrikeStrength > 0)
         {
             var zoneDiceRoll = rnd.Next(1, 7);
             if (zoneDiceRoll != 6)
@@ -210,7 +274,7 @@ public class MonsterFightService : IMonsterFightService
                         hitZone = HitZone.RIGHT_LEG;
                         break;
                 }
-            } 
+            }
             else
             {
                 zoneDiceRoll = rnd.Next(1, 7);
@@ -236,30 +300,44 @@ public class MonsterFightService : IMonsterFightService
                         break;
                 }
             }
-
         }
 
-        var newHeroHealth = lastState.Value.HeroHealth;
-        var newMonsterHealth = lastState.Value.MonsterHealth;
+        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO && workingState.StrikeStrength > 0)
+        {
+            ApplyPowerModifierEffects(workingState, monsterFight.Hero, monsterFight.Monster);
+
+            if (workingState.StrikeStrength < 1)
+            {
+                workingState.StrikeStrength = 0;
+                roundResultType = MonsterFightActionStateResultType.DRAW;
+            }
+        }
+
+        var newHeroHealth = workingState.HeroHealth;
+        var newMonsterHealth = workingState.MonsterHealth;
 
         if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER)
         {
-            newHeroHealth = GetNewHeroHealth(lastState, strikeStrength, hitZone);
-        } 
-        else
-        {
-            newMonsterHealth = GetNewMonsterHealth(lastState, strikeStrength, hitZone);
+            newHeroHealth = GetNewHeroHealth(workingState, hitZone);
         }
+        else if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
+        {
+            newMonsterHealth = GetNewMonsterHealth(workingState, hitZone);
+        }
+
+        workingState.HeroHealth = newHeroHealth;
+        workingState.MonsterHealth = newMonsterHealth;
+        workingState.HeroAbility = workingState.HeroHealth / 10;
+        workingState.MonsterAbility = workingState.MonsterHealth / 10;
+
+        ApplyRoundEndEffects(workingState, monsterFight.Hero, monsterFight.Monster);
+        DecrementEffectDurations(workingState);
 
         var newState = await BuildNewMonsterFightState(
                 monsterFight,
                 lastState,
                 roundResultType,
-                heroDiceRoll,
-                newHeroHealth,
-                monsterDiceRoll,
-                newMonsterHealth,
-                strikeStrength,
+                workingState,
                 hitZone
             );
 
@@ -267,14 +345,14 @@ public class MonsterFightService : IMonsterFightService
 
         if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO && newMonsterHealth <= 0)
         {
-            ((MonsterFightData)activityState.CurrentAction.Data).Reward = 
+            ((MonsterFightData)activityState.CurrentAction.Data).Reward =
                 await GenerateReward(
                         monsterFight,
                         activityState
                     );
         }
 
-        await _activityStateService.UpdateStateAsync( activityState );
+        await _activityStateService.UpdateStateAsync(activityState);
     }
 
     private async Task<MonsterFightReward> GenerateReward(MonsterFight monsterFight, ActivitySession activityState)
@@ -308,38 +386,38 @@ public class MonsterFightService : IMonsterFightService
         MonsterFight monsterFight,
         KeyValuePair<int, MonsterFightActionState> lastState,
         MonsterFightActionStateResultType roundResultType,
-        int heroDiceRoll, 
-        int newHeroHealth, 
-        int monsterDiceRoll, 
-        int newMonsterHealth, 
-        int strikeStrength, 
+        MonsterFightActionState workingState,
         HitZone hitZone)
     {
         var newOrder = lastState.Key + 1;
 
-        var newHeroAbility = newHeroHealth / 10;
-        var newMonsterAbility = newMonsterHealth / 10;
+        var newHeroHealth = workingState.HeroHealth;
+        var newMonsterHealth = workingState.MonsterHealth;
+        var newHeroAbility = workingState.HeroAbility;
+        var newMonsterAbility = workingState.MonsterAbility;
 
         var damage = 0;
-        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER)
-            damage = lastState.Value.HeroHealth - newHeroHealth;
-        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
-            damage = lastState.Value.MonsterHealth - newMonsterHealth;
+        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER
+            || roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
+        {
+            damage = workingState.StrikeStrength * _damageMap[hitZone];
+        }
 
         var newState = new MonsterFightActionState
         {
             HeroHealth = newHeroHealth,
             HeroAbility = newHeroAbility,
-            HeroDiceRoll = heroDiceRoll,
+            HeroDiceRoll = workingState.HeroDiceRoll,
             MonsterHealth = newMonsterHealth,
             MonsterAbility = newMonsterAbility,
-            MonsterDiceRoll = monsterDiceRoll,
-            ActVariants = (newHeroHealth <= 0 || newMonsterHealth <= 0) ?
-                new HashSet<HeroActVariant> { HeroActVariant.FINALIZE } :
-                new HashSet<HeroActVariant> { HeroActVariant.ATTACK },
+            MonsterDiceRoll = workingState.MonsterDiceRoll,
+            StrikeStrength = workingState.StrikeStrength,
+            ActVariants = BuildNextActVariants(newHeroHealth, newMonsterHealth, workingState.PocketItems),
+            ActiveEffects = CloneActiveEffects(workingState.ActiveEffects),
+            PocketItems = ClonePocketItems(workingState.PocketItems),
             Result = await BuildMonsterFightActionStateResult(
                 monsterFight, 
-                strikeStrength, 
+                workingState.StrikeStrength,
                 hitZone, 
                 roundResultType,
                 newHeroHealth,
@@ -406,21 +484,159 @@ public class MonsterFightService : IMonsterFightService
     }
 
     private int GetNewHeroHealth(
-        KeyValuePair<int, MonsterFightActionState>  lastState, 
-        int strikeStrength, 
+        MonsterFightActionState state,
         HitZone hitZone)
     {
-        var damage = strikeStrength * _damageMap[hitZone];
-        return lastState.Value.HeroHealth - damage;
+        var damage = state.StrikeStrength * _damageMap[hitZone];
+        return state.HeroHealth - damage;
     }
 
     private int GetNewMonsterHealth(
-        KeyValuePair<int, MonsterFightActionState> lastState,
-        int strikeStrength,
+        MonsterFightActionState state,
         HitZone hitZone)
     {
-        var damage = strikeStrength * _damageMap[hitZone];
-        return lastState.Value.MonsterHealth - damage;
+        var damage = state.StrikeStrength * _damageMap[hitZone];
+        return state.MonsterHealth - damage;
+    }
+
+    private HashSet<HeroActVariant> BuildNextActVariants(int heroHealth, int monsterHealth, List<HeroItemCell> pocketItems)
+    {
+        if (heroHealth <= 0 || monsterHealth <= 0)
+        {
+            return new HashSet<HeroActVariant> { HeroActVariant.FINALIZE };
+        }
+
+        var result = new HashSet<HeroActVariant> { HeroActVariant.ATTACK };
+        if (pocketItems.Count > 0)
+        {
+            result.Add(HeroActVariant.USE_ITEM);
+        }
+
+        return result;
+    }
+
+    private static List<ActiveEffect> CloneActiveEffects(List<ActiveEffect> effects)
+    {
+        return effects.Select(e => new ActiveEffect
+        {
+            DefinitionId = e.DefinitionId,
+            Type = e.Type,
+            SourceImageUrl = e.SourceImageUrl,
+            RemainingRounds = e.RemainingRounds,
+            Magnitude = e.Magnitude,
+            MinValue = e.MinValue,
+            MaxValue = e.MaxValue,
+            ChancePercent = e.ChancePercent,
+            ConditionType = e.ConditionType,
+            TargetType = e.TargetType,
+            Priority = e.Priority,
+            StackCount = e.StackCount,
+        }).ToList();
+    }
+
+    private static List<HeroItemCell> ClonePocketItems(List<HeroItemCell> items)
+    {
+        return items.Select(i => new HeroItemCell
+        {
+            Id = i.Id,
+            HeroId = i.HeroId,
+            ItemId = i.ItemId,
+            Amount = i.Amount,
+            Item = i.Item,
+        }).ToList();
+    }
+
+    private List<HeroItemCell> RemoveConsumedPocketItem(List<HeroItemCell> items, Guid heroItemCellId)
+    {
+        var pocketItem = items.FirstOrDefault(i => i.Id == heroItemCellId);
+        if (pocketItem == null)
+        {
+            return items;
+        }
+
+        if (pocketItem.Amount <= 1)
+        {
+            return items.Where(i => i.Id != heroItemCellId).ToList();
+        }
+
+        pocketItem.Amount -= 1;
+        return items;
+    }
+
+    private void ActivateItemEffects(MonsterFightActionState state, HeroItemCell consumedItem)
+    {
+        var effects = consumedItem.Item?.Effects ?? new List<EffectDefinition>();
+        foreach (var definition in effects.OrderBy(e => e.Priority))
+        {
+            var existing = state.ActiveEffects.FirstOrDefault(e => e.Type == definition.Type && e.RemainingRounds > 0);
+            if (existing == null)
+            {
+                state.ActiveEffects.Add(new ActiveEffect
+                {
+                    DefinitionId = definition.Id,
+                    Type = definition.Type,
+                    SourceImageUrl = consumedItem.Item?.ItemImage,
+                    RemainingRounds = definition.DurationRounds,
+                    Magnitude = definition.Magnitude,
+                    MinValue = definition.MinValue,
+                    MaxValue = definition.MaxValue,
+                    ChancePercent = definition.ChancePercent,
+                    ConditionType = definition.ConditionType,
+                    TargetType = definition.TargetType,
+                    Priority = definition.Priority,
+                    StackCount = 1,
+                });
+                continue;
+            }
+
+            var handler = _effectHandlerRegistry.GetHandler(definition.Type);
+            handler.Stack(existing, definition);
+        }
+    }
+
+    private void ApplyRoundStartEffects(MonsterFightActionState state, Hero hero, Monster monster)
+    {
+        foreach (var effect in state.ActiveEffects.OrderBy(e => e.Priority))
+        {
+            _effectHandlerRegistry.GetHandler(effect.Type).OnRoundStart(effect, state, hero, monster);
+        }
+    }
+
+    private void ApplyStrikeClaimedEffects(MonsterFightActionState state, Hero hero, Monster monster)
+    {
+        foreach (var effect in state.ActiveEffects.OrderBy(e => e.Priority))
+        {
+            _effectHandlerRegistry.GetHandler(effect.Type).OnStrikeClaimed(effect, state, hero, monster);
+        }
+    }
+
+    private void ApplyPowerModifierEffects(MonsterFightActionState state, Hero hero, Monster monster)
+    {
+        foreach (var effect in state.ActiveEffects.OrderBy(e => e.Priority))
+        {
+            _effectHandlerRegistry.GetHandler(effect.Type).OnPowerModifiers(effect, state, hero, monster);
+        }
+    }
+
+    private void ApplyRoundEndEffects(MonsterFightActionState state, Hero hero, Monster monster)
+    {
+        foreach (var effect in state.ActiveEffects.OrderBy(e => e.Priority))
+        {
+            _effectHandlerRegistry.GetHandler(effect.Type).OnRoundEnd(effect, state, hero, monster);
+        }
+    }
+
+    private static void DecrementEffectDurations(MonsterFightActionState state)
+    {
+        foreach (var effect in state.ActiveEffects)
+        {
+            effect.RemainingRounds -= 1;
+        }
+    }
+
+    private static void CleanupExpiredEffects(MonsterFightActionState state)
+    {
+        state.ActiveEffects = state.ActiveEffects.Where(e => e.RemainingRounds > 0).ToList();
     }
 
     private async Task DoFinalize(MonsterFight fight, Guid activityId)
@@ -447,7 +663,7 @@ public class MonsterFightService : IMonsterFightService
 
         var activitySession = await _activityStateService.GetAsync(activityId);
 
-        if (await _activitySessionService.HasNextAsync(activitySession))
+        if (activitySession != null && await _activitySessionService.HasNextAsync(activitySession))
         {
             await _activitySessionService.GoNextAsync(activitySession);
         } 
@@ -503,7 +719,7 @@ public class MonsterFightService : IMonsterFightService
     {
         if (activityState == null)
         {
-            throw (new Exception("There is no any activity sessions for selected user hero."));
+            throw new Exception("There is no any activity sessions for selected user hero.");
         }
 
         if (activityState.CurrentAction.Type != ActivityActionType.MONSTER_FIGHT)

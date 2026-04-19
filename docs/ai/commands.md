@@ -31,6 +31,11 @@ npm install
 npm run serve
 ```
 
+## MVP Database Reset Policy
+
+- Database reset/recreate is performed manually by the developer when needed.
+- The agent should not run destructive database reset commands automatically.
+
 ## Recommended Checks Before Finalizing Changes
 
 - Ensure changed files match the requested scope.

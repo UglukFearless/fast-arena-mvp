@@ -2,6 +2,7 @@
 using FastArena.Core.Domain.Activities.Actions;
 using FastArena.Core.Exceptions;
 using FastArena.Core.Interfaces.App;
+using FastArena.Core.Models;
 using FastArena.WebApi.Dtos;
 using FastArena.WebApi.Profiles;
 using FastArena.WebApi.Providers;
@@ -31,12 +32,21 @@ public class MonsterFightController : ControllerBase
     }
 
     [HttpPost("do")]
-    public async Task<ActionResult<MonsterFightRoundResultDto>> DoHeroAction(HeroActVariant actVariant)
+    public async Task<ActionResult<MonsterFightRoundResultDto>> DoHeroAction([FromBody] MonsterFightDoActionDto model)
     {
         try
         {
             var userId = AuthProvider.GetCurrentUserIdFromAccessor(_httpContextAccessor);
-            var roundResult = await _monsterFightService.CalcRoundAsync(actVariant, userId);
+            var payload = new MonsterFightActionPayload
+            {
+                ActVariant = model.ActVariant,
+                ActionData = new MonsterFightActionData
+                {
+                    UsedPocketItemCellId = model.ActionData?.UsedPocketItemCellId,
+                },
+            };
+
+            var roundResult = await _monsterFightService.CalcRoundAsync(payload, userId);
 
             return MonsterFightProfile.Map(roundResult);
         } 

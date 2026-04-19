@@ -25,6 +25,8 @@ The backend solution is located under `backend/src/` and is split into several p
 - Entity Framework Core data access.
 - Database context, mappings, and storage implementations.
 - Schema is defined in `ApplicationContext`. Base data is seeded at runtime by `FastArena.WebHost` seeders, not by EF `HasData`.
+- Item effect definitions are stored in DAL and linked to items (item-owned effect records).
+- **MVP migration policy:** EF migrations are not used. Schema changes are applied by recreating the database manually. Do not generate or run migration commands.
 
 ### FastArena.WebApi
 
@@ -70,6 +72,10 @@ The frontend is a Vue 3 application with TypeScript, Pinia, and Vue Router.
 - Frontend should reflect server state and provide interaction flow.
 - Mapping between DAL entities, domain models, and API DTOs is a critical seam.
 
+## Decisions
+
+For a log of tactical technical decisions and their rationale, see `docs/decisions.md`.
+
 ## Hotspots
 
 - Fight resolution flow.
@@ -77,6 +83,77 @@ The frontend is a Vue 3 application with TypeScript, Pinia, and Vue Router.
 - Mapping depth and nested response models.
 - Statistics derived from stored fight data.
 - Shop transaction flow: sell/buy selections confirmed atomically via `POST /api/shop/transaction`.
+- Staged effect system rollout:
+	- implemented: effect definition persistence and seed data,
+	- pending: runtime effect execution pipeline in fight lifecycle.
+
+## Implementation Notes: Effect System
+
+Current technical status:
+
+- Effect definitions are persisted as item-owned records in DAL and are exposed through API item DTO mapping.
+- Seed includes potion effect definitions for healing, ability override, and strike power bonus.
+- Current persisted effect parameters include:
+	- type,
+	- duration rounds,
+	- magnitude,
+	- min/max value bounds,
+	- chance percent,
+	- condition type,
+	- target type,
+	- priority,
+	- optional next effect definition id.
+
+Scope boundary for current phase:
+
+- Implemented: definition model, storage mapping, and seed data.
+- Not implemented yet: runtime active-effect lifecycle, event/phase dispatch, per-effect handlers, and stacking execution rules.
+
+## Planned Runtime Contract: Fight Effect Hooks
+
+This section describes implementation-level direction for runtime effect execution.
+
+### Goal
+
+- Use one unified fight-effect execution scheme for all effect types.
+- Keep effect-specific behavior inside dedicated handlers.
+- Keep fight service focused on phase progression, not on effect-specific branching.
+
+### Hook-Based Phase Contract
+
+Runtime effect processing is planned around fixed hooks in fight lifecycle:
+
+1. `RoundStart`
+	- normalize active effects,
+	- apply stack/merge rules for equal effect types,
+	- decrement/update duration lifecycle.
+2. `BeforeInitiative`
+	- apply pre-roll effect influence (for example heal or characteristic override activation).
+3. `AfterInitiativeRoll`
+	- react to roll results before strike confirmation.
+4. `OnStrikeConfirmed`
+	- process defense-window effects on confirmed incoming strike.
+5. `BeforeDamageCommit`
+	- apply strike power and pre-commit damage adjustments.
+6. `AfterDamageCommit`
+	- apply post-hit effects and state updates tied to committed damage.
+7. `RoundProjection`
+	- build final effective round values for API response after all recalculations.
+8. `Finalize`
+	- process fight-end effects when result is finalized.
+
+### Handler Behavior Rules
+
+- Each effect handler participates in the same hook contract.
+- Hooks that are irrelevant for a handler are expected to be no-op.
+- A handler may be active in multiple hooks during the same round.
+- Deterministic execution order is required on every hook pass.
+
+### Stacking And Merge Direction
+
+- Equal effect types are composed by effect-specific stack policy.
+- Composition may preserve multiple active instances or merge into one aggregated active effect.
+- Merge behavior (for example summing magnitude) belongs to the effect handler/strategy for that effect type.
 
 ## Change Policy
 

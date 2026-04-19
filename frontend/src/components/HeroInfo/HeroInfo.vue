@@ -15,14 +15,18 @@
 
         <template v-else-if="heroInfo">
             <HeroInfoCard :hero="heroInfo" />
-            <HeroInventory :hero="heroInfo" />
+            <HeroInventory
+                :hero="heroInfo"
+                @equipped="onItemEquipped"
+                @unequipped="onItemUnequipped"
+            />
             <HeroFightHistory :results="heroInfo.results" />
         </template>
     </section>
 </template>
 
 <script setup lang="ts">
-import { HeroClient, HeroInfoDto } from '@/api/clients';
+import { EquipmentSlotType, HeroClient, HeroInfoDto } from '@/api/clients';
 import { ApiSettings } from '@/utils/constants';
 import authFetch from '@/utils/http-helper';
 import { computed, ref, watch } from 'vue';
@@ -61,6 +65,47 @@ async function loadHeroInfo(id: string) {
 }
 
 watch(heroId, (id) => loadHeroInfo(id), { immediate: true });
+
+async function reloadHeroInfo() {
+    await loadHeroInfo(heroId.value);
+}
+
+async function onItemEquipped(payload: { heroItemCellId: string; slot: EquipmentSlotType }) {
+    const current = heroInfo.value;
+    if (!current) {
+        return;
+    }
+
+    const itemIndex = current.items.findIndex(i => i.id === payload.heroItemCellId);
+    const pocketIndex = current.pockets.findIndex(p => p.slot === payload.slot);
+
+    if (itemIndex < 0 || pocketIndex < 0 || current.pockets[pocketIndex].item) {
+        await reloadHeroInfo();
+        return;
+    }
+
+    const pickedItem = current.items[itemIndex];
+
+    current.items.splice(itemIndex, 1);
+    current.pockets[pocketIndex].item = pickedItem;
+}
+
+async function onItemUnequipped(payload: { slot: EquipmentSlotType }) {
+    const current = heroInfo.value;
+    if (!current) {
+        return;
+    }
+
+    const pocketIndex = current.pockets.findIndex(p => p.slot === payload.slot);
+    if (pocketIndex < 0 || !current.pockets[pocketIndex].item) {
+        await reloadHeroInfo();
+        return;
+    }
+
+    const removedItem = current.pockets[pocketIndex].item;
+    current.pockets[pocketIndex].item = undefined;
+    current.items.push(removedItem);
+}
 </script>
 
 <style lang="scss" scoped>

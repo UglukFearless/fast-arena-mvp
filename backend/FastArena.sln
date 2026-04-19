@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastArena.WebApi", "src\Fas
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastArena.Dal", "src\FastArena.Dal\FastArena.Dal.csproj", "{3F54121E-F46E-43A7-AE97-BA5075E925A1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FastArena.Core.Tests", "src\FastArena.Core.Tests\FastArena.Core.Tests.csproj", "{84045C57-6B16-4A88-AF1F-CC8704DAA9A1}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastArena.ApiClientGenerator", "src\FastArena.ApiClientGenerator\FastArena.ApiClientGenerator.csproj", "{C3745885-AEF5-41F5-B955-E3D154B14F1B}"
 EndProject
 Global
@@ -35,6 +37,10 @@ Global
 		{3F54121E-F46E-43A7-AE97-BA5075E925A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F54121E-F46E-43A7-AE97-BA5075E925A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F54121E-F46E-43A7-AE97-BA5075E925A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84045C57-6B16-4A88-AF1F-CC8704DAA9A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84045C57-6B16-4A88-AF1F-CC8704DAA9A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84045C57-6B16-4A88-AF1F-CC8704DAA9A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84045C57-6B16-4A88-AF1F-CC8704DAA9A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C3745885-AEF5-41F5-B955-E3D154B14F1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C3745885-AEF5-41F5-B955-E3D154B14F1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3745885-AEF5-41F5-B955-E3D154B14F1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
