@@ -71,9 +71,9 @@ public class ItemSeeder
             new()
             {
                 Id = painkillerId,
-                Name = "Обезболивающий наркотик",
-                Description = "Восстанавливает мастерство до максимума на 3 хода. А ещё с него знатно прёт!",
-                BaseCost = 30,
+                Name = "Обезболивающие",
+                Description = "Наркотик восстанавливает мастерство до максимума на 3 хода. А ещё с него знатно прёт!",
+                BaseCost = 20,
                 ItemImage = "/assets/items/posion_violet.png",
                 CanBeEquipped = true,
                 CanBeFolded = false,
@@ -99,8 +99,8 @@ public class ItemSeeder
             {
                 Id = furyPotionId,
                 Name = "Зелье свирепости",
-                Description = "Делает все успешные атаки более смертоносными добавляя 2 единицы силы удара на 3 хода. Ещё орёшь, как дурной и ссышься.",
-                BaseCost = 30,
+                Description = "Делает все успешные атаки более смертоносными добавляя 2 единицы силы удара на 4 хода. Ещё орёшь, как дурной и ссышься.",
+                BaseCost = 20,
                 ItemImage = "/assets/items/posion_black.png",
                 CanBeEquipped = true,
                 CanBeFolded = false,
@@ -112,7 +112,7 @@ public class ItemSeeder
                         Id = Guid.NewGuid(),
                         ItemId = furyPotionId,
                         Type = EffectType.STRIKE_POWER_BONUS,
-                        DurationRounds = 3,
+                        DurationRounds = 4,
                         Magnitude = 2,
                         MinValue = 2,
                         MaxValue = 2,

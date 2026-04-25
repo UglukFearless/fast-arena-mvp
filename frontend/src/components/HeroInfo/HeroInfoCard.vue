@@ -27,6 +27,18 @@
                 </div>
             </div>
 
+            <div class="hero-card__level-progress">
+                <div class="hero-card__level-progress-head">
+                    <span class="hero-card__level-progress-label">Прогресс уровня</span>
+                    <span class="hero-card__level-progress-value">
+                        {{ hero.experience }} / {{ nextLevelExperience }} (до {{ nextLevel }} ур.)
+                    </span>
+                </div>
+                <div class="hero-card__level-progress-bar" role="progressbar" :aria-valuenow="Math.round(levelProgressPercent)" aria-valuemin="0" aria-valuemax="100">
+                    <div class="hero-card__level-progress-fill" :style="{ width: `${levelProgressPercent}%` }" />
+                </div>
+            </div>
+
             <div v-if="killerName" class="hero-card__killer">
                 <span class="hero-card__killer-label">Убит монстром:</span>
                 <span class="hero-card__killer-name">{{ killerName }}</span>
@@ -59,6 +71,25 @@ const statusClass = computed(() =>
 const killerName = computed(() => {
     const record = props.hero.results.find(r => r.type === MonsterFightResultType.DEFEAT);
     return record?.monster.name ?? '';
+});
+
+const nextLevel = computed(() => props.hero.level + 1);
+
+const previousLevelExperience = computed(() => props.hero.levelProgressInfo?.previousAmound ?? 0);
+const nextLevelExperience = computed(() => props.hero.levelProgressInfo?.nextAmound ?? props.hero.experience);
+
+const levelProgressPercent = computed(() => {
+    const range = nextLevelExperience.value - previousLevelExperience.value;
+    if (range <= 0) {
+        return 100;
+    }
+
+    const normalizedCurrent = Math.min(
+        Math.max(props.hero.experience, previousLevelExperience.value),
+        nextLevelExperience.value,
+    );
+
+    return ((normalizedCurrent - previousLevelExperience.value) / range) * 100;
 });
 </script>
 
@@ -168,6 +199,49 @@ const killerName = computed(() => {
             font-size: 20px;
             font-weight: 700;
             color: #8b2525;
+        }
+    }
+
+    &__level-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        &-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+
+            @media (max-width: 560px) {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        &-label {
+            font-weight: bold;
+            color: #5e5e5e;
+        }
+
+        &-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1d2940;
+        }
+
+        &-bar {
+            height: 14px;
+            border-radius: 999px;
+            background: #e5e9f1;
+            overflow: hidden;
+        }
+
+        &-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #2f974a 0%, #67cf82 100%);
+            transition: width 0.25s ease;
         }
     }
 }

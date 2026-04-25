@@ -68,7 +68,7 @@ public class HeroService : IHeroService
     public async Task<Hero> GetAsync(Guid id)
     {
         var hero = await _heroStorage.GetAsync(id);
-        return hero;
+        return await AddProgressInfo(hero);
     }
 
     public async Task<Hero> GetSelectedByUserIdAsync(Guid userId)

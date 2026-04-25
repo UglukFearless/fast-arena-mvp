@@ -16,6 +16,8 @@ public class HeroInfoProfile
             Name = info.Hero.Name,
             Sex = info.Hero.Sex,
             Level = info.Hero.Level,
+            Experience = info.Hero.Experience,
+            LevelProgressInfo = HeroProfile.Map(info.Hero.LevelProgressInfo),
             PortraitUrl = info.Hero.Portrait?.Url,
             MaxHealth = info.Hero.MaxHealth,
             MaxAbility = info.Hero.MaxHealth / 10,

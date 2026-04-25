@@ -8,6 +8,8 @@ public class HeroInfoDto
     public required string Name { get; set; }
     public required HeroSex Sex { get; set; }
     public required int Level { get; set; }
+    public required long Experience { get; set; }
+    public HeroLevelProgressDto? LevelProgressInfo { get; set; }
     public string? PortraitUrl { get; set; }
     public HeroAliveState IsAlive { get; set; }
     public int MaxHealth { get; set; }
