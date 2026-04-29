@@ -1141,6 +1141,8 @@ export interface HeroInfoDto {
     name: string;
     sex: HeroSex;
     level: number;
+    experience: number;
+    levelProgressInfo: HeroLevelProgressDto | undefined;
     portraitUrl: string | undefined;
     isAlive: HeroAliveState;
     maxHealth: number;

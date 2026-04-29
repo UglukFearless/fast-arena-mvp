@@ -31,7 +31,7 @@
                 <div class="hero-card__level-progress-head">
                     <span class="hero-card__level-progress-label">Прогресс уровня</span>
                     <span class="hero-card__level-progress-value">
-                        {{ hero.experience }} / {{ nextLevelExperience }} (до {{ nextLevel }} ур.)
+                        {{ levelProgressCurrent }} / {{ levelProgressTotal }} (до {{ nextLevel }} ур.)
                     </span>
                 </div>
                 <div class="hero-card__level-progress-bar" role="progressbar" :aria-valuenow="Math.round(levelProgressPercent)" aria-valuemin="0" aria-valuemax="100">
@@ -78,18 +78,18 @@ const nextLevel = computed(() => props.hero.level + 1);
 const previousLevelExperience = computed(() => props.hero.levelProgressInfo?.previousAmound ?? 0);
 const nextLevelExperience = computed(() => props.hero.levelProgressInfo?.nextAmound ?? props.hero.experience);
 
+const levelProgressTotal = computed(() => nextLevelExperience.value - previousLevelExperience.value);
+const levelProgressCurrent = computed(() => Math.min(
+    Math.max(props.hero.experience - previousLevelExperience.value, 0),
+    levelProgressTotal.value,
+));
+
 const levelProgressPercent = computed(() => {
-    const range = nextLevelExperience.value - previousLevelExperience.value;
-    if (range <= 0) {
+    if (levelProgressTotal.value <= 0) {
         return 100;
     }
 
-    const normalizedCurrent = Math.min(
-        Math.max(props.hero.experience, previousLevelExperience.value),
-        nextLevelExperience.value,
-    );
-
-    return ((normalizedCurrent - previousLevelExperience.value) / range) * 100;
+    return (levelProgressCurrent.value / levelProgressTotal.value) * 100;
 });
 </script>
 

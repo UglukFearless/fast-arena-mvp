@@ -17,7 +17,7 @@ public class HeroProgressService : IHeroProgressService
         var monsterHealth = fight.Monster.MaxHealth;
 
         return Task.FromResult((int) 
-            (FIGHT_EXPERIENCE_BASE * ((float) monsterLevel/heroLevel) * ((float) monsterHealth /heroHealth)));
+            (FIGHT_EXPERIENCE_BASE * ((float) monsterLevel/heroLevel) * ((float) monsterHealth/heroHealth)));
     }
 
     public async Task<HeroLevelProgressInfo> GetInfoByLevelAsync(int level)
