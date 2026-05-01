@@ -368,18 +368,64 @@ public class MonsterFightService : IMonsterFightService
             + (int) (rnd.Next(10) * ((double) monster.MaxHealth / hero.MaxHealth));
 
         var coinItem = await _itemService.GetBaseMoneyItemAsync();
+        var rewardItems = new List<GivenItem>
+        {
+            new GivenItem
+            {
+                Item = coinItem,
+                Amount = coinReward,
+            }
+        };
+
+        var moldRewardEntries = monster.Mold?.RewardEntries ?? new List<MonsterRewardEntry>();
+        foreach (var rewardEntry in moldRewardEntries)
+        {
+            if (rewardEntry.Amount <= 0 || rewardEntry.ChancePercent <= 0)
+            {
+                continue;
+            }
+
+            var roll = rnd.Next(1, 101);
+            if (roll > rewardEntry.ChancePercent)
+            {
+                continue;
+            }
+
+            rewardItems.Add(new GivenItem
+            {
+                Item = rewardEntry.Item,
+                Amount = rewardEntry.Amount,
+            });
+        }
 
         return new MonsterFightReward
         {
-            Items = new List<GivenItem>
-            {
-                new GivenItem
-                {
-                    Item = coinItem,
-                    Amount = coinReward,
-                }
-            }
+            Items = AggregateStackableItems(rewardItems)
         };
+    }
+
+    private static List<GivenItem> AggregateStackableItems(ICollection<GivenItem> items)
+    {
+        var stackableItems = items
+            .Where(i => i.Item.CanBeFolded)
+            .GroupBy(i => i.Item.Id)
+            .Select(g => new GivenItem
+            {
+                Item = g.First().Item,
+                Amount = g.Sum(i => i.Amount),
+            });
+
+        var nonStackableItems = items
+            .Where(i => !i.Item.CanBeFolded)
+            .Select(i => new GivenItem
+            {
+                Item = i.Item,
+                Amount = i.Amount,
+            });
+
+        return stackableItems
+            .Concat(nonStackableItems)
+            .ToList();
     }
 
     private async Task<KeyValuePair<int, MonsterFightActionState>> BuildNewMonsterFightState(
@@ -650,6 +696,7 @@ public class MonsterFightService : IMonsterFightService
             await _monsterFightResultService.AddWinResultAsync(fight);
             if (fight.Reward != null)
             {
+                fight.Reward.Items = AggregateStackableItems(fight.Reward.Items);
                 await _heroService.GiveItemsToHeroAsync(fight.Hero.Id, fight.Reward.Items);
             }
             var exp = await _heroProgressService.CalcExperienceForFightAsync(fight);

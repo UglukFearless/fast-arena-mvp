@@ -6,16 +6,19 @@ public class SeederRunner
     private readonly MonsterSeeder _monsterSeeder;
     private readonly EntityLinker _entityLinker;
     private readonly ItemSeeder _itemSeeder;
+    private readonly MonsterRewardSeeder _monsterRewardSeeder;
 
     public SeederRunner(
         PortraitSeeder portraitSeeder, 
         MonsterSeeder monsterSeeder,
         ItemSeeder itemSeeder,
+        MonsterRewardSeeder monsterRewardSeeder,
         EntityLinker entityLinker
     ) {
         _portraitSeeder = portraitSeeder;
         _monsterSeeder = monsterSeeder;
         _itemSeeder = itemSeeder;
+        _monsterRewardSeeder = monsterRewardSeeder;
         _entityLinker = entityLinker; 
     }
 
@@ -25,5 +28,6 @@ public class SeederRunner
         await _monsterSeeder.SeedAsync();
         await _entityLinker.LinkMonstersToPortraitsAsync();
         await _itemSeeder.SeedAsync();
+        await _monsterRewardSeeder.SeedAsync();
     }
 }

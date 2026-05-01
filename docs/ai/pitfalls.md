@@ -20,6 +20,8 @@ This file captures frequent mistakes and constraints relevant to this project.
 - Single source of truth for documentation granularity and chat boundaries: `docs/ai/doc-writing-boundaries.md`.
 - `docs/ai/pitfalls.md` should not duplicate those rules.
 
+- **Work is done step-by-step; each meaningful step requires explicit user acceptance before moving to the next.** Do not proceed to code changes after documentation, do not proceed to further implementation after a prior batch — wait for the user to review and accept each deliverable before continuing.
+
 ## Maintenance
 
 Add short entries after real incidents, regressions, or repeated confusion.

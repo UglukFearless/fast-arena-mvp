@@ -23,11 +23,7 @@ public class Startup
         services.AddAppServices();
         services.AddProviders();
 
-        services.AddScoped<PortraitSeeder>();
-        services.AddScoped<MonsterSeeder>();
-        services.AddScoped<EntityLinker>();
-        services.AddScoped<ItemSeeder>();
-        services.AddScoped<SeederRunner>();
+        services.AddSeeders();
 
         services.AddCors(options =>
         {

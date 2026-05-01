@@ -16,13 +16,21 @@ public class MonsterMoldStorage : IMonsterMoldStorage
 
     public async Task<ICollection<MonsterMold>> GetAllAsync()
     {
-        var monsterMolds = await _context.MonsterMolds.Include(mm => mm.Portrait).ToListAsync();
+        var monsterMolds = await _context.MonsterMolds
+            .Include(mm => mm.Portrait)
+            .Include(mm => mm.RewardEntries!)
+            .ThenInclude(re => re.Item)
+            .ToListAsync();
         return MonsterProfile.Map(monsterMolds, true);
     }
 
     public async Task<MonsterMold> GetAsync(Guid id)
     {
-        var monsterMold = await _context.MonsterMolds.FirstAsync(mm => mm.Id == id);
+        var monsterMold = await _context.MonsterMolds
+            .Include(mm => mm.Portrait)
+            .Include(mm => mm.RewardEntries!)
+            .ThenInclude(re => re.Item)
+            .FirstAsync(mm => mm.Id == id);
         return MonsterProfile.Map(monsterMold, true);
     }
 

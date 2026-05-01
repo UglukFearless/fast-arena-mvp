@@ -163,8 +163,10 @@ Phases or rules marked **[Planned]** are intentionally kept as navigation marker
 
 ## Fight Rewards And Penalties
 
-- Rewards: experience and gold.
+- Rewards: experience, gold, and monster trophies.
 - Gold is used for economy flows (shop transactions and future item usage).
+- A victory over a monster may also grant item trophies associated with that monster kind.
+- Item trophies are additional to gold, not a replacement for it.
 - Current hard penalty: permanent death.
 - Additional debuffs may be added later.
 

@@ -34,6 +34,7 @@ public class MonsterService : IMonsterService
         var monster = new Monster { 
             Id = Guid.NewGuid(),
             MonsterMoldId = mold.Id,
+            Mold = mold,
             Level = level,
             Portrait = mold.Portrait,
             MaxHealth = CalcHealht(level, mold.BaseHealth, mold.HealthPerLevel),

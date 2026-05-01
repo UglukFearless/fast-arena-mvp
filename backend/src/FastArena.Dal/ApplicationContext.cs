@@ -98,6 +98,22 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<MonsterMoldDal>()
             .HasOne(mm => mm.Portrait);
 
+        modelBuilder.Entity<MonsterRewardEntryDal>()
+            .HasIndex(mre => mre.MonsterMoldId);
+
+        modelBuilder.Entity<MonsterRewardEntryDal>()
+            .HasIndex(mre => mre.ItemId);
+
+        modelBuilder.Entity<MonsterRewardEntryDal>()
+            .HasOne(mre => mre.MonsterMold)
+            .WithMany(mm => mm.RewardEntries)
+            .HasForeignKey(mre => mre.MonsterMoldId);
+
+        modelBuilder.Entity<MonsterRewardEntryDal>()
+            .HasOne(mre => mre.Item)
+            .WithMany(i => i.MonsterRewardEntries)
+            .HasForeignKey(mre => mre.ItemId);
+
         modelBuilder.Entity<MonsterFightResultDal>()
             .HasOne(mfr => mfr.Hero)
             .WithMany(h => h.Results)
@@ -122,5 +138,6 @@ public class ApplicationContext : DbContext
     public DbSet<HeroItemCellDal> HeroItemCells { get; set; }
     public DbSet<HeroEquippedSlotDal> HeroEquippedSlots { get; set; }
     public DbSet<MonsterMoldDal> MonsterMolds { get; set; }
+    public DbSet<MonsterRewardEntryDal> MonsterRewardEntries { get; set; }
     public DbSet<MonsterFightResultDal> MonsterFightResults { get; set; }
 }

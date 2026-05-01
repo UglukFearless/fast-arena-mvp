@@ -16,4 +16,5 @@ public class ItemDal
     public ICollection<HeroItemCellDal>? HeroItems { get; set; }
     public ICollection<EffectDefinitionDal>? Effects { get; set; }
     public ICollection<ItemAllowedSlotDal>? AllowedSlots { get; set; }
+    public ICollection<MonsterRewardEntryDal>? MonsterRewardEntries { get; set; }
 }

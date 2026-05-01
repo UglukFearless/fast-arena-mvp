@@ -13,4 +13,5 @@ public class MonsterMoldDal
     public MonsterSex Sex { get; set; } = MonsterSex.NONE;
     public Guid? PortraitId { get; set; }
     public PortraitDal? Portrait { get; set; }
+    public ICollection<MonsterRewardEntryDal>? RewardEntries { get; set; }
 }

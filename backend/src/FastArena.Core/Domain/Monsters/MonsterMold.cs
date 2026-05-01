@@ -11,4 +11,5 @@ public class MonsterMold
     public required MonsterSex Sex { get; set; } = MonsterSex.NONE;
     public Guid PortraitId { get; set; }
     public Portrait? Portrait { get; set; }
+    public List<MonsterRewardEntry> RewardEntries { get; set; } = new();
 }
