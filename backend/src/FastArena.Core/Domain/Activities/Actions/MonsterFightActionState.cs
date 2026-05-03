@@ -13,6 +13,8 @@ public class MonsterFightActionState : ActivityActionState
     public int MonsterAbility { get; set;}
     public int? MonsterDiceRoll { get;set; }
     public int StrikeStrength { get; set; }
+    public int UnitDamageModifier { get; set; }
+    public bool StrikeBlocked { get; set; }
     public MonsterFightActionStateResult? Result { get; set; }
     public HashSet<HeroActVariant> ActVariants { get; set; }
     public List<ActiveEffect> ActiveEffects { get; set; } = new();

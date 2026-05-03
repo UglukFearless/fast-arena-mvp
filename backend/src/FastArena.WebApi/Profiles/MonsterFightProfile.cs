@@ -1,6 +1,7 @@
 ﻿
 
 using FastArena.Core.Domain.Activities.Actions;
+using FastArena.Core.Domain.Effects;
 using FastArena.Core.Domain.MondterFights;
 using FastArena.WebApi.Dtos;
 
@@ -37,6 +38,10 @@ internal class MonsterFightProfile
         if (monsterFightActionState == null)
             return null;
 
+        var visibleEffects = monsterFightActionState.ActiveEffects
+            .Where(e => e.SourceType != EffectSourceType.Equipment)
+            .ToList();
+
         return new MonsterFightActionStateDto
         {
             HeroHealth = monsterFightActionState.HeroHealth,
@@ -46,10 +51,10 @@ internal class MonsterFightProfile
             MonsterAbility = monsterFightActionState.MonsterAbility,
             MonsterDiceRoll = monsterFightActionState.MonsterDiceRoll,
             StrikeStrength = monsterFightActionState.StrikeStrength,
+            StrikeBlocked = monsterFightActionState.StrikeBlocked,
             Result = monsterFightActionState.Result,
             ActVariants = monsterFightActionState.ActVariants,
-            ActiveEffects = ActiveEffectProfile.Map(monsterFightActionState.ActiveEffects),
-            PocketItems = HeroItemCellProfile.Map(monsterFightActionState.PocketItems, true),
+            ActiveEffects = ActiveEffectProfile.Map(visibleEffects),
         };
     }
 

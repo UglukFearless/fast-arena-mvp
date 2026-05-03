@@ -48,6 +48,27 @@ Each entry follows this structure:
 - **Applies to:** Fight service hook dispatch, `IEffectHandler` stacking responsibility.
 - **Status:** Active.
 
+### Equipment Effects Use The Shared Effect Pipeline With Persistent Lifetime
+
+- **Decision:** Weapon and shield combat modifiers are implemented as persistent effects inside the existing effect pipeline, not as a separate modifier system.
+- **Why:** Reuses handler registry, hook dispatch, and fight state structure already in place. A parallel system would duplicate lifecycle and ordering logic for no gain.
+- **Applies to:** `MonsterFightService`, `ActiveEffect`, `IEffectHandler`, fight round DTO, weapon and shield seed data.
+- **Status:** Active.
+
+### ActiveEffect Extended With LifetimeType And SourceType
+
+### Equipment Effects Are Not Displayed In Fight UI
+
+- **Decision:** Effects with `SourceType = Equipment` are filtered from the active effects list in the fight round response. Equipment influence is expressed through round outcome values, not through effect indicators.
+- **Why:** Persistent equipment effects are always active and carry no per-round state worth surfacing to the player. Effect indicators are meaningful for consumables with limited duration. If a specific equipment item needs UI representation in the future, it will receive a dedicated `SourceType` value.
+- **Applies to:** Fight round DTO mapping, frontend active effect rendering.
+- **Status:** Active.
+
+- **Decision:** `ActiveEffect` gains `LifetimeType` (`RoundBased` | `Persistent`) and `SourceType` (`Potion` | `Equipment` | `Skill`).
+- **Why:** Decrement and cleanup logic must distinguish persistent equipment effects from expiring consumable effects. Source type enables correct initialization, ordering, and future UI attribution.
+- **Applies to:** `ActiveEffect`, fight service decrement/cleanup logic, fight round DTO.
+- **Status:** Active.
+
 ## Change Policy
 
 Add an entry when a non-obvious technical choice is made that affects multiple modules or could be revisited.

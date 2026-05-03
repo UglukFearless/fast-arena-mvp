@@ -22,8 +22,10 @@ public class HealHpEffectHandler : IEffectHandler
     }
     
     public void OnStrikeClaimed(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
+
+    public void OnIncomingStrikeConfirmed(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
     
-    public void OnPowerModifiers(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
+    public void OnBeforeDamageCommit(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
     
     public void OnRoundEnd(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
     

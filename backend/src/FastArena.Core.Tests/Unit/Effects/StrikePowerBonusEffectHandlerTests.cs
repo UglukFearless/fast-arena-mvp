@@ -7,7 +7,7 @@ namespace FastArena.Core.Tests;
 public class StrikePowerBonusEffectHandlerTests
 {
     [Fact]
-    public void OnPowerModifiers_AddsMagnitudeToStrikeStrength()
+    public void OnBeforeDamageCommit_AddsMagnitudeToStrikeStrength()
     {
         var handler = new StrikePowerBonusEffectHandler();
         var hero = EffectTestData.CreateHero();
@@ -15,7 +15,7 @@ public class StrikePowerBonusEffectHandlerTests
         var state = EffectTestData.CreateState(strikeStrength: 2);
         var effect = EffectTestData.CreateActiveEffect(EffectType.STRIKE_POWER_BONUS, remainingRounds: 2, magnitude: 3);
 
-        handler.OnPowerModifiers(effect, state, hero, monster);
+        handler.OnBeforeDamageCommit(effect, state, hero, monster);
 
         Assert.Equal(5, state.StrikeStrength);
     }

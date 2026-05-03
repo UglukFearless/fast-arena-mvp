@@ -8,7 +8,7 @@ namespace FastArena.Core.Services.Effects;
 
 /// <summary>
 /// Handler for STRIKE_POWER_BONUS effect.
-/// Applies strike power bonus at OnPowerModifiers (after hit zone, before damage calc).
+/// Applies strike power bonus at OnBeforeDamageCommit (before damage calc).
 /// Adds merged magnitude to the strike power bonus context value.
 /// Stacking rule: sum magnitudes ÷ average duration, ceiling.
 /// </summary>
@@ -19,8 +19,10 @@ public class StrikePowerBonusEffectHandler : IEffectHandler
     public void OnRoundStart(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
     
     public void OnStrikeClaimed(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
+
+    public void OnIncomingStrikeConfirmed(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster) { }
     
-    public void OnPowerModifiers(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster)
+    public void OnBeforeDamageCommit(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster)
     {
         state.StrikeStrength += effect.Magnitude;
     }

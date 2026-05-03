@@ -1026,6 +1026,7 @@ export interface HeroDto {
     maxAbility: number;
     userId: string;
     items: HeroItemCellDto[];
+    equippedSlots: HeroPocketSlotDto[];
     results: MonsterFightResultDto[];
 }
 
@@ -1063,6 +1064,7 @@ export interface ItemDto {
     canBeFolded: boolean;
     type: ItemType;
     effects: EffectDefinitionDto[] | undefined;
+    allowedSlots: EquipmentSlotType[] | undefined;
 }
 
 export enum ItemType {
@@ -1078,11 +1080,12 @@ export interface EffectDefinitionDto {
     id: string;
     type: EffectType;
     durationRounds: number;
+    lifetimeType: EffectLifetimeType;
+    sourceType: EffectSourceType;
     magnitude: number;
     minValue: number;
     maxValue: number;
     chancePercent: number;
-    conditionType: EffectConditionType;
     targetType: EffectTargetType;
     priority: number;
     nextEffectDefinitionId: string | undefined;
@@ -1092,11 +1095,19 @@ export enum EffectType {
     HEAL_HP = 0,
     OVERRIDE_ABILITY_TO_MAX = 1,
     STRIKE_POWER_BONUS = 2,
+    UNIT_DAMAGE_DELTA = 3,
+    INCOMING_STRIKE_FULL_BLOCK = 4,
 }
 
-export enum EffectConditionType {
-    ALWAYS = 0,
-    ON_SUCCESSFUL_STRIKE = 1,
+export enum EffectLifetimeType {
+    RoundBased = 0,
+    Persistent = 1,
+}
+
+export enum EffectSourceType {
+    Potion = 0,
+    Equipment = 1,
+    Skill = 2,
 }
 
 export enum EffectTargetType {
@@ -1104,6 +1115,19 @@ export enum EffectTargetType {
     OPPONENT = 1,
     BOTH = 2,
     CONTEXT_VALUE = 3,
+}
+
+export enum EquipmentSlotType {
+    POCKET_1 = 0,
+    POCKET_2 = 1,
+    POCKET_3 = 2,
+    RIGHT_HAND = 3,
+    LEFT_HAND = 4,
+}
+
+export interface HeroPocketSlotDto {
+    slot: EquipmentSlotType;
+    item: HeroItemCellDto | undefined;
 }
 
 export interface MonsterFightResultDto {
@@ -1154,19 +1178,6 @@ export interface HeroInfoDto {
     results: MonsterFightResultDto[];
 }
 
-export interface HeroPocketSlotDto {
-    slot: EquipmentSlotType;
-    item: HeroItemCellDto | undefined;
-}
-
-export enum EquipmentSlotType {
-    POCKET_1 = 0,
-    POCKET_2 = 1,
-    POCKET_3 = 2,
-    RIGHT_HAND = 3,
-    LEFT_HAND = 4,
-}
-
 export interface HeroEquipModel {
     heroItemCellId: string;
 }
@@ -1190,10 +1201,10 @@ export interface MonsterFightActionStateDto {
     monsterAbility: number;
     monsterDiceRoll: number | undefined;
     strikeStrength: number;
+    strikeBlocked: boolean;
     result: MonsterFightActionStateResult | undefined;
     actVariants: HeroActVariant[];
     activeEffects: ActiveEffectDto[];
-    pocketItems: HeroItemCellDto[];
 }
 
 export interface MonsterFightActionStateResult {
@@ -1218,11 +1229,12 @@ export interface ActiveEffectDto {
     type: EffectType;
     imageUrl: string | undefined;
     remainingRounds: number;
+    lifetimeType: EffectLifetimeType;
+    sourceType: EffectSourceType;
     magnitude: number;
     minValue: number;
     maxValue: number;
     chancePercent: number;
-    conditionType: EffectConditionType;
     targetType: EffectTargetType;
     priority: number;
     stackCount: number;

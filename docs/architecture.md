@@ -84,8 +84,8 @@ For a log of tactical technical decisions and their rationale, see `docs/decisio
 - Statistics derived from stored fight data.
 - Shop transaction flow: sell/buy selections confirmed atomically via `POST /api/shop/transaction`.
 - Staged effect system rollout:
-	- implemented: effect definition persistence and seed data,
-	- pending: runtime effect execution pipeline in fight lifecycle.
+	- implemented: effect definition persistence, seed data, runtime active-effect lifecycle, per-effect handlers, stacking execution rules, fight lifecycle hook dispatch.
+	- pending: equipment effect initialization at fight start, ConditionType removal, LifetimeType/SourceType extension.
 
 ## Implementation Notes: Effect System
 
@@ -99,17 +99,16 @@ Current technical status:
 	- magnitude,
 	- min/max value bounds,
 	- chance percent,
-	- condition type,
 	- target type,
 	- priority,
 	- optional next effect definition id.
 
 Scope boundary for current phase:
 
-- Implemented: definition model, storage mapping, and seed data.
-- Not implemented yet: runtime active-effect lifecycle, event/phase dispatch, per-effect handlers, and stacking execution rules.
+- Implemented: definition model, storage mapping, seed data, runtime active-effect lifecycle, per-effect handlers (`HealHp`, `OverrideAbilityToMax`, `StrikePowerBonus`), stacking execution rules, fight lifecycle hook dispatch.
+- Pending: equipment effect types and initialization at fight start; `LifetimeType` and `SourceType` fields on `ActiveEffect`; removal of `ConditionType` from definition and active effect models.
 
-## Planned Runtime Contract: Fight Effect Hooks
+## Runtime Contract: Fight Effect Hooks
 
 This section describes implementation-level direction for runtime effect execution.
 
@@ -124,9 +123,10 @@ This section describes implementation-level direction for runtime effect executi
 Runtime effect processing is planned around fixed hooks in fight lifecycle:
 
 1. `RoundStart`
-	- normalize active effects,
-	- apply stack/merge rules for equal effect types,
-	- decrement/update duration lifecycle.
+	- normalize active round-based effects,
+	- apply stack/merge rules for equal round-based effect types,
+	- decrement/update duration lifecycle for round-based effects.
+	- Persistent equipment effects are not normalized or decremented at round start.
 2. `BeforeInitiative`
 	- apply pre-roll effect influence (for example heal or characteristic override activation).
 3. `AfterInitiativeRoll`
@@ -151,9 +151,15 @@ Runtime effect processing is planned around fixed hooks in fight lifecycle:
 
 ### Stacking And Merge Direction
 
-- Equal effect types are composed by effect-specific stack policy.
-- Composition may preserve multiple active instances or merge into one aggregated active effect.
+- Equal effect types from round-based sources are composed by effect-specific stack policy.
+- Persistent equipment effects do not participate in stack merge; each contributes independently in the relevant hook.
 - Merge behavior (for example summing magnitude) belongs to the effect handler/strategy for that effect type.
+
+### Equipment Effect Initialization
+
+- Persistent effects from equipped weapon and shield are initialized into fight state at fight start, before the first round.
+- `ActiveEffect` is extended with `LifetimeType` (`RoundBased` | `Persistent`) and `SourceType` (`Potion` | `Equipment` | `Skill`) to distinguish consumable and equipment effects.
+- `LifetimeType` drives decrement and cleanup logic: persistent effects are skipped.
 
 ## Change Policy
 

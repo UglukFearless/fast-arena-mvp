@@ -128,7 +128,7 @@ function canEquipInventoryItem(item: HeroItemCellDto) {
     return !props.isReadOnly
         && !props.isActing
         && !!item.item
-        && item.item.type === ItemType.POTION;
+        && [ItemType.POTION, ItemType.WEAPON, ItemType.SHIELD].includes(item.item.type);
 }
 
 function onCellClick(cell: GridCell) {

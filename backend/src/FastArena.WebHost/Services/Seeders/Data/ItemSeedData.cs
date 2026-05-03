@@ -63,11 +63,12 @@ public static class ItemSeedData
                     ItemId = HealingPotionId,
                     Type = EffectType.HEAL_HP,
                     DurationRounds = 1,
+                    LifetimeType = EffectLifetimeType.RoundBased,
+                    SourceType = EffectSourceType.Potion,
                     Magnitude = 60,
                     MinValue = 60,
                     MaxValue = 60,
                     ChancePercent = 100,
-                    ConditionType = EffectConditionType.ALWAYS,
                     TargetType = EffectTargetType.SELF,
                 }
             },
@@ -90,11 +91,12 @@ public static class ItemSeedData
                     ItemId = PainkillerPotionId,
                     Type = EffectType.OVERRIDE_ABILITY_TO_MAX,
                     DurationRounds = 3,
+                    LifetimeType = EffectLifetimeType.RoundBased,
+                    SourceType = EffectSourceType.Potion,
                     Magnitude = 0,
                     MinValue = 0,
                     MaxValue = 0,
                     ChancePercent = 100,
-                    ConditionType = EffectConditionType.ALWAYS,
                     TargetType = EffectTargetType.SELF,
                 }
             },
@@ -117,11 +119,12 @@ public static class ItemSeedData
                     ItemId = FuryPotionId,
                     Type = EffectType.STRIKE_POWER_BONUS,
                     DurationRounds = 4,
+                    LifetimeType = EffectLifetimeType.RoundBased,
+                    SourceType = EffectSourceType.Potion,
                     Magnitude = 2,
                     MinValue = 2,
                     MaxValue = 2,
                     ChancePercent = 100,
-                    ConditionType = EffectConditionType.ON_SUCCESSFUL_STRIKE,
                     TargetType = EffectTargetType.SELF,
                 }
             },
@@ -147,17 +150,51 @@ public static class ItemSeedData
             CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.WEAPON,
+            Effects = new List<EffectDefinitionDal>
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    ItemId = OneHandSwordId,
+                    Type = EffectType.UNIT_DAMAGE_DELTA,
+                    DurationRounds = 0,
+                    LifetimeType = EffectLifetimeType.Persistent,
+                    SourceType = EffectSourceType.Equipment,
+                    Magnitude = 2,
+                    MinValue = 2,
+                    MaxValue = 2,
+                    ChancePercent = 100,
+                    TargetType = EffectTargetType.CONTEXT_VALUE,
+                }
+            },
         },
         new()
         {
             Id = ShieldId,
             Name = "Легкий деревянный щит",
-            Description = "Легкий и деревянный... и щит. Позволяет с вероятностью 20 процентов полностью заблокировать 2 пропущенных атаки. Ломается.",
+            Description = "Легкий и деревянный... и щит. Позволяет с вероятностью 50 процентов полностью заблокировать 2 пропущенных атаки. Ломается.",
             BaseCost = 50,
             ItemImage = "/assets/items/shchit.png",
             CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.SHIELD,
+            Effects = new List<EffectDefinitionDal>
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    ItemId = ShieldId,
+                    Type = EffectType.INCOMING_STRIKE_FULL_BLOCK,
+                    DurationRounds = 0,
+                    LifetimeType = EffectLifetimeType.Persistent,
+                    SourceType = EffectSourceType.Equipment,
+                    Magnitude = 2,
+                    MinValue = 2,
+                    MaxValue = 2,
+                    ChancePercent = 50,
+                    TargetType = EffectTargetType.SELF,
+                }
+            },
         },
         new()
         {
@@ -169,6 +206,23 @@ public static class ItemSeedData
             CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.WEAPON,
+            Effects = new List<EffectDefinitionDal>
+            {
+                new()
+                {
+                    Id = Guid.NewGuid(),
+                    ItemId = TwoHandSwordId,
+                    Type = EffectType.STRIKE_POWER_BONUS,
+                    DurationRounds = 0,
+                    LifetimeType = EffectLifetimeType.Persistent,
+                    SourceType = EffectSourceType.Equipment,
+                    Magnitude = 1,
+                    MinValue = 1,
+                    MaxValue = 1,
+                    ChancePercent = 100,
+                    TargetType = EffectTargetType.CONTEXT_VALUE,
+                }
+            },
         },
         new()
         {

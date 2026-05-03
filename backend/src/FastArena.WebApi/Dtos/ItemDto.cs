@@ -1,4 +1,5 @@
 ﻿
+using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.Items;
 
 namespace FastArena.WebApi.Dtos;
@@ -14,4 +15,5 @@ public class ItemDto
     public bool CanBeFolded { get; set; }
     public ItemType Type { get; set; }
     public List<EffectDefinitionDto>? Effects { get; set; }
+    public List<EquipmentSlotType>? AllowedSlots { get; set; }
 }

@@ -94,13 +94,15 @@ This section defines business phases where active effects may influence a round.
 The phase names are domain-oriented and describe gameplay semantics.
 Phases or rules marked **[Planned]** are intentionally kept as navigation markers for upcoming behavior.
 
+Equipment effects (from equipped weapon or shield) are active from the start of the fight and remain active throughout all rounds without per-round activation or expiry.
+
 ### Phase A: Round Start
 
 - Available hero actions while both participants are alive:
 	- attack,
 	- use combat item.
 - Once HP reaches 0, combat round action is no longer available and combat goes to finalization.
-- Active effects are normalized at round start according to their stacking rules.
+- Active effects are normalized at round start according to their stacking rules. This applies to round-based effects only; equipment effects are not subject to round-start normalization.
 - If item usage is chosen:
 	- item effects start influencing the round before initiative,
 	- consumed item is removed from pocket,

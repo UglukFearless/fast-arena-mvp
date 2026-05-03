@@ -7,7 +7,20 @@ import { useMonsterFight } from '@/stores/monster-fight';
 import { computed } from 'vue';
 
 const monsterFightStore = useMonsterFight();
-const roundResultText = computed(() => monsterFightStore.currentState?.result?.resultText);
+const roundResultText = computed(() => {
+    const state = monsterFightStore.currentState;
+    const resultText = state?.result?.resultText;
+
+    if (!resultText) {
+        return '';
+    }
+
+    if (!state.strikeBlocked) {
+        return resultText;
+    }
+
+    return `${resultText}<br><strong>Щит полностью блокирует удар.</strong>`;
+});
 </script>
 
 <style lang="scss">

@@ -193,11 +193,15 @@ public class MonsterFightService : IMonsterFightService
             MonsterAbility = lastStateValue.MonsterAbility,
             MonsterDiceRoll = null,
             StrikeStrength = 0,
+            UnitDamageModifier = 0,
+            StrikeBlocked = false,
             Result = null,
             ActVariants = new HashSet<HeroActVariant>(),
             ActiveEffects = CloneActiveEffects(lastStateValue.ActiveEffects),
             PocketItems = ClonePocketItems(lastStateValue.PocketItems),
         };
+
+        InitializeEquipmentEffects(workingState, monsterFight.Hero);
 
         CleanupExpiredEffects(workingState);
 
@@ -247,6 +251,16 @@ public class MonsterFightService : IMonsterFightService
                     workingState.StrikeStrength += abilityBalance;
                 }
                 workingState.StrikeStrength = Math.Abs(workingState.StrikeStrength);
+            }
+        }
+
+        if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER && workingState.StrikeStrength > 0)
+        {
+            ApplyIncomingStrikeConfirmedEffects(workingState, monsterFight.Hero, monsterFight.Monster);
+            if (workingState.StrikeBlocked)
+            {
+                workingState.StrikeStrength = 0;
+                roundResultType = MonsterFightActionStateResultType.DRAW;
             }
         }
 
@@ -304,7 +318,8 @@ public class MonsterFightService : IMonsterFightService
 
         if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO && workingState.StrikeStrength > 0)
         {
-            ApplyPowerModifierEffects(workingState, monsterFight.Hero, monsterFight.Monster);
+            workingState.UnitDamageModifier = 0;
+            ApplyBeforeDamageCommitEffects(workingState, monsterFight.Hero, monsterFight.Monster);
 
             if (workingState.StrikeStrength < 1)
             {
@@ -446,7 +461,7 @@ public class MonsterFightService : IMonsterFightService
         if (roundResultType == MonsterFightActionStateResultType.STRIKE_BY_MONSTER
             || roundResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
         {
-            damage = workingState.StrikeStrength * _damageMap[hitZone];
+            damage = CalculateDamage(workingState, hitZone);
         }
 
         var newState = new MonsterFightActionState
@@ -458,6 +473,8 @@ public class MonsterFightService : IMonsterFightService
             MonsterAbility = newMonsterAbility,
             MonsterDiceRoll = workingState.MonsterDiceRoll,
             StrikeStrength = workingState.StrikeStrength,
+            UnitDamageModifier = workingState.UnitDamageModifier,
+            StrikeBlocked = workingState.StrikeBlocked,
             ActVariants = BuildNextActVariants(newHeroHealth, newMonsterHealth, workingState.PocketItems),
             ActiveEffects = CloneActiveEffects(workingState.ActiveEffects),
             PocketItems = ClonePocketItems(workingState.PocketItems),
@@ -533,7 +550,7 @@ public class MonsterFightService : IMonsterFightService
         MonsterFightActionState state,
         HitZone hitZone)
     {
-        var damage = state.StrikeStrength * _damageMap[hitZone];
+        var damage = CalculateDamage(state, hitZone);
         return state.HeroHealth - damage;
     }
 
@@ -541,8 +558,15 @@ public class MonsterFightService : IMonsterFightService
         MonsterFightActionState state,
         HitZone hitZone)
     {
-        var damage = state.StrikeStrength * _damageMap[hitZone];
+        var damage = CalculateDamage(state, hitZone);
         return state.MonsterHealth - damage;
+    }
+
+    private int CalculateDamage(MonsterFightActionState state, HitZone hitZone)
+    {
+        var unitDamage = _damageMap[hitZone] + state.UnitDamageModifier;
+        var damage = state.StrikeStrength * unitDamage;
+        return Math.Max(0, damage);
     }
 
     private HashSet<HeroActVariant> BuildNextActVariants(int heroHealth, int monsterHealth, List<HeroItemCell> pocketItems)
@@ -569,11 +593,12 @@ public class MonsterFightService : IMonsterFightService
             Type = e.Type,
             SourceImageUrl = e.SourceImageUrl,
             RemainingRounds = e.RemainingRounds,
+            LifetimeType = e.LifetimeType,
+            SourceType = e.SourceType,
             Magnitude = e.Magnitude,
             MinValue = e.MinValue,
             MaxValue = e.MaxValue,
             ChancePercent = e.ChancePercent,
-            ConditionType = e.ConditionType,
             TargetType = e.TargetType,
             Priority = e.Priority,
             StackCount = e.StackCount,
@@ -614,7 +639,10 @@ public class MonsterFightService : IMonsterFightService
         var effects = consumedItem.Item?.Effects ?? new List<EffectDefinition>();
         foreach (var definition in effects.OrderBy(e => e.Priority))
         {
-            var existing = state.ActiveEffects.FirstOrDefault(e => e.Type == definition.Type && e.RemainingRounds > 0);
+            var existing = state.ActiveEffects.FirstOrDefault(e =>
+                e.Type == definition.Type &&
+                e.LifetimeType == EffectLifetimeType.RoundBased &&
+                e.RemainingRounds > 0);
             if (existing == null)
             {
                 state.ActiveEffects.Add(new ActiveEffect
@@ -623,11 +651,12 @@ public class MonsterFightService : IMonsterFightService
                     Type = definition.Type,
                     SourceImageUrl = consumedItem.Item?.ItemImage,
                     RemainingRounds = definition.DurationRounds,
+                    LifetimeType = definition.LifetimeType,
+                    SourceType = definition.SourceType,
                     Magnitude = definition.Magnitude,
                     MinValue = definition.MinValue,
                     MaxValue = definition.MaxValue,
                     ChancePercent = definition.ChancePercent,
-                    ConditionType = definition.ConditionType,
                     TargetType = definition.TargetType,
                     Priority = definition.Priority,
                     StackCount = 1,
@@ -638,6 +667,60 @@ public class MonsterFightService : IMonsterFightService
             var handler = _effectHandlerRegistry.GetHandler(definition.Type);
             handler.Stack(existing, definition);
         }
+    }
+
+    private static void InitializeEquipmentEffects(MonsterFightActionState state, Hero hero)
+    {
+        if (state.ActiveEffects.Any(e => e.SourceType == EffectSourceType.Equipment))
+        {
+            return;
+        }
+
+        var equippedSlots = hero.EquippedSlots ?? new List<HeroEquippedSlot>();
+        foreach (var slot in equippedSlots)
+        {
+            if (!IsCombatEquipmentSlot(slot.Slot))
+            {
+                continue;
+            }
+
+            var item = slot.HeroItemCell?.Item;
+            if (item == null)
+            {
+                continue;
+            }
+
+            var effects = item.Effects ?? new List<EffectDefinition>();
+            foreach (var definition in effects.OrderBy(e => e.Priority))
+            {
+                if (definition.SourceType != EffectSourceType.Equipment)
+                {
+                    continue;
+                }
+
+                state.ActiveEffects.Add(new ActiveEffect
+                {
+                    DefinitionId = definition.Id,
+                    Type = definition.Type,
+                    SourceImageUrl = item.ItemImage,
+                    RemainingRounds = definition.DurationRounds,
+                    LifetimeType = definition.LifetimeType,
+                    SourceType = definition.SourceType,
+                    Magnitude = definition.Magnitude,
+                    MinValue = definition.MinValue,
+                    MaxValue = definition.MaxValue,
+                    ChancePercent = definition.ChancePercent,
+                    TargetType = definition.TargetType,
+                    Priority = definition.Priority,
+                    StackCount = 1,
+                });
+            }
+        }
+    }
+
+    private static bool IsCombatEquipmentSlot(EquipmentSlotType slot)
+    {
+        return slot == EquipmentSlotType.RIGHT_HAND || slot == EquipmentSlotType.LEFT_HAND;
     }
 
     private void ApplyRoundStartEffects(MonsterFightActionState state, Hero hero, Monster monster)
@@ -656,11 +739,19 @@ public class MonsterFightService : IMonsterFightService
         }
     }
 
-    private void ApplyPowerModifierEffects(MonsterFightActionState state, Hero hero, Monster monster)
+    private void ApplyBeforeDamageCommitEffects(MonsterFightActionState state, Hero hero, Monster monster)
     {
         foreach (var effect in state.ActiveEffects.OrderBy(e => e.Priority))
         {
-            _effectHandlerRegistry.GetHandler(effect.Type).OnPowerModifiers(effect, state, hero, monster);
+            _effectHandlerRegistry.GetHandler(effect.Type).OnBeforeDamageCommit(effect, state, hero, monster);
+        }
+    }
+
+    private void ApplyIncomingStrikeConfirmedEffects(MonsterFightActionState state, Hero hero, Monster monster)
+    {
+        foreach (var effect in state.ActiveEffects.OrderBy(e => e.Priority))
+        {
+            _effectHandlerRegistry.GetHandler(effect.Type).OnIncomingStrikeConfirmed(effect, state, hero, monster);
         }
     }
 
@@ -676,13 +767,26 @@ public class MonsterFightService : IMonsterFightService
     {
         foreach (var effect in state.ActiveEffects)
         {
+            if (effect.LifetimeType == EffectLifetimeType.Persistent)
+            {
+                continue;
+            }
+
             effect.RemainingRounds -= 1;
         }
     }
 
     private static void CleanupExpiredEffects(MonsterFightActionState state)
     {
-        state.ActiveEffects = state.ActiveEffects.Where(e => e.RemainingRounds > 0).ToList();
+        state.ActiveEffects = state.ActiveEffects.Where(e =>
+        {
+            if (e.LifetimeType == EffectLifetimeType.RoundBased)
+            {
+                return e.RemainingRounds > 0;
+            }
+
+            return true;
+        }).ToList();
     }
 
     private async Task DoFinalize(MonsterFight fight, Guid activityId)

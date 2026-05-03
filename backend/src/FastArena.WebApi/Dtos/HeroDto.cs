@@ -16,5 +16,6 @@ public class HeroDto
     public int MaxAbility { get; set; }
     public Guid UserId { get; set; }
     public List<HeroItemCellDto> Items { get; set; } = new List<HeroItemCellDto>();
+    public List<HeroPocketSlotDto> EquippedSlots { get; set; } = new List<HeroPocketSlotDto>();
     public List<MonsterFightResultDto> Results { get; set; } = new List<MonsterFightResultDto>();
 }

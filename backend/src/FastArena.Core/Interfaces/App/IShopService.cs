@@ -5,7 +5,7 @@ namespace FastArena.Core.Interfaces.App;
 public interface IShopService
 {
     /// <summary>
-    /// Retrieve available shop items (potions) for a hero with calculated sell prices.
+    /// Retrieve available shop items (potions, weapons, shields) for a hero with calculated sell prices.
     /// Validates hero ownership and activity state.
     /// </summary>
     /// <param name="userId">Id of the requesting user (from JWT token)</param>

@@ -32,12 +32,16 @@ public class ShopService : IShopService
     {
         await EnsureShopAccessibleAsync(userId);
 
-        // Get available potions
         var potions = await _itemStorage.GetByTypeAsync(ItemType.POTION);
+        var weapons = await _itemStorage.GetByTypeAsync(ItemType.WEAPON);
+        var shields = await _itemStorage.GetByTypeAsync(ItemType.SHIELD);
         var moneyItem = await _itemService.GetBaseMoneyItemAsync();
+        var catalogItems = potions
+            .Concat(weapons)
+            .Concat(shields)
+            .ToList();
 
-        // Map to ShopItemDto with calculated sell prices
-        var shopItems = potions.Select(item => new ShopItem
+        var shopItems = catalogItems.Select(item => new ShopItem
         {
             ItemId = item.Id,
             Name = item.Name,
@@ -150,7 +154,7 @@ public class ShopService : IShopService
                 throw new ActionDeniedException("One of the selected shop items does not exist.");
             }
 
-            if (item.Type != ItemType.POTION)
+            if (!IsShopItemType(item.Type))
             {
                 throw new ActionDeniedException("One of the selected shop items is not available in the shop.");
             }
@@ -207,6 +211,11 @@ public class ShopService : IShopService
     private int CalculateBuyPrice(int baseCost)
     {
         return (int)Math.Round(baseCost * 0.5);
+    }
+
+    private static bool IsShopItemType(ItemType itemType)
+    {
+        return itemType == ItemType.POTION || itemType == ItemType.WEAPON || itemType == ItemType.SHIELD;
     }
 
     private async Task<Domain.Heroes.Hero> EnsureShopAccessibleAsync(Guid userId)

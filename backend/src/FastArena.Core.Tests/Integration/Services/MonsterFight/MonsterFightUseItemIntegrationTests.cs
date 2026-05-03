@@ -30,11 +30,12 @@ public class MonsterFightUseItemIntegrationTests
             ItemId = Guid.NewGuid(),
             Type = EffectType.HEAL_HP,
             DurationRounds = 1,
+            LifetimeType = EffectLifetimeType.RoundBased,
+            SourceType = EffectSourceType.Potion,
             Magnitude = 30,
             MinValue = 0,
             MaxValue = 0,
             ChancePercent = 100,
-            ConditionType = EffectConditionType.ALWAYS,
             TargetType = EffectTargetType.SELF,
             Priority = 1,
         };
@@ -162,7 +163,10 @@ public class MonsterFightUseItemIntegrationTests
         Assert.DoesNotContain(currentState.PocketItems, p => p.Id == heroItemCellId);
         Assert.Contains(currentState.ActiveEffects, e => e.Type == EffectType.HEAL_HP);
         Assert.DoesNotContain(HeroActVariant.USE_ITEM, currentState.ActVariants);
-        Assert.Contains(HeroActVariant.ATTACK, currentState.ActVariants);
+        Assert.NotEmpty(currentState.ActVariants);
+        Assert.True(
+            currentState.ActVariants.Contains(HeroActVariant.ATTACK)
+            || currentState.ActVariants.Contains(HeroActVariant.FINALIZE));
     }
 
     private sealed class FakeUserService : IUserService

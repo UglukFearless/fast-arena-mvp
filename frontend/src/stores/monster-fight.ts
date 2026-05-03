@@ -1,4 +1,4 @@
-import { ActiveEffectDto, HeroActVariant, MonsterFightActionStateDto, MonsterFightActionStateResult, MonsterFightClient, MonsterFightDoActionDataDto, MonsterFightDto } from "@/api/clients";
+import { ActiveEffectDto, EquipmentSlotType, HeroActVariant, HeroItemCellDto, MonsterFightActionStateDto, MonsterFightActionStateResult, MonsterFightClient, MonsterFightDoActionDataDto, MonsterFightDto } from "@/api/clients";
 import { ApiSettings } from "@/utils/constants";
 import authFetch from "@/utils/http-helper";
 import { defineStore } from "pinia";
@@ -81,11 +81,21 @@ export const useMonsterFight = defineStore('monster-fight', {
             return Object.entries(state.monsterFight.state)
                 .filter(s => s[0] !== this.currentOrder)
                 .filter(s => !!s[1].result)
-                .map(s => (s[1].result as MonsterFightActionStateResult).resultText)
+                .map(s => formatRoundResultText(s[1]))
                 .reverse();
         },
         heroActiveEffects(): ActiveEffectDto[] {
             return this.currentState?.activeEffects ?? [];
+        },
+        heroEquipmentSlots(state) {
+            return state.monsterFight?.hero.equippedSlots
+                .filter(s => s.slot === EquipmentSlotType.RIGHT_HAND || s.slot === EquipmentSlotType.LEFT_HAND) ?? [];
+        },
+        pocketItems(state): HeroItemCellDto[] {
+            const pocketSlots = [EquipmentSlotType.POCKET_1, EquipmentSlotType.POCKET_2, EquipmentSlotType.POCKET_3];
+            return state.monsterFight?.hero.equippedSlots
+                .filter(s => pocketSlots.includes(s.slot) && s.item != null)
+                .map(s => s.item!) ?? [];
         },
     },
     actions: {
@@ -107,6 +117,16 @@ export const useMonsterFight = defineStore('monster-fight', {
                 });
 
                 if (!roundResult.shoudGoNext) {
+                    if (payload.actVariant === HeroActVariant.USE_ITEM && payload.actionData?.usedPocketItemCellId) {
+                        const slot = this.monsterFight!.hero.equippedSlots.find(s => s.item?.id === payload.actionData!.usedPocketItemCellId);
+                        if (slot?.item) {
+                            if (slot.item.amount <= 1) {
+                                slot.item = undefined;
+                            } else {
+                                slot.item.amount -= 1;
+                            }
+                        }
+                    }
                     this.monsterFight!.state[roundResult.stateOrder!] = roundResult.state!;
                     this.monsterFight!.reward = roundResult.reward;
                 } else {
@@ -123,3 +143,16 @@ export const useMonsterFight = defineStore('monster-fight', {
         }
     }
 });
+
+function formatRoundResultText(state: MonsterFightActionStateDto | null | undefined) {
+    const resultText = state?.result?.resultText ?? '';
+    if (!resultText) {
+        return '';
+    }
+
+    if (!state?.strikeBlocked) {
+        return resultText;
+    }
+
+    return `${resultText}<br><strong>Щит полностью блокирует удар.</strong>`;
+}

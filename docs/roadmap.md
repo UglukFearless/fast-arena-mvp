@@ -25,7 +25,7 @@ Build a complete and balanced hero progression loop around combat: meaningful eq
 - Description: Weapons, shields, and eventually armor should meaningfully affect combat outcomes. Weapon damage modifiers first, then shield blocking, armor last.
 - Status: `in-progress`
 - Target window: near-term
-- Notes: Weapon usage is the current sprint goal. See `docs/features/weapon-usage.md`. Shield and armor follow.
+- Notes: Backend fully implemented (effect pipeline, equip/unequip, shop, seeds, tests). Frontend equipment UI and shield block visualization remain. See `docs/features/weapon-usage.md`.
 
 ### Initiative 2: Balanced Economy and Progression
 

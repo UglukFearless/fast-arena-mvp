@@ -44,18 +44,20 @@ public class HeroInfoService : IHeroInfoService
     private static List<HeroEquippedSlot> GetFixedPocketSlots(Hero hero)
     {
         var slotsByType = hero.EquippedSlots?
-            .Where(s => IsPocketSlot(s.Slot))
+            .Where(s => IsInventorySlot(s.Slot))
             .ToDictionary(s => s.Slot)
             ?? new Dictionary<EquipmentSlotType, HeroEquippedSlot>();
 
-        var pocketOrder = new[]
+        var inventorySlotOrder = new[]
         {
             EquipmentSlotType.POCKET_1,
             EquipmentSlotType.POCKET_2,
             EquipmentSlotType.POCKET_3,
+            EquipmentSlotType.RIGHT_HAND,
+            EquipmentSlotType.LEFT_HAND,
         };
 
-        return pocketOrder.Select(slot =>
+        return inventorySlotOrder.Select(slot =>
         {
             if (slotsByType.TryGetValue(slot, out var existed))
             {
@@ -72,10 +74,12 @@ public class HeroInfoService : IHeroInfoService
         }).ToList();
     }
 
-    private static bool IsPocketSlot(EquipmentSlotType slot)
+    private static bool IsInventorySlot(EquipmentSlotType slot)
     {
         return slot == EquipmentSlotType.POCKET_1
             || slot == EquipmentSlotType.POCKET_2
-            || slot == EquipmentSlotType.POCKET_3;
+            || slot == EquipmentSlotType.POCKET_3
+            || slot == EquipmentSlotType.RIGHT_HAND
+            || slot == EquipmentSlotType.LEFT_HAND;
     }
 }

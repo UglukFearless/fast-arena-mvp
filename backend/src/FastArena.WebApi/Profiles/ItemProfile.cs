@@ -23,6 +23,7 @@ internal static class ItemProfile
             BaseCost = item.BaseCost,
             Type = item.Type,
             Effects = item.Effects != null ? EffectDefinitionProfile.Map(item.Effects) : null,
+            AllowedSlots = item.AllowedSlots?.Select(s => s.Slot).Distinct().ToList(),
         };
 
         return dto;

@@ -28,15 +28,16 @@
 	- Hero pocket system (3 slots) for usable combat items.
 	- In-fight item usage action with pocket consumption.
 	- Runtime active-effect model with stacking and duration lifecycle.
-- Planned (not fully implemented yet):
-	- Weapon influence on outgoing damage.
-	- Shield influence on incoming damage.
+- In progress:
+	- Weapon combat modifiers (permanent while equipped).
+	- Shield full-block protection (permanent while equipped, limited uses per fight).
+- Planned (not yet started):
 	- Armor influence on incoming damage.
 	- Extended equipment influence on combat characteristics.
 
 ## Combat Item Subdomains
 
-### Weapon (Planned, Not Implemented)
+### Weapon (In Progress)
 
 - Weapon can be one-handed or two-handed.
 - Two weapons at the same time (one in each hand) are not allowed.
@@ -45,6 +46,7 @@
 
 Weapon may modify outgoing damage by two independent mechanisms:
 
+- Weapon combat modifiers are active for the entire fight while the weapon is equipped. They do not expire per round and are not consumed by use.
 - Both mechanisms may coexist on the same weapon.
 - Weapon modifiers are applied only after a strike is confirmed; they do not affect the fact of hit/miss.
 
@@ -71,8 +73,9 @@ Long-term direction:
 
 - Weapons may apply additional effects, including probabilistic effects (for example bleeding or poisoning).
 
-### Shield (Planned, Not Implemented)
+### Shield (In Progress)
 
+- Shield protection is active for the entire fight while the shield is equipped. Block uses are consumed during the fight but do not expire per round; the shield protects until all uses are spent.
 - Shield is evaluated only after it is confirmed that the participant receives a strike.
 - Shield may fully block incoming damage with a configured probability.
 - Block probability is represented in percent values, not in dice-face thresholds.

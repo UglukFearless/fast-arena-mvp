@@ -25,12 +25,18 @@ public interface IEffectHandler
     /// Apply ability override or other pre-strike modifiers.
     /// </summary>
     void OnStrikeClaimed(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster);
+
+    /// <summary>
+    /// Called when an incoming strike is confirmed (strike strength >= 1) and before hit zone resolution.
+    /// Allows defensive effects to alter or cancel incoming damage flow.
+    /// </summary>
+    void OnIncomingStrikeConfirmed(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster);
     
     /// <summary>
-    /// Called after hit zone is determined but before damage calculation.
-    /// Apply strike power modifiers and other power-level adjustments.
+    /// Called before damage is committed.
+    /// Apply all pre-damage modifiers (strike power and unit-damage contributions).
     /// </summary>
-    void OnPowerModifiers(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster);
+    void OnBeforeDamageCommit(ActiveEffect effect, MonsterFightActionState state, Hero hero, Monster monster);
     
     /// <summary>
     /// Called after damage is committed to HP.

@@ -12,8 +12,8 @@ public class MonsterFightActionStateDto
     public int MonsterAbility { get; set; }
     public int? MonsterDiceRoll { get; set; }
     public int StrikeStrength { get; set; }
+    public bool StrikeBlocked { get; set; }
     public MonsterFightActionStateResult? Result { get; set; }
     public HashSet<HeroActVariant> ActVariants { get; set; }
     public List<ActiveEffectDto> ActiveEffects { get; set; } = new();
-    public List<HeroItemCellDto> PocketItems { get; set; } = new();
 }

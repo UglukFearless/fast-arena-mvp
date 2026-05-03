@@ -54,7 +54,7 @@ const buttonsState = ref(AjaxActionState.READY);
 const isItemPickerVisible = ref(false);
 
 const pocketItems = computed((): HeroItemCellDto[] => {
-    return monsterFightStore.currentState?.pocketItems ?? [];
+    return monsterFightStore.pocketItems;
 });
 
 const convertActionCodeToModel = function(code: HeroActVariant): HeroActionModel {

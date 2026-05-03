@@ -24,9 +24,12 @@ public static class ServiceConfig
         services.AddScoped<IItemService, ItemService>();
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IShopService, ShopService>();
+        
         services.AddSingleton<IEffectHandler, HealHpEffectHandler>();
         services.AddSingleton<IEffectHandler, OverrideAbilityToMaxEffectHandler>();
         services.AddSingleton<IEffectHandler, StrikePowerBonusEffectHandler>();
+        services.AddSingleton<IEffectHandler, UnitDamageDeltaEffectHandler>();
+        services.AddSingleton<IEffectHandler, IncomingStrikeFullBlockEffectHandler>();
         services.AddSingleton<EffectHandlerRegistry>();
 
         return services;
