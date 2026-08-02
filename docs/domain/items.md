@@ -83,28 +83,22 @@ Long-term direction:
 - Each successful full block consumes one use.
 - After all uses are consumed, the shield is considered broken for the current fight and provides no further protection.
 
-### Armor (Planned, Not Implemented)
+### Armor (In Progress)
 
 - Armor is equipped against the hit-zone map (for example: helmet -> head, greaves -> legs).
 - Armor pieces can cover one or several zones (for example: cuirass may cover body zones but not neck/groin).
-- The same zone cannot be covered by two armor pieces at once.
-- If two armor pieces overlap by at least one zone, they conflict and cannot be equipped together.
-- Near-term implementation note: avoid overlap-conflict-heavy item definitions where possible.
+- Two armor pieces cannot be equipped simultaneously if their protected zones overlap.
+- Armor protection is active for the entire fight while the armor is equipped.
 
-Armor may mitigate damage by two mechanisms:
+Armor mitigates incoming damage as follows:
 
-1. Strike power absorption with durability
-
-- Armor absorbs part of incoming strike power before HP damage is calculated.
-- Example: incoming strike power is 4, armor durability is 2 -> armor absorbs 2 power, remaining strike power is 2.
-- Absorbed power reduces armor durability by the same amount.
-- When durability reaches 0, that armor no longer protects.
-
-2. Flat damage absorption per strike power unit
-
-- Armor reduces zone unit damage by a fixed amount for each strike power unit.
-- Example: strike power is 4, zone unit damage is 10, armor absorbs 2 per power -> `4 * (10 - 2) = 32` instead of 40.
-- Zone unit damage per 1 strike power cannot drop below 1.
+- Armor has a protection value that applies to all zones it protects.
+- When a strike is confirmed for a protected zone, armor subtracts its protection value from the strike power.
+- Armor first reduces the incoming strike power, then damage is calculated from the remaining strike power.
+- If the strike power is lower than armor protection, armor absorbs the entire strike and the target receives no damage.
+- Protection value is consumed sequentially across all incoming strikes in a round.
+- Once protection value is exhausted (reaches 0), the armor breaks and provides no further protection for the rest of the fight.
+- Example: armor protection is 4; hero receives strikes of 2 and 3 power in the same round. The first strike is fully absorbed (2 < 4, armor left with 2). The second strike: armor absorbs 2, hero receives damage 1 (3 - 2). Armor is now broken and provides no protection for further strikes that round.
 
 ### Usable Items And Pockets (Implemented MVP)
 

@@ -22,10 +22,10 @@ Build a complete and balanced hero progression loop around combat: meaningful eq
 
 ### Initiative 1: Equipment Combat Influence
 
-- Description: Weapons, shields, and eventually armor should meaningfully affect combat outcomes. Weapon damage modifiers first, then shield blocking, armor last.
+- Description: Equipment should meaningfully affect combat outcomes. Weapons and shields are already integrated; armor system is the next milestone.
 - Status: `in-progress`
 - Target window: near-term
-- Notes: Backend fully implemented (effect pipeline, equip/unequip, shop, seeds, tests). Frontend equipment UI and shield block visualization remain. See `docs/features/weapon-usage.md`.
+- Notes: Weapon and shield flow is implemented end-to-end. Next focus: design and implement armor system across backend and frontend while keeping equipment behavior coherent. See `docs/features/weapon-usage.md`.
 
 ### Initiative 2: Balanced Economy and Progression
 

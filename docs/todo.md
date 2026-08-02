@@ -6,9 +6,9 @@ This document tracks short-horizon tasks. It should stay compact and operational
 
 ## Current Priorities
 
-### Documentation
+### Gameplay
 
-- [ ] Fill `docs/architecture.md` with codebase-specific examples.
+- [ ] Create armor system.
 
 ### Completed Goals
 

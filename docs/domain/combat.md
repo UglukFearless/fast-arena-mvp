@@ -66,11 +66,17 @@ Examples:
 ### Phase 4: Damage Calculation
 
 - Each hit zone has a damage price per 1 strike power.
-- Total damage formula:
-	- `Damage = ZoneUnitDamage * StrikePower`
+- If the target has armor protecting the hit zone, armor first reduces the incoming strike power.
+- Remaining strike power is then used for damage calculation.
+- Damage formula:
+	- `Damage = ZoneUnitDamage * RemainingStrikePower`
 - Example: head has unit damage 20 HP.
 	- Strike power 1 -> 20 HP damage.
 	- Strike power 2 -> 40 HP damage.
+- If armor protection is greater than or equal to strike power, the target receives no damage and armor absorbs the entire strike.
+- Example: head unit damage is 20 HP, incoming strike power is 3, helmet protection is 2 -> armor reduces strike power to 1 -> target receives 20 HP damage.
+- Armor protection is consumed sequentially across all strikes in a round. Once consumed, armor breaks and provides no further protection.
+- Source of truth for armor mechanics: [Items](items.md).
 
 ### Phase 5: State Update And End Check
 
@@ -85,6 +91,7 @@ Examples:
 	- outgoing damage,
 	- incoming damage.
 - Weapon damage modifiers are applied after a strike is confirmed and do not affect hit eligibility.
+- Armor protection is evaluated after a strike is confirmed and applies to protected zones only.
 - Source of truth for item categories and behavior flags: [Items](items.md).
 - Current implementation status for combat item mechanics is tracked in [Items](items.md).
 
