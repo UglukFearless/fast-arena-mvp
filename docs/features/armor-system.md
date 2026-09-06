@@ -1,76 +1,76 @@
-# Feature: Armor System
+# Фича: Система брони
 
-## Goal
+## Цель
 
-Enable armor pieces to protect hero zones during combat, extending the equipment system with zone-based coverage, conflict rules, and per-fight protection durability.
+Дать частям брони возможность защищать зоны героя во время боя, расширив систему экипировки покрытием по зонам, правилами конфликтов и прочностью защиты в рамках одного боя.
 
-## Domain References
+## Ссылки на предметную область
 
-- `docs/domain/items.md` — armor type, zone coverage, protection mechanics, conflict rules.
-- `docs/domain/combat.md` — Phase 4 damage calculation, Phase E power modifier ordering.
+- `docs/domain/items.md` — тип брони, покрытие зон, механика защиты, правила конфликтов.
+- `docs/domain/combat.md` — расчёт урона в Фазе 4, порядок модификаторов силы в Фазе E.
 
-## Scope
+## Объём
 
-- Hero can buy armor pieces from the shop.
-- Hero can equip armor pieces; equipping is blocked if the new piece overlaps zones with an already equipped piece.
-- Equipped armor reduces incoming strike power for covered zones during a fight.
-- Armor protection is exhausted sequentially across strikes within a fight; once exhausted, the armor piece provides no further protection until the next fight.
+- Герой может покупать части брони в магазине.
+- Герой может экипировать части брони; экипировка блокируется, если новая часть пересекается зонами с уже экипированной.
+- Экипированная броня снижает входящую силу удара для покрытых зон во время боя.
+- Защита брони расходуется последовательно по ударам в рамках боя; после исчерпания часть брони не даёт защиты до следующего боя.
 
-## Acceptance Criteria
+## Критерии приёмки
 
-1. Armor items are available in the shop and can be purchased by the hero.
-2. Hero can equip an armor piece if no currently equipped piece covers overlapping zones.
-3. Equipping a conflicting armor piece is rejected with a clear reason.
-4. During a fight, an incoming strike against a covered zone reduces its effective strike power by the armor's protection value before damage is calculated.
-5. If armor protection is greater than or equal to incoming strike power, no HP damage is applied.
-6. Armor protection is consumed across strikes in order; once at zero, the armor piece is inactive for the rest of the fight.
-7. Fight round response reflects armor protection state (active or broken).
-8. After the fight, armor remains equipped and protection is restored for the next fight.
+1. Предметы брони доступны в магазине и могут быть куплены героем.
+2. Герой может экипировать часть брони, если ни одна из уже экипированных частей не покрывает пересекающиеся зоны.
+3. Экипировка конфликтующей части брони отклоняется с понятной причиной.
+4. Во время боя входящий удар по покрытой зоне снижает эффективную силу удара на значение защиты брони до расчёта урона.
+5. Если защита брони больше или равна входящей силе удара, урон по HP не наносится.
+6. Защита брони расходуется по ударам по порядку; достигнув нуля, часть брони становится неактивной до конца боя.
+7. Ответ раунда боя отражает состояние защиты брони (активна или сломана).
+8. После боя броня остаётся экипированной, а защита восстанавливается к следующему бою.
 
-## Architecture Notes
+## Архитектурные заметки
 
-- Armor protection is a fight-scoped runtime state, analogous to shield uses remaining.
-- Armor protection evaluation is placed at Phase E of the fight lifecycle (power-level damage modifiers), before zone unit damage is applied.
-- Zone coverage and conflict validation belongs to `HeroEquipmentService`.
-- Hit-zone map is shared across all participants (current MVP limitation).
+- Защита брони — рантайм-состояние в рамках боя, аналогичное оставшимся использованиям щита.
+- Оценка защиты брони размещена на Фазе E жизненного цикла боя (модификаторы урона на уровне силы), до применения юнит-урона зоны.
+- Проверка покрытия зон и конфликтов относится к `HeroEquipmentService`.
+- Карта зон попадания общая для всех участников (текущее ограничение MVP).
 
-## Implementation Checklist
+## Чек-лист реализации
 
-### Phase 1 — Domain And Data Model
+### Фаза 1 — Предметная область и модель данных
 
-- [ ] Define armor item structure: protected zones list and protection value.
-- [ ] Implement zone overlap conflict check in equipment service.
-- [ ] Seed initial armor item catalog with zone coverage and protection values.
+- [ ] Определить структуру предмета брони: список защищаемых зон и значение защиты.
+- [ ] Реализовать проверку конфликта пересечения зон в сервисе экипировки.
+- [ ] Засеять начальный каталог предметов брони с покрытием зон и значениями защиты.
 
-### Phase 2 — Shop And Equip Flow
+### Фаза 2 — Магазин и поток экипировки
 
-- [ ] Extend shop to include armor items.
-- [ ] Enable equip/unequip armor via equipment service with conflict validation.
-- [ ] Add backend tests for equip conflict rules.
+- [ ] Расширить магазин предметами брони.
+- [ ] Включить экипировку/снятие брони через сервис экипировки с валидацией конфликтов.
+- [ ] Добавить backend-тесты на правила конфликта экипировки.
 
-### Phase 3 — Combat Integration
+### Фаза 3 — Интеграция с боем
 
-- [ ] Initialize armor runtime state (remaining protection) at fight start from equipped armor.
-- [ ] Wire armor protection absorption into Phase E of fight lifecycle.
-- [ ] Extend fight round DTO to include armor state (protection remaining per piece).
-- [ ] Add backend tests for armor protection consumption and breakage.
+- [ ] Инициализировать рантайм-состояние брони (оставшаяся защита) в начале боя из экипированной брони.
+- [ ] Подключить поглощение защитой брони в Фазу E жизненного цикла боя.
+- [ ] Расширить DTO раунда боя состоянием брони (оставшаяся защита по каждой части).
+- [ ] Добавить backend-тесты на расход и поломку защиты брони.
 
-### Phase 4 — Frontend
+### Фаза 4 — Frontend
 
-- [ ] Show equipped armor pieces in hero equipment UI.
-- [ ] Show armor state (active / broken) in fight window.
+- [ ] Показывать экипированные части брони в UI экипировки героя.
+- [ ] Показывать состояние брони (активна / сломана) в окне боя.
 
-## Out Of Scope
+## Вне объёма
 
-- Armor durability persisting after fight (armor restores fully after each fight).
-- Armor repair mechanics.
-- Zone-specific hit zone maps per creature type (long-term direction).
-- Flat damage absorption per strike power unit (not part of MVP armor model).
+- Сохранение прочности брони после боя (броня полностью восстанавливается после каждого боя).
+- Механика ремонта брони.
+- Карты зон попадания по типу существа (долгосрочное направление).
+- Плоское поглощение урона на единицу силы удара (не входит в MVP-модель брони).
 
-## Rejected Paths
+## Отклонённые варианты
 
-- Two independent armor damage mitigation mechanisms (strike power absorption + flat damage per power unit): replaced by single protection-value model for clarity and MVP scope.
+- Два независимых механизма смягчения урона бронёй (поглощение силы удара + плоский урон на единицу силы): заменены единой моделью значения защиты ради ясности и объёма MVP.
 
-## Change Policy
+## Политика изменений
 
-Update this file as implementation decisions are finalized and phases progress.
+Обновлять этот файл по мере финализации решений по реализации и продвижения по фазам.

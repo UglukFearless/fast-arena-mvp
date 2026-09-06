@@ -1,133 +1,133 @@
-# Items
+# Предметы
 
-## Entity
+## Сущность
 
-- An object that exists in the game world and can be held by a hero.
-- Has a name, description, base cost, and an image.
-- Belongs to one of several types that define how it behaves.
+- Объект, существующий в игровом мире и который может держать при себе герой.
+- Имеет название, описание, базовую стоимость и изображение.
+- Относится к одному из нескольких типов, определяющих его поведение.
 
-## Item Types
+## Типы предметов
 
-- **Money** — currency used for purchases. Gold is the only money item.
-- **Potion** — consumable used during combat. Restores HP or temporarily modifies combat characteristics.
-- **Weapon** — equippable item that modifies attack damage or attack power.
-- **Shield** — equippable item that provides a chance to block incoming attacks.
-- **Armor** — equippable protective item. Reserved for future use.
-- **Other** — loot and collectibles with no active effect. Sold for gold.
+- **Деньги (Money)** — валюта для покупок. Единственный денежный предмет — золото.
+- **Зелье (Potion)** — расходуемый предмет, используемый во время боя. Восстанавливает HP или временно изменяет боевые характеристики.
+- **Оружие (Weapon)** — экипируемый предмет, изменяющий урон атаки или силу атаки.
+- **Щит (Shield)** — экипируемый предмет, дающий шанс заблокировать входящие атаки.
+- **Броня (Armor)** — экипируемый защитный предмет. Зарезервировано для будущего использования.
+- **Прочее (Other)** — лут и коллекционные предметы без активного эффекта. Продаются за золото.
 
-## Behavioral Flags
+## Флаги поведения
 
-- Stackable items can be accumulated in one inventory cell (for example gold or simple loot).
-- Equippable items can be actively equipped or used by the hero (for example potions, weapons, shields).
+- Стекуемые предметы могут накапливаться в одной ячейке инвентаря (например, золото или простой лут).
+- Экипируемые предметы могут быть активно надеты или использованы героем (например, зелья, оружие, щиты).
 
-## Combat Usage Status
+## Статус использования в бою
 
-- Implemented (MVP now):
-	- Item taxonomy exists (money, potion, weapon, shield, armor, other).
-	- Behavioral flags for stacking and equipping exist.
-	- Hero pocket system (3 slots) for usable combat items.
-	- In-fight item usage action with pocket consumption.
-	- Runtime active-effect model with stacking and duration lifecycle.
-- In progress:
-	- Weapon combat modifiers (permanent while equipped).
-	- Shield full-block protection (permanent while equipped, limited uses per fight).
-- Planned (not yet started):
-	- Armor influence on incoming damage.
-	- Extended equipment influence on combat characteristics.
+- Реализовано (сейчас в MVP):
+	- Существует таксономия предметов (деньги, зелье, оружие, щит, броня, прочее).
+	- Существуют флаги поведения для стекования и экипировки.
+	- Система кармана героя (3 слота) для расходуемых боевых предметов.
+	- Действие использования предмета в бою с расходованием из кармана.
+	- Рантайм-модель активных эффектов со стекованием и жизненным циклом длительности.
+- В процессе:
+	- Боевые модификаторы оружия (постоянны, пока оружие экипировано).
+	- Полная блокировка щитом (постоянна, пока щит экипирован, ограниченное число использований за бой).
+- Запланировано (ещё не начато):
+	- Влияние брони на входящий урон.
+	- Расширенное влияние экипировки на боевые характеристики.
 
-## Combat Item Subdomains
+## Боевые поддомены предметов
 
-### Weapon (In Progress)
+### Оружие (в процессе)
 
-- Weapon can be one-handed or two-handed.
-- Two weapons at the same time (one in each hand) are not allowed.
-- If a one-handed weapon is equipped, the second hand may equip a shield.
-- A two-handed weapon occupies both hands and excludes shield usage.
+- Оружие может быть одноручным или двуручным.
+- Два оружия одновременно (по одному в каждой руке) не допускаются.
+- Если экипировано одноручное оружие, во вторую руку может быть экипирован щит.
+- Двуручное оружие занимает обе руки и исключает использование щита.
 
-Weapon may modify outgoing damage by two independent mechanisms:
+Оружие может изменять исходящий урон двумя независимыми механизмами:
 
-- Weapon combat modifiers are active for the entire fight while the weapon is equipped. They do not expire per round and are not consumed by use.
-- Both mechanisms may coexist on the same weapon.
-- Weapon modifiers are applied only after a strike is confirmed; they do not affect the fact of hit/miss.
+- Боевые модификаторы оружия активны на протяжении всего боя, пока оружие экипировано. Они не истекают по раундам и не расходуются при использовании.
+- Оба механизма могут сосуществовать на одном оружии.
+- Модификаторы оружия применяются только после подтверждения удара; они не влияют на сам факт попадания/промаха.
 
-1. Strike power modifier
+1. Модификатор силы удара
 
-- Changes strike power after successful attack resolution.
-- Can be positive or negative.
-- Example formula:
+- Изменяет силу удара после успешного разрешения атаки.
+- Может быть положительным или отрицательным.
+- Пример формулы:
 	- `FinalDamage = (StrikePower + WeaponStrikePowerDelta) * ZoneUnitDamage`
 
-2. Flat damage per strike power unit
+2. Плоский урон за единицу силы удара
 
-- Adds or subtracts a fixed HP amount for each strike power unit.
-- Can be positive or negative.
-- Example formula:
+- Добавляет или вычитает фиксированное количество HP за каждую единицу силы удара.
+- Может быть положительным или отрицательным.
+- Пример формулы:
 	- `FinalDamage = (StrikePower * ZoneUnitDamage) + (WeaponFlatPerPowerDelta * StrikePower)`
 
-Near-term note:
+Замечание на ближайшую перспективу:
 
-- When both mechanisms are active, implementation should keep a deterministic and explicit calculation order.
-- Negative final damage is not intended.
+- Когда активны оба механизма, реализация должна сохранять детерминированный и явный порядок расчёта.
+- Отрицательный итоговый урон не предполагается.
 
-Long-term direction:
+Долгосрочное направление:
 
-- Weapons may apply additional effects, including probabilistic effects (for example bleeding or poisoning).
+- Оружие может применять дополнительные эффекты, включая вероятностные (например, кровотечение или отравление).
 
-### Shield (In Progress)
+### Щит (в процессе)
 
-- Shield protection is active for the entire fight while the shield is equipped. Block uses are consumed during the fight but do not expire per round; the shield protects until all uses are spent.
-- Shield is evaluated only after it is confirmed that the participant receives a strike.
-- Shield may fully block incoming damage with a configured probability.
-- Block probability is represented in percent values, not in dice-face thresholds.
-- Shield has a finite number of successful block uses in a fight.
-- Each successful full block consumes one use.
-- After all uses are consumed, the shield is considered broken for the current fight and provides no further protection.
+- Защита щитом активна на протяжении всего боя, пока щит экипирован. Использования блока расходуются в течение боя, но не истекают по раундам; щит защищает, пока не закончатся все использования.
+- Щит оценивается только после подтверждения того, что участник получает удар.
+- Щит может полностью заблокировать входящий урон с заданной вероятностью.
+- Вероятность блока выражается в процентах, а не в порогах граней кубика.
+- У щита есть конечное число успешных блокировок за бой.
+- Каждая успешная полная блокировка расходует одно использование.
+- После расхода всех использований щит считается сломанным на текущий бой и больше не даёт защиты.
 
-### Armor (In Progress)
+### Броня (в процессе)
 
-- Armor is equipped against the hit-zone map (for example: helmet -> head, greaves -> legs).
-- Armor pieces can cover one or several zones (for example: cuirass may cover body zones but not neck/groin).
-- Two armor pieces cannot be equipped simultaneously if their protected zones overlap.
-- Armor protection is active for the entire fight while the armor is equipped.
+- Броня экипируется относительно карты зон попадания (например: шлем -> голова, поножи -> ноги).
+- Части брони могут покрывать одну или несколько зон (например, кираса может покрывать зоны тела, но не шею/пах).
+- Две части брони нельзя экипировать одновременно, если их защищаемые зоны пересекаются.
+- Защита брони активна на протяжении всего боя, пока броня экипирована.
 
-Armor mitigates incoming damage as follows:
+Броня смягчает входящий урон следующим образом:
 
-- Armor has a protection value that applies to all zones it protects.
-- When a strike is confirmed for a protected zone, armor subtracts its protection value from the strike power.
-- Armor first reduces the incoming strike power, then damage is calculated from the remaining strike power.
-- If the strike power is lower than armor protection, armor absorbs the entire strike and the target receives no damage.
-- Protection value is consumed sequentially across all incoming strikes in a round.
-- Once protection value is exhausted (reaches 0), the armor breaks and provides no further protection for the rest of the fight.
-- Example: armor protection is 4; hero receives strikes of 2 and 3 power in the same round. The first strike is fully absorbed (2 < 4, armor left with 2). The second strike: armor absorbs 2, hero receives damage 1 (3 - 2). Armor is now broken and provides no protection for further strikes that round.
+- У брони есть значение защиты, применяемое ко всем зонам, которые она защищает.
+- Когда удар подтверждён по защищённой зоне, броня вычитает своё значение защиты из силы удара.
+- Броня сначала снижает входящую силу удара, затем урон рассчитывается по оставшейся силе удара.
+- Если сила удара меньше защиты брони, броня поглощает удар целиком, и цель не получает урона.
+- Значение защиты расходуется последовательно по всем входящим ударам в раунде.
+- Как только значение защиты исчерпано (достигает 0), броня ломается и больше не даёт защиты до конца боя.
+- Пример: защита брони равна 4; герой получает удары силой 2 и 3 в одном раунде. Первый удар полностью поглощается (2 < 4, у брони остаётся 2). Второй удар: броня поглощает 2, герой получает урон 1 (3 - 2). Теперь броня сломана и не защищает от дальнейших ударов в этом раунде.
 
-### Usable Items And Pockets (Implemented MVP)
+### Расходуемые предметы и карманы (реализовано в MVP)
 
-#### Pockets
+#### Карманы
 
-- Before a fight, the hero places usable items into pocket slots.
-- Pockets are the only inventory slots accessible during combat and travel.
-- Current pocket count: 3.
-- If all pockets are occupied, placing another usable item into pockets is denied.
+- Перед боем герой размещает расходуемые предметы в слотах кармана.
+- Карманы — единственные слоты инвентаря, доступные во время боя и путешествия.
+- Текущее количество карманов: 3.
+- Если все карманы заняты, поместить ещё один расходуемый предмет в карман нельзя.
 
-#### Slot Compatibility
+#### Совместимость слотов
 
-- Equippable items have predefined allowed equipment slots.
-- Potions are compatible with pocket slots.
-- Other equippable categories may have a single deterministic slot set, but use the same compatibility concept.
+- У экипируемых предметов есть предопределённые допустимые слоты экипировки.
+- Зелья совместимы со слотами кармана.
+- Другие категории экипируемых предметов могут иметь единственный детерминированный набор слотов, но используют ту же концепцию совместимости.
 
-#### Using An Item In Combat
+#### Использование предмета в бою
 
-- Using an item is a distinct round action, alternative to attack.
-- The item is consumed on use and removed from the pocket.
-- In a round where the hero uses an item, the hero applies the item effect but does not attack:
-	- if the hero rolls higher in the initiative phase, the higher roll is ignored for strike purposes,
-	- if the opponent rolls higher, the incoming strike is resolved by normal rules.
-- Monster item usage mechanics are a long-term direction and are not planned in the near term.
+- Использование предмета — отдельное действие раунда, альтернативное атаке.
+- Предмет расходуется при использовании и удаляется из кармана.
+- В раунде, где герой использует предмет, герой применяет эффект предмета, но не атакует:
+	- если герой выбрасывает больше в фазе инициативы, более высокий бросок игнорируется для целей удара,
+	- если больше выбрасывает противник, входящий удар разрешается по обычным правилам.
+- Использование предметов монстрами — долгосрочное направление, не запланировано в ближайшей перспективе.
 
-#### Effect Model
+#### Модель эффектов
 
-Effects applied by items follow the shared effect model. See [`docs/domain/effects.md`](effects.md).
+Эффекты, применяемые предметами, следуют общей модели эффектов. См. [`docs/domain/effects.md`](effects.md).
 
-## Change Policy
+## Политика изменений
 
-Update this file when item types, flags, or item entity rules change.
+Обновлять этот файл при изменении типов предметов, флагов или правил сущности предмета.

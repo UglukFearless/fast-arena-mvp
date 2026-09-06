@@ -1,100 +1,100 @@
-# Effects
+# Эффекты
 
-## Purpose
+## Назначение
 
-This page describes the effect system: how effects are defined, applied, and stacked.
-Effects are a shared mechanic used by items, and in the future by hero skills and other sources.
+Эта страница описывает систему эффектов: как эффекты определяются, применяются и стекуются.
+Эффекты — общий механизм, используемый предметами, а в будущем — навыками героя и другими источниками.
 
-## Effect Model
+## Модель эффекта
 
-An effect has the following core properties:
+У эффекта есть следующие основные свойства:
 
-- **Duration** — for round-based effects, number of rounds the effect is active. The round of activation counts as round 1.
-- **Lifetime** — whether the effect expires by round count or persists for the entire fight.
-- **Source** — the category of the source that produced the effect (for example: consumable item, equipped item, skill).
-- **Target** — what characteristic or mechanic the effect modifies.
+- **Длительность (Duration)** — для пораундовых эффектов число раундов, в течение которых эффект активен. Раунд активации считается раундом 1.
+- **Время жизни (Lifetime)** — истекает ли эффект по числу раундов или сохраняется на весь бой.
+- **Источник (Source)** — категория источника, породившего эффект (например: расходуемый предмет, экипированный предмет, навык).
+- **Цель (Target)** — какую характеристику или механику изменяет эффект.
 
-Lifetime and duration are distinct concepts:
+Время жизни и длительность — разные понятия:
 
-- Round-based effects use duration to count down remaining rounds.
-- Persistent effects last for the entire fight regardless of round count.
+- Пораундовые эффекты используют длительность для отсчёта оставшихся раундов.
+- Постоянные эффекты действуют весь бой независимо от числа раундов.
 
-## Effect Types
+## Типы эффектов
 
-Effects are defined by domain type plus configurable parameters.
+Эффекты определяются доменным типом плюс настраиваемыми параметрами.
 
-### 1. Resource Modification
+### 1. Изменение ресурса
 
-- Changes resource values such as HP.
-- Typical timing: immediate, before initiative roll of the same round.
-- Typical parameters: target resource, amount, clamp rules.
+- Изменяет значения ресурсов, таких как HP.
+- Типичный момент применения: немедленно, до броска инициативы того же раунда.
+- Типичные параметры: целевой ресурс, величина, правила ограничения (clamp).
 
-### 2. Characteristic Override
+### 2. Переопределение характеристики
 
-- Temporarily replaces a calculated characteristic with an override value.
-- Current known case: Ability override to hero maximum (`floor(MaxHP / 10)`) regardless of current HP.
-- Typical parameters: characteristic name, override rule/value, duration.
+- Временно заменяет вычисляемую характеристику переопределённым значением.
+- Текущий известный случай: переопределение Способности до максимума героя (`floor(MaxHP / 10)`) независимо от текущего HP.
+- Типичные параметры: имя характеристики, правило/значение переопределения, длительность.
 
-### 3. Characteristic Modifier
+### 3. Модификатор характеристики
 
-- Additive or multiplicative change to a calculated combat value.
-- Current known case: strike power bonus on successful attack.
-- Typical parameters: affected value, operation type, magnitude, duration, trigger conditions.
+- Аддитивное или мультипликативное изменение вычисляемого боевого значения.
+- Текущий известный случай: бонус к силе удара при успешной атаке.
+- Типичные параметры: затрагиваемое значение, тип операции, величина, длительность, условия срабатывания.
 
-### 4. Triggered Probability Effects (Future)
+### 4. Срабатывающие вероятностные эффекты (в будущем)
 
-- Activate on specific combat events with configured probability.
-- Typical parameters: trigger event, probability, payload effect.
+- Активируются на определённых боевых событиях с заданной вероятностью.
+- Типичные параметры: событие-триггер, вероятность, эффект-нагрузка.
 
-### 5. Meta-Economy Effects (Future)
+### 5. Мета-экономические эффекты (в будущем)
 
-- Affect non-damage combat outputs (for example reward quality/amount).
-- Typical parameters: affected reward channel, operation type, magnitude, duration.
+- Влияют на не связанные с уроном боевые результаты (например, качество/количество награды).
+- Типичные параметры: затрагиваемый канал награды, тип операции, величина, длительность.
 
-## Effect Stacking
+## Стекование эффектов
 
-### General Rules
+### Общие правила
 
-- Stacking is evaluated at the start of each round, before any hook fires.
-- Persistent effects (from equipment) do not participate in the stack merge mechanism. Each equipped item contributes its effect independently; their contributions are aggregated in the relevant phase.
-- Round-based effects from consumables follow per-type stacking rules below. Stacking only applies when the existing effect of the same type is still active. If the previous effect has already expired, the new activation starts fresh without merging.
-- Same-type round-based effects always collapse into one aggregated active effect; two parallel round-based effects of the same type do not coexist.
+- Стекование оценивается в начале каждого раунда, до срабатывания любых хуков.
+- Постоянные эффекты (от экипировки) не участвуют в механизме объединения стека. Каждый экипированный предмет вносит свой эффект независимо; их вклады агрегируются на соответствующей фазе.
+- Пораундовые эффекты от расходуемых предметов следуют правилам стекования по типу, указанным ниже. Стекование применяется только пока существующий эффект того же типа ещё активен. Если предыдущий эффект уже истёк, новая активация начинается заново без объединения.
+- Однотипные пораундовые эффекты всегда схлопываются в один агрегированный активный эффект; два параллельных пораундовых эффекта одного типа не существуют одновременно.
 
-### Per-Type Stacking Rules
+### Правила стекования по типу
 
-#### Healing Effect (Resource Modification)
+#### Эффект лечения (изменение ресурса)
 
-- Restores HP at round start, before initiative.
-- Stacking formula: new magnitude = sum of magnitudes ÷ average duration (standard mathematical rounding). Duration of the merged effect = the averaged duration.
-- Because a one-round heal fires and expires within the same round, two consecutive one-round heals cannot be active at the same time and do not stack; each starts fresh.
+- Восстанавливает HP в начале раунда, до инициативы.
+- Формула стекования: новая величина = сумма величин ÷ средняя длительность (стандартное математическое округление). Длительность объединённого эффекта = усреднённая длительность.
+- Поскольку лечение на один раунд срабатывает и истекает в пределах того же раунда, два последовательных однораундовых лечения не могут быть активны одновременно и не стекуются; каждое начинается заново.
 
-#### Ability Maximization Effect (Characteristic Override)
+#### Эффект максимизации Способности (переопределение характеристики)
 
-- Overrides the hero's Ability to the maximum healthy value regardless of current HP.
-- Stacking rule: remaining durations are summed. The merged effect continues with the combined round count.
-- Example: first effect has 2 rounds remaining; new 3-round dose is used → merged effect has 5 rounds remaining.
+- Переопределяет Способность героя до максимального здорового значения независимо от текущего HP.
+- Правило стекования: оставшиеся длительности суммируются. Объединённый эффект продолжается с суммарным числом раундов.
+- Пример: у первого эффекта осталось 2 раунда; применяется новая доза на 3 раунда → у объединённого эффекта остаётся 5 раундов.
 
-#### Strike Power Boost Effect (Characteristic Modifier)
+#### Эффект усиления силы удара (модификатор характеристики)
 
-- Adds a flat bonus to the hero's strike power on a confirmed hit.
-- Stacking formula: new magnitude = sum of magnitudes ÷ average duration, rounded up (ceiling). Rounding up is intentional — using the same effect twice carries risk, and a small bonus rewards it.
-- Example: two boosts where formula yields 2.2 → result is 3.
+- Добавляет плоский бонус к силе удара героя при подтверждённом попадании.
+- Формула стекования: новая величина = сумма величин ÷ средняя длительность, с округлением вверх (ceiling). Округление вверх сделано намеренно — повторное использование одного и того же эффекта несёт риск, и небольшой бонус вознаграждает за это.
+- Пример: два усиления, где формула даёт 2.2 → результат равен 3.
 
-## Equipment Effects
+## Эффекты экипировки
 
-- Effects from equipped items (for example weapon or shield) are persistent: they are active for the entire fight from the moment combat starts.
-- Equipment effects follow the same phase model as round-based effects.
-- Equipment effects do not merge with each other or with round-based effects of the same type. Each contributes independently in the relevant phase.
-- Equipment slot rules (one item per slot) naturally prevent duplicate effects from the same slot.
+- Эффекты от экипированных предметов (например, оружия или щита) постоянны: они активны весь бой с момента его начала.
+- Эффекты экипировки следуют той же фазовой модели, что и пораундовые эффекты.
+- Эффекты экипировки не объединяются друг с другом или с пораундовыми эффектами того же типа. Каждый вносит вклад независимо на соответствующей фазе.
+- Правила слотов экипировки (один предмет на слот) естественным образом предотвращают дублирование эффектов из одного слота.
 
-## Future Effect Categories
+## Будущие категории эффектов
 
-- Passive trigger effects (no explicit use action):
-	- Example: charm that passively reduces chance of a lethal blow.
-	- Example: charm that increases loot reward on victory.
-- These require a passive slot or always-on pocket mechanic to be designed separately.
-- Hero skills that apply effects will follow the same type/stacking model.
+- Пассивные срабатывающие эффекты (без явного действия использования):
+	- Пример: амулет, пассивно снижающий шанс смертельного удара.
+	- Пример: амулет, увеличивающий награду лутом при победе.
+- Для них потребуется отдельно спроектировать пассивный слот или механику «всегда включённого» кармана.
+- Навыки героя, применяющие эффекты, будут следовать той же модели типов/стекования.
 
-## Change Policy
+## Политика изменений
 
-Update this file when new effect types, stacking rules, or effect sources are introduced.
+Обновлять этот файл при введении новых типов эффектов, правил стекования или источников эффектов.

@@ -1,107 +1,107 @@
-# Feature: Item Effects Runtime Pipeline
+# Фича: Рантайм-пайплайн эффектов предметов
 
-## Goal
+## Цель
 
-Enable heroes to use potions and other consumable items during combat, applying typed effects to combat state with correct phase ordering, duration tracking, and stacking rules.
+Дать героям возможность использовать зелья и другие расходуемые предметы во время боя, применяя типизированные эффекты к состоянию боя с корректным порядком фаз, отслеживанием длительности и правилами стекования.
 
-## Domain References
+## Ссылки на предметную область
 
-- Item types, pockets, effect model, and stacking rules: [`docs/domain/items.md`](../domain/items.md)
-- Fight round phases and effect application hooks: [`docs/domain/combat.md`](../domain/combat.md)
+- Типы предметов, карманы, модель эффектов и правила стекования: [`docs/domain/items.md`](../domain/items.md)
+- Фазы раунда боя и хуки применения эффектов: [`docs/domain/combat.md`](../domain/combat.md)
 
-## Acceptance Criteria
+## Критерии приёмки
 
-1. A hero can equip potions into pocket slots before a fight.
-2. During a fight round, the hero can choose to use an item instead of attacking.
-3. The correct effect (heal, ability override, strike power bonus) is applied at the correct round phase.
-4. Duration tracking decrements remaining rounds after each applicable round.
-5. Same-type repeated usage is merged according to that effect type's stacking rule.
-6. Consumed item is removed from pocket on use.
-7. Fight round result returned to the frontend reflects active effect outcomes.
+1. Герой может экипировать зелья в слоты кармана перед боем.
+2. Во время раунда боя герой может выбрать использование предмета вместо атаки.
+3. Правильный эффект (лечение, переопределение способности, бонус силы удара) применяется на правильной фазе раунда.
+4. Отслеживание длительности уменьшает оставшиеся раунды после каждого применимого раунда.
+5. Повторное использование того же типа объединяется согласно правилу стекования этого типа эффекта.
+6. Использованный предмет удаляется из кармана при использовании.
+7. Результат раунда боя, возвращаемый фронтенду, отражает исходы активных эффектов.
 
-## Architecture Contract
+## Архитектурный контракт
 
-### Modules Involved
+### Задействованные модули
 
-- `FastArena.Core` — `ActiveEffect` model, `IEffectHandler` interface, hook dispatch in fight service.
-- `FastArena.Dal` — Serialized or session-level storage for active effects between rounds.
-- `FastArena.WebApi` — Fight round DTO extended with active effect state.
-- `FastArena.WebHost` — No changes expected.
+- `FastArena.Core` — модель `ActiveEffect`, интерфейс `IEffectHandler`, диспетчеризация хуков в сервисе боя.
+- `FastArena.Dal` — сериализованное или сессионное хранение активных эффектов между раундами.
+- `FastArena.WebApi` — DTO раунда боя, расширенное состоянием активных эффектов.
+- `FastArena.WebHost` — изменения не ожидаются.
 
-### ActiveEffect Model (Runtime)
+### Модель ActiveEffect (рантайм)
 
-Fields:
+Поля:
 
-- `DefinitionId` — reference to the persisted effect definition.
-- `EffectType` — copied from definition at activation time.
-- `RemainingRounds` — decremented after each applicable round.
-- `Parameters` — copied magnitude, min/max, chance, condition type, target type from definition.
-- `StackCount` — for merged same-type effects; resolved by the handler's stacking rule.
+- `DefinitionId` — ссылка на сохранённое определение эффекта.
+- `EffectType` — копируется из определения в момент активации.
+- `RemainingRounds` — уменьшается после каждого применимого раунда.
+- `Parameters` — скопированные из определения величина, min/max, шанс, тип условия, тип цели.
+- `StackCount` — для объединённых однотипных эффектов; разрешается правилом стекования обработчика.
 
-### Fight Lifecycle Hooks
+### Хуки жизненного цикла боя
 
-Phase names mirror `docs/domain/combat.md` domain phases:
+Названия фаз соответствуют доменным фазам из `docs/domain/combat.md`:
 
-- `OnRoundStart` — normalize active effects; apply resource modification effects (e.g. heal potion).
-- `OnStrikeClaimed` — apply ability override effects (Phase B).
-- `OnPowerModifiers` — apply strike power bonus effects (Phase E).
-- `OnRoundEnd` — apply end-of-round hooks and decrement remaining rounds (Phase G).
-- Expired effects are removed at the beginning of the next round (`OnRoundStart` normalization step), so an effect that reached `0` this round is still visible in the produced state snapshot.
+- `OnRoundStart` — нормализация активных эффектов; применение эффектов изменения ресурса (например, зелье лечения).
+- `OnStrikeClaimed` — применение эффектов переопределения способности (Фаза B).
+- `OnPowerModifiers` — применение эффектов бонуса силы удара (Фаза E).
+- `OnRoundEnd` — применение хуков конца раунда и уменьшение оставшихся раундов (Фаза G).
+- Истёкшие эффекты удаляются в начале следующего раунда (шаг нормализации `OnRoundStart`), поэтому эффект, достигший `0` в этом раунде, всё ещё виден в сформированном снимке состояния.
 
-### Handler Registry
+### Реестр обработчиков
 
-- Each `EffectType` maps to one `IEffectHandler` implementation.
-- Handlers are stateless; all state lives in the `ActiveEffect` instance.
-- The handler for a type is responsible for its own stacking rule when a new activation arrives.
+- Каждый `EffectType` сопоставлен одной реализации `IEffectHandler`.
+- Обработчики без состояния; всё состояние живёт в экземпляре `ActiveEffect`.
+- Обработчик для типа сам отвечает за своё правило стекования при поступлении новой активации.
 
-## Implementation Phases
+## Фазы реализации
 
-### Phase 1 — Persisted Definitions And Seed Data ✅
+### Фаза 1 — Сохранённые определения и seed-данные ✅
 
-- Effect definition schema persisted in DAL; fields include Type, DurationRounds, Magnitude, MinValue, MaxValue, ChancePercent, ConditionType, TargetType, Priority, NextEffectDefinitionId.
-- Potion seed baseline: heal 60 (100% chance), ability override to max for 3 rounds, strike power bonus +2 for 3 rounds.
+- Схема определения эффекта сохранена в DAL; поля включают Type, DurationRounds, Magnitude, MinValue, MaxValue, ChancePercent, ConditionType, TargetType, Priority, NextEffectDefinitionId.
+- Базовый seed зелий: лечение 60 (100% шанс), переопределение способности до максимума на 3 раунда, бонус силы удара +2 на 3 раунда.
 
-### Phase 2 — Domain Rules Finalization ✅
+### Фаза 2 — Финализация доменных правил ✅
 
-- ✅ In-fight item usage rules documented: timing, passive mode, draw condition when passive and opponent does not hit (see `docs/domain/combat.md` Phases A–G and `docs/domain/items.md` Usable Items section).
-- ✅ Stacking semantics per effect type finalized (see `docs/domain/effects.md`).
-- ✅ Outcome: `docs/domain/items.md` and `docs/domain/combat.md` and `docs/domain/effects.md` reflect complete rules with no remaining ambiguity.
+- ✅ Задокументированы правила использования предмета в бою: тайминг, пассивный режим, условие ничьей, когда герой пассивен, а противник не попадает (см. `docs/domain/combat.md` Фазы A–G и раздел «Расходуемые предметы» в `docs/domain/items.md`).
+- ✅ Финализирована семантика стекования по типу эффекта (см. `docs/domain/effects.md`).
+- ✅ Итог: `docs/domain/items.md`, `docs/domain/combat.md` и `docs/domain/effects.md` отражают полные правила без оставшихся неоднозначностей.
 
-### Phase 3 — Architecture Contract ✅
+### Фаза 3 — Архитектурный контракт ✅
 
-- ✅ Define `ActiveEffect` in `FastArena.Core/Domain/Effects/ActiveEffect.cs`.
-- ✅ Align handlers to operate directly on fight state values, avoiding ad-hoc context objects.
-- ✅ Define `IEffectHandler` interface in `FastArena.Core/Interfaces/Effects/IEffectHandler.cs` with hooks: `OnRoundStart`, `OnStrikeClaimed`, `OnPowerModifiers`, `OnRoundEnd`, `Stack()`.
-- ✅ Define `EffectHandlerRegistry` in `FastArena.Core/Services/Effects/EffectHandlerRegistry.cs` (maps `EffectType` → `IEffectHandler`).
+- ✅ Определить `ActiveEffect` в `FastArena.Core/Domain/Effects/ActiveEffect.cs`.
+- ✅ Согласовать обработчики так, чтобы они работали напрямую со значениями состояния боя, избегая специальных контекстных объектов.
+- ✅ Определить интерфейс `IEffectHandler` в `FastArena.Core/Interfaces/Effects/IEffectHandler.cs` с хуками: `OnRoundStart`, `OnStrikeClaimed`, `OnPowerModifiers`, `OnRoundEnd`, `Stack()`.
+- ✅ Определить `EffectHandlerRegistry` в `FastArena.Core/Services/Effects/EffectHandlerRegistry.cs` (сопоставление `EffectType` → `IEffectHandler`).
 
-### Phase 4 — Fight Service Wiring ✅
+### Фаза 4 — Подключение к сервису боя ✅
 
-- ✅ Instantiate `ActiveEffect` when hero chooses item use at Phase A.
-- ✅ Dispatch hooks through registry at the correct fight phases.
-- ✅ Remove pocket item on use; update inventory.
-- ✅ Decrement effect durations at round end and cleanup expired effects at the start of the next round.
+- ✅ Создавать экземпляр `ActiveEffect`, когда герой выбирает использование предмета на Фазе A.
+- ✅ Диспетчеризовать хуки через реестр на правильных фазах боя.
+- ✅ Удалять предмет из кармана при использовании; обновлять инвентарь.
+- ✅ Уменьшать длительности эффектов в конце раунда и очищать истёкшие эффекты в начале следующего раунда.
 
-### Phase 6 — Backend Test Coverage ✅
+### Фаза 6 — Покрытие backend-тестами ✅
 
-- ✅ Unit tests grouped under `backend/src/FastArena.Core.Tests/Unit/`:
-	- `Effects/` — handlers and handler registry behavior.
-	- `Services/MonsterFight/` — lifecycle semantics inside fight service helpers.
-- ✅ Service-level integration scenario grouped under `backend/src/FastArena.Core.Tests/Integration/Services/MonsterFight/`.
-- ✅ Current suite validates item-use state transition, pocket consumption, effect activation, and lifecycle invariants.
+- ✅ Юнит-тесты сгруппированы в `backend/src/FastArena.Core.Tests/Unit/`:
+	- `Effects/` — поведение обработчиков и реестра обработчиков.
+	- `Services/MonsterFight/` — семантика жизненного цикла внутри хелперов сервиса боя.
+- ✅ Сценарий интеграции на уровне сервиса сгруппирован в `backend/src/FastArena.Core.Tests/Integration/Services/MonsterFight/`.
+- ✅ Текущий набор тестов проверяет переход состояния при использовании предмета, расход кармана, активацию эффекта и инварианты жизненного цикла.
 
-### Phase 5 — Frontend Integration ⏳
+### Фаза 5 — Интеграция с frontend ⏳
 
-- Extend fight round DTO with active effect state (type, remaining rounds) visible to UI.
-- Extend active effect DTO with a temporary `imageUrl` field for frontend rendering, resolved by backend from the current effect source.
-- Update frontend to show used item and active effect indicators.
-- Current icon strategy is temporary: active effect indicators use item-source icons.
-- Future rework required: move to dedicated effect icons, or derive icon resolution from effect source/type through an explicit resolver policy.
+- Расширить DTO раунда боя состоянием активных эффектов (тип, оставшиеся раунды), видимым для UI.
+- Расширить DTO активного эффекта временным полем `imageUrl` для отрисовки на frontend, разрешаемым backend из текущего источника эффекта.
+- Обновить frontend для отображения использованного предмета и индикаторов активных эффектов.
+- Текущая стратегия иконок временная: индикаторы активных эффектов используют иконки источника-предмета.
+- В будущем потребуется переработка: переход на выделенные иконки эффектов или разрешение иконки из источника/типа эффекта через явную политику-резолвер.
 
-## Rejected Paths
+## Отклонённые варианты
 
-- **Store operation type in effect definition storage:** Would couple the storage schema to runtime logic. Rejected because handlers need full control over how an effect type is applied. See `docs/decisions.md` → "Effect Application Phase And Operation Type Are Runtime Concerns".
-- **Persist `ActiveEffect` as a dedicated DAL table:** Adds migration complexity for MVP with little benefit. Preferred alternative: serialize into fight session state or reconstruct from fight event log.
+- **Хранить тип операции в хранилище определения эффекта:** связало бы схему хранения с логикой рантайма. Отклонено, поскольку обработчикам нужен полный контроль над тем, как применяется тип эффекта. См. `docs/decisions.md` → «Фаза применения эффекта и тип операции — забота рантайма».
+- **Хранить `ActiveEffect` как отдельную таблицу DAL:** добавляет сложность миграций для MVP при малой выгоде. Предпочтительная альтернатива: сериализация в состояние сессии боя или восстановление из журнала событий боя.
 
-## Change Policy
+## Политика изменений
 
-Update phases as implementation progresses. Move resolved open questions to `docs/decisions.md` once a path is chosen.
+Обновлять фазы по мере продвижения реализации. Переносить разрешённые открытые вопросы в `docs/decisions.md`, как только выбран путь.

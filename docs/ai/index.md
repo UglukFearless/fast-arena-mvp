@@ -1,68 +1,68 @@
-# AI Routing Index
+# Индекс маршрутизации для AI
 
-## Purpose
+## Назначение
 
-This file defines what an AI agent should read first, depending on task type.
-Canonical business knowledge lives in human documentation under `docs/`.
+Этот файл определяет, что AI-агенту следует читать в первую очередь, в зависимости от типа задачи.
+Каноническое знание о предметной области находится в документации для людей под `docs/`.
 
-## Reading Order By Task
+## Порядок чтения по типу задачи
 
-### Domain Or Business Rules
+### Предметная область или бизнес-правила
 
-1. Read `docs/ai/pitfalls.md` first.
-2. Read `docs/domain.md` (index) and the relevant sub-page(s) under `docs/domain/`.
-3. If implementation details are needed, read `docs/architecture.md`.
-4. For near-term execution context, read `docs/todo.md`.
-5. If domain information is missing or ambiguous, follow `docs/ai/domain-gaps.md`.
+1. Сначала прочитать `docs/ai/pitfalls.md`.
+2. Прочитать `docs/domain.md` (индекс) и соответствующую подстраницу(ы) в `docs/domain/`.
+3. Если нужны детали реализации, прочитать `docs/architecture.md`.
+4. Для контекста ближайших задач прочитать `docs/todo.md`.
+5. Если информация о предметной области отсутствует или неоднозначна, следовать `docs/ai/domain-gaps.md`.
 
-### Feature Implementation
+### Реализация фичи
 
-1. Read `docs/ai/pitfalls.md` first.
-2. Read `docs/domain.md` (index) and the relevant sub-page(s) under `docs/domain/`.
-3. Read `docs/architecture.md`.
-4. Read `docs/code-style.md`.
-5. Read `docs/todo.md`.
-6. Read `docs/decisions.md` for any prior decisions that affect this feature.
-7. If an implementation note exists, read `docs/features/{feature-name}.md`.
-8. If direction trade-offs matter, read `docs/roadmap.md`.
+1. Сначала прочитать `docs/ai/pitfalls.md`.
+2. Прочитать `docs/domain.md` (индекс) и соответствующую подстраницу(ы) в `docs/domain/`.
+3. Прочитать `docs/architecture.md`.
+4. Прочитать `docs/code-style.md`.
+5. Прочитать `docs/todo.md`.
+6. Прочитать `docs/decisions.md` на предмет ранее принятых решений, влияющих на эту фичу.
+7. Если существует заметка по реализации, прочитать `docs/features/{feature-name}.md`.
+8. Если важны компромиссы по направлению развития, прочитать `docs/roadmap.md`.
 
-### Planning And Prioritization
+### Планирование и приоритизация
 
-1. Read `docs/ai/pitfalls.md` first.
-2. Read `docs/roadmap.md`.
-3. Read `docs/todo.md`.
-4. Read `docs/domain.md` to validate product meaning.
+1. Сначала прочитать `docs/ai/pitfalls.md`.
+2. Прочитать `docs/roadmap.md`.
+3. Прочитать `docs/todo.md`.
+4. Прочитать `docs/domain.md`, чтобы сверить продуктовый смысл.
 
-### Documentation Updates
+### Обновление документации
 
-1. Read `docs/ai/pitfalls.md` first.
-2. Read `docs/ai/doc-writing-boundaries.md`.
-3. Read target canonical doc (`docs/domain.md`, `docs/todo.md`, `docs/architecture.md`, etc.).
-4. Keep updates proportional to the target document scope.
+1. Сначала прочитать `docs/ai/pitfalls.md`.
+2. Прочитать `docs/ai/doc-writing-boundaries.md`.
+3. Прочитать целевой канонический документ (`docs/domain.md`, `docs/todo.md`, `docs/architecture.md` и т.д.).
+4. Держать объём обновлений соразмерным охвату целевого документа.
 
-### Decisions And Rationale
+### Решения и их обоснование
 
-1. Read `docs/decisions.md` for the log of tactical technical decisions.
-2. If the decision is feature-specific, also read `docs/features/{feature-name}.md` for full context.
+1. Прочитать `docs/decisions.md` — журнал тактических технических решений.
+2. Если решение относится к конкретной фиче, также прочитать `docs/features/{feature-name}.md` для полного контекста.
 
-### Environment And Runtime Commands
+### Окружение и команды запуска
 
-1. Read `docs/ai/commands.md`.
-2. If needed, confirm top-level context in `README.md`.
+1. Прочитать `docs/ai/commands.md`.
+2. При необходимости уточнить общий контекст верхнего уровня в `README.md`.
 
-## Working Rules
+## Рабочие правила
 
-- Treat `docs/domain.md` as source of truth for product semantics.
-- Keep `docs/domain.md` and `docs/domain/*` business-only; put implementation details into `docs/architecture.md`.
-- Treat `docs/code-style.md` as source of truth for project-specific style rules.
-- Treat `docs/ai/doc-writing-boundaries.md` as source of truth for documentation granularity and chat boundaries.
-- Implementation plans and phased steps live in `docs/features/`. Create one note per feature before coding starts.
-- Tactical decisions live in `docs/decisions.md`. Add an entry when a non-obvious technical choice is made.
-- Flow: domain rules → decisions → feature note → code.
-- Do not invent business rules that are absent from docs.
-- If docs are ambiguous, ask for clarification before changing behavior.
-- Keep outputs consistent with current MVP scope.
+- Считать `docs/domain.md` источником истины по продуктовой семантике.
+- Держать `docs/domain.md` и `docs/domain/*` только про бизнес-логику; детали реализации выносить в `docs/architecture.md`.
+- Считать `docs/code-style.md` источником истины по стилевым правилам проекта.
+- Считать `docs/ai/doc-writing-boundaries.md` источником истины по гранулярности документации и границам обсуждений.
+- Планы реализации и поэтапные шаги живут в `docs/features/`. Перед началом кодирования создавать одну заметку на фичу.
+- Тактические решения живут в `docs/decisions.md`. Добавлять запись, когда принят неочевидный технический выбор.
+- Поток: правила предметной области → решения → заметка по фиче → код.
+- Не придумывать бизнес-правила, отсутствующие в документации.
+- Если документация неоднозначна, запрашивать уточнение до изменения поведения.
+- Держать результат в рамках текущего объёма MVP.
 
-## Maintenance
+## Поддержка
 
-Update this file when documentation structure changes.
+Обновлять этот файл при изменении структуры документации.

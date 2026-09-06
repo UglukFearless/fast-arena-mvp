@@ -1,47 +1,47 @@
-# Roadmap
+# Дорожная карта
 
-## Purpose
+## Назначение
 
-This document tracks long-term direction. It is intentionally concise and does not duplicate sprint tasks.
+Этот документ отслеживает долгосрочное направление. Он намеренно лаконичен и не дублирует спринтовые задачи.
 
-## Current State
+## Текущее состояние
 
-MVP in active development. Core hero progression loop is operational: hero creation, monster fights, inventory, shop, item effects in combat, monster item rewards.
+MVP в активной разработке. Основной цикл прогрессии героя работает: создание героя, бои с монстрами, инвентарь, магазин, эффекты предметов в бою, награды предметами с монстров.
 
-## Goal
+## Цель
 
-Build a complete and balanced hero progression loop around combat: meaningful equipment choices, varied combat outcomes, long-term hero growth.
+Построить полный и сбалансированный цикл прогрессии героя вокруг боя: значимый выбор экипировки, разнообразные исходы боя, долгосрочный рост героя.
 
-## General Rules
+## Общие правила
 
-- Keep this file strategic, not operational.
-- Put short-term execution tasks in `docs/todo.md`.
-- Update this file only when direction changes.
+- Держать этот файл стратегическим, а не операционным.
+- Краткосрочные исполнительные задачи размещать в `docs/todo.md`.
+- Обновлять этот файл только при изменении направления.
 
-## Strategic Initiatives
+## Стратегические инициативы
 
-### Initiative 1: Equipment Combat Influence
+### Инициатива 1: Влияние экипировки на бой
 
-- Description: Equipment should meaningfully affect combat outcomes. Weapons and shields are already integrated; armor system is the next milestone.
-- Status: `in-progress`
-- Target window: near-term
-- Notes: Weapon and shield flow is implemented end-to-end. Next focus: design and implement armor system across backend and frontend while keeping equipment behavior coherent. See `docs/features/weapon-usage.md`.
+- Описание: Экипировка должна значимо влиять на исход боя. Оружие и щиты уже интегрированы; система брони — следующая веха.
+- Статус: `in-progress`
+- Целевой горизонт: ближайший
+- Заметки: Поток оружия и щита реализован от начала до конца. Следующий фокус: спроектировать и реализовать систему брони на backend и frontend, сохраняя согласованность поведения экипировки. См. `docs/features/weapon-usage.md`.
 
-### Initiative 2: Balanced Economy and Progression
+### Инициатива 2: Сбалансированная экономика и прогрессия
 
-- Description: Gold income, shop prices, and item costs should form a coherent progression curve. Heroes should feel growth over multiple fights.
-- Status: `idea`
-- Target window: mid-term
-- Notes: Depends on having meaningful items to buy (Initiative 1).
+- Описание: Доход золота, цены в магазине и стоимость предметов должны формировать согласованную кривую прогрессии. Герои должны ощущать рост на протяжении нескольких боёв.
+- Статус: `idea`
+- Целевой горизонт: среднесрочный
+- Заметки: Зависит от наличия значимых предметов для покупки (Инициатива 1).
 
-### Initiative 3: Combat Depth and Variety
+### Инициатива 3: Глубина и разнообразие боя
 
-- Description: Introduce hit zone maps per creature type, probabilistic weapon effects (bleeding, poison), and potentially multi-action combat turns.
-- Status: `idea`
-- Target window: long-term
-- Notes: Foundation requires Initiative 1 to be stable.
+- Описание: Ввести карты зон попадания для каждого типа существ, вероятностные эффекты оружия (кровотечение, отравление) и, возможно, многодейственные боевые ходы.
+- Статус: `idea`
+- Целевой горизонт: долгосрочный
+- Заметки: Основа требует, чтобы Инициатива 1 была стабильной.
 
-## Status Model
+## Модель статусов
 
 - `idea`
 - `planned`
@@ -49,6 +49,6 @@ Build a complete and balanced hero progression loop around combat: meaningful eq
 - `done`
 - `dropped`
 
-## Change Policy
+## Политика изменений
 
-Update this file when project priorities or major initiatives change.
+Обновлять этот файл при изменении приоритетов проекта или крупных инициатив.

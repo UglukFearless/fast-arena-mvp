@@ -1,27 +1,27 @@
-# AI Pitfalls
+# Типичные ошибки для AI
 
-## Purpose
+## Назначение
 
-This file captures frequent mistakes and constraints relevant to this project.
+Этот файл фиксирует частые ошибки и ограничения, актуальные для этого проекта.
 
-## Known Pitfalls
+## Известные подводные камни
 
-- **Always read `docs/ai/pitfalls.md` at the start of any task.** Known constraints live here; skipping this causes repeated mistakes.
-- Do not treat roadmap items as current implementation facts.
-- Do not infer gameplay mechanics beyond `docs/domain.md`.
-- Mapping depth can affect nested response fields; verify related mappings when changing DTO shaping.
-- Keep MVP assumptions explicit; future ideas are not current behavior.
-- **Do NOT generate, run, or commit EF migrations.** Migrations are disabled in MVP. Schema changes go directly in `ApplicationContext.OnModelCreating()`. See `docs/architecture.md` for the MVP migration policy.
-- Schema changes are applied by manually recreating the database locally. Do not auto-drop, auto-create, or auto-reset the database.
-- Domain docs (`docs/domain/*`) must stay business-only: do not include implementation identifiers (enum names, DTO/type names, field/property names).
+- **Всегда читать `docs/ai/pitfalls.md` в начале любой задачи.** Здесь собраны известные ограничения; пропуск этого шага приводит к повторяющимся ошибкам.
+- Не считать пункты roadmap текущими фактами реализации.
+- Не додумывать игровые механики сверх того, что описано в `docs/domain.md`.
+- Глубина маппинга может влиять на вложенные поля ответа; при изменении формы DTO проверять связанные маппинги.
+- Держать допущения MVP явными; идеи на будущее — не текущее поведение.
+- **НЕ генерировать, не запускать и не коммитить EF-миграции.** Миграции отключены в MVP. Изменения схемы вносятся напрямую в `ApplicationContext.OnModelCreating()`. См. `docs/architecture.md` — политика миграций для MVP.
+- Изменения схемы применяются вручную, через пересоздание базы данных локально. Не выполнять автоматический drop, create или reset базы данных.
+- Документация предметной области (`docs/domain/*`) должна оставаться только про бизнес-логику: не включать идентификаторы реализации (имена enum, имена DTO/типов, имена полей/свойств).
 
-## Documentation Boundaries
+## Границы документации
 
-- Single source of truth for documentation granularity and chat boundaries: `docs/ai/doc-writing-boundaries.md`.
-- `docs/ai/pitfalls.md` should not duplicate those rules.
+- Единственный источник истины по гранулярности документации и границам обсуждений: `docs/ai/doc-writing-boundaries.md`.
+- `docs/ai/pitfalls.md` не должен дублировать эти правила.
 
-- **Work is done step-by-step; each meaningful step requires explicit user acceptance before moving to the next.** Do not proceed to code changes after documentation, do not proceed to further implementation after a prior batch — wait for the user to review and accept each deliverable before continuing.
+- **Работа ведётся пошагово; каждый значимый шаг требует явного подтверждения пользователя перед переходом к следующему.** Не переходить к изменениям кода после документации, не переходить к дальнейшей реализации после предыдущей партии работы — ждать, пока пользователь просмотрит и примет каждый результат, прежде чем продолжать.
 
-## Maintenance
+## Поддержка
 
-Add short entries after real incidents, regressions, or repeated confusion.
+Добавлять короткие записи после реальных инцидентов, регрессий или повторяющейся путаницы.

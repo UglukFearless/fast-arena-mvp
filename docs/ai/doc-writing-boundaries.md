@@ -1,69 +1,69 @@
-# Documentation Writing Boundaries
+# Границы ведения документации
 
-## Purpose
+## Назначение
 
-This file defines strict boundaries for updating project docs during implementation chats.
+Этот файл задаёт строгие границы для обновления документации проекта во время рабочих чатов по реализации.
 
-## Core Rules
+## Основные правила
 
-- Keep completed tasks concise. One short result line is preferred.
-- Do not add technical implementation details into completed todo items.
-- Detailed planning for upcoming tasks is allowed when it helps future implementation.
-- High-level planning in an old chat is allowed.
-- Detailed planning of a new feature in an old chat should be moved to a new chat.
+- Держать завершённые задачи лаконичными. Предпочтительна одна короткая строка результата.
+- Не добавлять технические детали реализации в завершённые пункты todo.
+- Подробное планирование предстоящих задач допустимо, если оно помогает будущей реализации.
+- Планирование на высоком уровне в старом чате допустимо.
+- Подробное планирование новой фичи в старом чате следует переносить в новый чат.
 
-## Non-Negotiable Separation
+## Не подлежащее обсуждению разделение
 
-- `docs/domain.md` and `docs/domain/*` are for business meaning only.
-- Domain docs must not describe code structures, storage schemas, DTO fields, handlers, event pipelines, or other technical implementation choices.
-- If a note explains "how it is implemented", it belongs outside domain docs.
+- `docs/domain.md` и `docs/domain/*` — только про бизнес-смысл.
+- Документация предметной области не должна описывать структуры кода, схемы хранения, поля DTO, обработчики, событийные пайплайны или другие технические решения по реализации.
+- Если заметка объясняет «как это реализовано» — ей не место в документации предметной области.
 
-## By Document Type
+## По типам документов
 
 ### `docs/todo.md`
 
-- Completed items: concise outcomes only.
-- Avoid post-factum technical narratives.
-- Planned items may include moderate detail if it is actionable.
+- Завершённые пункты: только краткие итоги.
+- Избегать пост-фактум технических повествований.
+- Запланированные пункты могут содержать умеренную детализацию, если она применима на практике.
 
 ### `docs/domain.md`
 
-- Keep only product/domain meaning and business rules.
-- Do not include UI structure, technical steps, code-level implementation notes, or chat transcript details.
+- Держать только продуктовый/доменный смысл и бизнес-правила.
+- Не включать структуру UI, технические шаги, заметки уровня кода или детали из переписки в чате.
 
 ### `docs/domain/*`
 
-- Apply the same boundary as `docs/domain.md`: business rules only.
-- Allowed: gameplay semantics, domain terms, constraints, and expected outcomes.
-- Not allowed: class names, table/field schemas, API contract details, mapper/storage notes, runtime pipeline internals.
+- Применять ту же границу, что и для `docs/domain.md`: только бизнес-правила.
+- Допустимо: игровая семантика, доменные термины, ограничения и ожидаемые результаты.
+- Недопустимо: имена классов, схемы таблиц/полей, детали API-контракта, заметки о мапперах/хранилище, внутренности рантайм-пайплайна.
 
 ### `docs/architecture.md`
 
-- Primary place for implementation-level notes and current technical state.
-- Record where data is stored, how modules interact, and staged implementation status.
+- Основное место для заметок уровня реализации и текущего технического состояния.
+- Фиксировать, где хранятся данные, как взаимодействуют модули, и статус поэтапной реализации.
 
 ### `docs/decisions.md`
 
-- For tactical technical choices where trade-offs exist or the choice could be revisited.
-- Each entry: decision, rationale (1–2 lines), scope, status.
-- Not for: business rules, code style, or minor implementation details that affect only one file.
+- Для тактических технических решений, где есть компромиссы или выбор может быть пересмотрен.
+- Каждая запись: решение, обоснование (1–2 строки), область применения, статус.
+- Не для: бизнес-правил, стиля кода или мелких деталей реализации, затрагивающих только один файл.
 
 ### `docs/features/*.md`
 
-- One file per feature. Created before coding starts; updated as implementation progresses.
-- Contains: acceptance criteria, domain references, architecture contract, phased implementation steps, rejected paths, open questions.
-- Reference domain docs; do not duplicate their content.
-- Not for: business rules (those belong in `docs/domain/`) or structural module descriptions (those belong in `docs/architecture.md`).
+- Один файл на фичу. Создаётся до начала кодирования; обновляется по ходу реализации.
+- Содержит: критерии приёмки, ссылки на доменную документацию, архитектурный контракт, поэтапные шаги реализации, отклонённые варианты, открытые вопросы.
+- Ссылаться на доменную документацию; не дублировать её содержимое.
+- Не для: бизнес-правил (им место в `docs/domain/`) или описаний структуры модулей (им место в `docs/architecture.md`).
 
 ### `docs/ai/*`
 
-- Use for agent process rules, writing boundaries, and chat workflow constraints.
-- Do not duplicate business rules from domain docs unless needed as a short pointer.
+- Использовать для правил процесса агента, границ ведения документации и ограничений рабочего процесса в чате.
+- Не дублировать бизнес-правила из доменной документации, кроме случаев, когда нужна короткая ссылка.
 
-## Escalation Rule
+## Правило эскалации
 
-If a documentation update starts expanding into architecture design or detailed implementation planning for a new feature line, stop and continue in a new chat.
+Если обновление документации начинает перерастать в проектирование архитектуры или подробное планирование новой линии фич — остановиться и продолжить в новом чате.
 
-## Maintenance
+## Поддержка
 
-Update this file when recurring documentation mistakes are identified.
+Обновлять этот файл при выявлении повторяющихся ошибок в ведении документации.

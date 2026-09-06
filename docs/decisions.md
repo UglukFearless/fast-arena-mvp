@@ -1,75 +1,75 @@
-# Technical Decisions
+# Технические решения
 
-## Purpose
+## Назначение
 
-Log of tactical technical decisions: what was chosen and why.
+Журнал тактических технических решений: что было выбрано и почему.
 
-Entries are short (4–5 lines). Business rules stay in `docs/domain/`. Architecture structure stays in `docs/architecture.md`. This file records the rationale behind choices that affect multiple modules or that could plausibly be revisited.
+Записи короткие (4–5 строк). Бизнес-правила остаются в `docs/domain/`. Структура архитектуры остаётся в `docs/architecture.md`. Этот файл фиксирует обоснование выборов, затрагивающих несколько модулей или которые могут быть пересмотрены.
 
-## Decisions
+## Решения
 
-### Effect Application Phase And Operation Type Are Runtime Concerns
+### Фаза применения эффекта и тип операции — забота рантайма
 
-- **Decision:** Application phase and operation type are not stored in effect definition storage. They are resolved by typed runtime handlers.
-- **Why:** Effect definitions are data; logic belongs in code. Persisting operation type would couple the storage schema to runtime behavior and make handler evolution brittle.
-- **Applies to:** Item effects, potions, future active abilities.
-- **Status:** Active.
+- **Решение:** Фаза применения и тип операции не хранятся в хранилище определений эффекта. Они разрешаются типизированными рантайм-обработчиками.
+- **Почему:** Определения эффектов — это данные; логика принадлежит коду. Сохранение типа операции связало бы схему хранения с поведением рантайма и сделало бы развитие обработчиков хрупким.
+- **Применяется к:** Эффектам предметов, зельям, будущим активным способностям.
+- **Статус:** Активно.
 
-### Hero DAL Mapping Depth For Fight History
+### Глубина DAL-маппинга героя для истории боёв
 
-- **Decision:** When a Hero response needs nested fight history, use deep mapping (`MonsterFightProfile.Map(..., true)`). Default shallow mapping leaves `Monster.Portrait` null.
-- **Why:** EF Core lazy loading is not used; includes must be explicit. Deep mapping is opt-in to avoid over-fetching in contexts that do not need full fight history.
-- **Applies to:** HeroInfo endpoints, statistics responses.
-- **Status:** Active.
+- **Решение:** Когда ответу Hero нужна вложенная история боёв, использовать глубокий маппинг (`MonsterFightProfile.Map(..., true)`). Маппинг по умолчанию (неглубокий) оставляет `Monster.Portrait` пустым.
+- **Почему:** Ленивая загрузка EF Core не используется; включения (includes) должны быть явными. Глубокий маппинг — опциональный, чтобы избежать избыточной выборки данных в контекстах, где полная история боёв не нужна.
+- **Применяется к:** Эндпоинтам HeroInfo, ответам статистики.
+- **Статус:** Активно.
 
-## Format
+## Формат
 
-Each entry follows this structure:
+Каждая запись следует такой структуре:
 
 ```
-### Short Title (noun phrase)
-- **Decision:** What was chosen.
-- **Why:** Rationale (1–2 lines).
-- **Applies to:** Affected modules or use cases.
+### Краткий заголовок (именная фраза)
+- **Decision:** Что было выбрано.
+- **Why:** Обоснование (1–2 строки).
+- **Applies to:** Затронутые модули или сценарии использования.
 - **Status:** active | pending | superseded.
 ```
 
-### ActiveEffect State Lives In Fight State, Server-Authoritative
+### Состояние ActiveEffect живёт в состоянии боя, сервер — источник истины
 
-- **Decision:** `ActiveEffect` instances are serialized into fight session state on the server. Each round response returns the current active effect snapshot to the frontend. No separate client-side state mechanism.
-- **Why:** The server is the single source of truth for fight state. Introducing a parallel client-side or session-cache mechanism would create sync risks. Fight state already travels with each round response.
-- **Applies to:** Fight service, fight round DTO, frontend fight store.
-- **Status:** Active.
+- **Решение:** Экземпляры `ActiveEffect` сериализуются в состояние сессии боя на сервере. Каждый ответ раунда возвращает фронтенду текущий снимок активных эффектов. Отдельного механизма клиентского состояния нет.
+- **Почему:** Сервер — единственный источник истины для состояния боя. Введение параллельного клиентского или сессионного кэш-механизма создало бы риски рассинхронизации. Состояние боя уже передаётся с каждым ответом раунда.
+- **Применяется к:** Сервису боя, DTO раунда боя, frontend-хранилищу боя.
+- **Статус:** Активно.
 
-### Effect Stacking Normalization Happens At Round Start
+### Нормализация стекования эффектов происходит в начале раунда
 
-- **Decision:** Stacking normalization runs at the start of each round (Phase A), before any hook fires.
-- **Why:** Ensures all effects are in a consistent merged state before initiative, ability calculation, and damage hooks evaluate them. Per-type stacking rules run in this phase.
-- **Applies to:** Fight service hook dispatch, `IEffectHandler` stacking responsibility.
-- **Status:** Active.
+- **Решение:** Нормализация стекования выполняется в начале каждого раунда (Фаза A), до срабатывания любых хуков.
+- **Почему:** Гарантирует, что все эффекты находятся в согласованном объединённом состоянии до того, как их оценят хуки инициативы, расчёта способности и урона. Правила стекования по типу выполняются на этой фазе.
+- **Применяется к:** Диспетчеризации хуков сервиса боя, ответственности `IEffectHandler` за стекование.
+- **Статус:** Активно.
 
-### Equipment Effects Use The Shared Effect Pipeline With Persistent Lifetime
+### Эффекты экипировки используют общий пайплайн эффектов с постоянным временем жизни
 
-- **Decision:** Weapon and shield combat modifiers are implemented as persistent effects inside the existing effect pipeline, not as a separate modifier system.
-- **Why:** Reuses handler registry, hook dispatch, and fight state structure already in place. A parallel system would duplicate lifecycle and ordering logic for no gain.
-- **Applies to:** `MonsterFightService`, `ActiveEffect`, `IEffectHandler`, fight round DTO, weapon and shield seed data.
-- **Status:** Active.
+- **Решение:** Боевые модификаторы оружия и щита реализованы как постоянные эффекты внутри существующего пайплайна эффектов, а не как отдельная система модификаторов.
+- **Почему:** Переиспользует уже существующие реестр обработчиков, диспетчеризацию хуков и структуру состояния боя. Параллельная система дублировала бы логику жизненного цикла и порядка выполнения без какой-либо выгоды.
+- **Применяется к:** `MonsterFightService`, `ActiveEffect`, `IEffectHandler`, DTO раунда боя, seed-данным оружия и щита.
+- **Статус:** Активно.
 
-### ActiveEffect Extended With LifetimeType And SourceType
+### ActiveEffect расширен LifetimeType и SourceType
 
-### Equipment Effects Are Not Displayed In Fight UI
+### Эффекты экипировки не отображаются в UI боя
 
-- **Decision:** Effects with `SourceType = Equipment` are filtered from the active effects list in the fight round response. Equipment influence is expressed through round outcome values, not through effect indicators.
-- **Why:** Persistent equipment effects are always active and carry no per-round state worth surfacing to the player. Effect indicators are meaningful for consumables with limited duration. If a specific equipment item needs UI representation in the future, it will receive a dedicated `SourceType` value.
-- **Applies to:** Fight round DTO mapping, frontend active effect rendering.
-- **Status:** Active.
+- **Решение:** Эффекты с `SourceType = Equipment` отфильтровываются из списка активных эффектов в ответе раунда боя. Влияние экипировки выражается через значения исхода раунда, а не через индикаторы эффектов.
+- **Почему:** Постоянные эффекты экипировки всегда активны и не несут пораундового состояния, которое стоило бы показывать игроку. Индикаторы эффектов имеют смысл для расходуемых предметов с ограниченной длительностью. Если конкретному предмету экипировки в будущем понадобится отображение в UI, для него будет введено отдельное значение `SourceType`.
+- **Применяется к:** Маппингу DTO раунда боя, отрисовке активных эффектов на frontend.
+- **Статус:** Активно.
 
-- **Decision:** `ActiveEffect` gains `LifetimeType` (`RoundBased` | `Persistent`) and `SourceType` (`Potion` | `Equipment` | `Skill`).
-- **Why:** Decrement and cleanup logic must distinguish persistent equipment effects from expiring consumable effects. Source type enables correct initialization, ordering, and future UI attribution.
-- **Applies to:** `ActiveEffect`, fight service decrement/cleanup logic, fight round DTO.
-- **Status:** Active.
+- **Решение:** `ActiveEffect` получает поля `LifetimeType` (`RoundBased` | `Persistent`) и `SourceType` (`Potion` | `Equipment` | `Skill`).
+- **Почему:** Логика уменьшения и очистки должна различать постоянные эффекты экипировки и истекающие эффекты расходуемых предметов. Тип источника обеспечивает корректную инициализацию, порядок и будущую атрибуцию в UI.
+- **Применяется к:** `ActiveEffect`, логике уменьшения/очистки сервиса боя, DTO раунда боя.
+- **Статус:** Активно.
 
-## Change Policy
+## Политика изменений
 
-Add an entry when a non-obvious technical choice is made that affects multiple modules or could be revisited.
-Update status to `superseded` when a decision is reversed; do not delete the entry until the superseding decision is stable.
+Добавлять запись, когда принимается неочевидный технический выбор, затрагивающий несколько модулей или который может быть пересмотрен.
+Обновлять статус на `superseded`, когда решение отменяется; не удалять запись, пока замещающее решение не станет стабильным.

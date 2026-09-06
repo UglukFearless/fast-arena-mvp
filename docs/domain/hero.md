@@ -1,29 +1,29 @@
-# Hero
+# Герой
 
-## Entity
+## Сущность
 
-- A player-controlled character.
-- Has a portrait, characteristics, and progression state.
-- Participates in fights and accumulates results.
+- Персонаж, управляемый игроком.
+- Имеет портрет, характеристики и состояние прогрессии.
+- Участвует в боях и накапливает результаты.
 
-## Hero Combat Characteristics
+## Боевые характеристики героя
 
-- The hero currently has Health Points (HP).
-- The hero also has Ability.
-- At the current MVP stage, Ability is derived from current HP by integer division.
-- Formula: `Ability = floor(currentHP / 10)`.
-- This means an exhausted (damaged) hero becomes progressively less effective in combat.
+- В текущий момент у героя есть очки здоровья (HP).
+- У героя также есть Способность (Ability).
+- На текущем этапе MVP Способность вычисляется из текущего HP через целочисленное деление.
+- Формула: `Ability = floor(currentHP / 10)`.
+- Это означает, что истощённый (повреждённый) герой становится постепенно менее эффективным в бою.
 
-## Planned Evolution Of Characteristics
+## Планируемая эволюция характеристик
 
-- Ability derivation may evolve beyond the current HP-based formula.
-- Additional factors beyond current health may influence Ability.
-- Passive and active skills are planned for future iterations.
+- Способ вычисления Способности может измениться и выйти за рамки текущей формулы на основе HP.
+- Помимо текущего здоровья, на Способность могут влиять дополнительные факторы.
+- Пассивные и активные навыки запланированы на будущие итерации.
 
-## Hero Ownership Per User
+## Владение героями на пользователя
 
-- At MVP stage, one user can have an unlimited number of heroes.
+- На этапе MVP один пользователь может иметь неограниченное количество героев.
 
-## Change Policy
+## Политика изменений
 
-Update this file when hero characteristics, progression rules, or ownership rules change.
+Обновлять этот файл при изменении характеристик героя, правил прогрессии или правил владения.

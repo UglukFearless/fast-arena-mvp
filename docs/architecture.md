@@ -1,166 +1,166 @@
-# Architecture
+# Архитектура
 
-## Purpose
+## Назначение
 
-This document maps the product domain to the current codebase structure.
+Этот документ отображает предметную область продукта на текущую структуру кодовой базы.
 
-## Top-Level Structure
+## Структура верхнего уровня
 
-- `backend/` contains the ASP.NET Core backend and data access layers.
-- `frontend/` contains the Vue 3 client application.
-- `docker-compose.yml` defines the local runtime environment.
-- `.env.example` documents required environment variables.
+- `backend/` содержит бэкенд на ASP.NET Core и слои доступа к данным.
+- `frontend/` содержит клиентское приложение на Vue 3.
+- `docker-compose.yml` определяет локальное окружение выполнения.
+- `.env.example` документирует необходимые переменные окружения.
 
-## Backend Overview
+## Обзор backend
 
-The backend solution is located under `backend/src/` and is split into several projects.
+Backend-решение расположено в `backend/src/` и разбито на несколько проектов.
 
 ### FastArena.Core
 
-- Domain models and business logic.
-- Core services, interfaces, and exceptions.
+- Доменные модели и бизнес-логика.
+- Основные сервисы, интерфейсы и исключения.
 
 ### FastArena.Dal
 
-- Entity Framework Core data access.
-- Database context, mappings, and storage implementations.
-- Schema is defined in `ApplicationContext`. Base data is seeded at runtime by `FastArena.WebHost` seeders, not by EF `HasData`.
-- Item effect definitions are stored in DAL and linked to items (item-owned effect records).
-- **MVP migration policy:** EF migrations are not used. Schema changes are applied by recreating the database manually. Do not generate or run migration commands.
+- Доступ к данным через Entity Framework Core.
+- Контекст базы данных, маппинги и реализации хранилища.
+- Схема определена в `ApplicationContext`. Базовые данные заполняются во время выполнения сидерами `FastArena.WebHost`, а не через EF `HasData`.
+- Определения эффектов предметов хранятся в DAL и связаны с предметами (записи эффектов, принадлежащие предмету).
+- **Политика миграций в MVP:** EF-миграции не используются. Изменения схемы применяются вручную через пересоздание базы данных. Не генерировать и не запускать команды миграций.
 
 ### FastArena.WebApi
 
-- API-facing DTOs, controllers, and mapping profiles.
-- Converts internal models into HTTP responses.
+- DTO для API, контроллеры и профили маппинга.
+- Преобразует внутренние модели в HTTP-ответы.
 
 ### FastArena.WebHost
 
-- Application startup and runtime configuration.
-- Hosts the web application.
-- `Services/Seeders/` contains runtime seeders that populate base data on first startup: portraits, monsters, and items.
-- `wwwroot/assets/` serves static files: `portraits/`, `creatures/`, `items/`.
+- Запуск приложения и конфигурация времени выполнения.
+- Хостит веб-приложение.
+- `Services/Seeders/` содержит рантайм-сидеры, заполняющие базовые данные при первом запуске: портреты, монстров и предметы.
+- `wwwroot/assets/` раздаёт статические файлы: `portraits/`, `creatures/`, `items/`.
 
 ### FastArena.ApiClientGenerator
 
-- Generates API client code used by the frontend.
+- Генерирует код API-клиента, используемый фронтендом.
 
-## Frontend Overview
+## Обзор frontend
 
-The frontend is a Vue 3 application with TypeScript, Pinia, and Vue Router.
+Frontend — приложение на Vue 3 с TypeScript, Pinia и Vue Router.
 
-### Main Areas
+### Основные области
 
-- `src/pages/` contains route-level screens.
-- `src/components/` contains reusable UI and feature components.
-- `src/stores/` contains Pinia stores for client state.
-- `src/services/` contains client-side application services.
-- `src/api/` contains generated or wrapped API clients.
-- `src/router/` contains route definitions.
+- `src/pages/` содержит экраны уровня маршрутов.
+- `src/components/` содержит переиспользуемые UI- и feature-компоненты.
+- `src/stores/` содержит Pinia-хранилища клиентского состояния.
+- `src/services/` содержит клиентские сервисы приложения.
+- `src/api/` содержит сгенерированные или обёрнутые API-клиенты.
+- `src/router/` содержит определения маршрутов.
 
-## Data Flow
+## Поток данных
 
-1. The frontend triggers an action from a page, component, or store.
-2. A client service or store calls the API layer.
-3. The backend controller receives the request.
-4. Backend services and DAL resolve domain logic and persistence.
-5. The backend returns DTOs to the frontend.
-6. The frontend updates state and UI.
+1. Frontend инициирует действие со страницы, компонента или store.
+2. Клиентский сервис или store вызывает слой API.
+3. Backend-контроллер принимает запрос.
+4. Backend-сервисы и DAL разрешают доменную логику и сохранение данных.
+5. Backend возвращает DTO фронтенду.
+6. Frontend обновляет состояние и UI.
 
-## Current Boundaries
+## Текущие границы
 
-- Domain rules should stay primarily in backend core logic.
-- Frontend should reflect server state and provide interaction flow.
-- Mapping between DAL entities, domain models, and API DTOs is a critical seam.
+- Доменные правила должны оставаться преимущественно в основной backend-логике.
+- Frontend должен отражать серверное состояние и обеспечивать поток взаимодействия.
+- Маппинг между сущностями DAL, доменными моделями и API DTO — критический шов.
 
-## Decisions
+## Решения
 
-For a log of tactical technical decisions and their rationale, see `docs/decisions.md`.
+Журнал тактических технических решений и их обоснования см. в `docs/decisions.md`.
 
-## Hotspots
+## Горячие точки
 
-- Fight resolution flow.
-- Hero creation and portrait selection.
-- Mapping depth and nested response models.
-- Statistics derived from stored fight data.
-- Shop transaction flow: sell/buy selections confirmed atomically via `POST /api/shop/transaction`.
-- Staged effect system rollout:
-	- implemented: effect definition persistence, seed data, runtime active-effect lifecycle, per-effect handlers, stacking execution rules, fight lifecycle hook dispatch.
-	- pending: equipment effect initialization at fight start, ConditionType removal, LifetimeType/SourceType extension.
+- Поток разрешения боя.
+- Создание героя и выбор портрета.
+- Глубина маппинга и вложенные модели ответа.
+- Статистика, вычисляемая из сохранённых данных боёв.
+- Поток транзакций магазина: выбор на продажу/покупку подтверждается атомарно через `POST /api/shop/transaction`.
+- Поэтапное внедрение системы эффектов:
+	- реализовано: сохранение определений эффектов, seed-данные, рантайм-жизненный цикл активных эффектов, обработчики по каждому эффекту, правила выполнения стекования, диспетчеризация хуков жизненного цикла боя.
+	- в ожидании: инициализация эффектов экипировки в начале боя, удаление ConditionType, расширение LifetimeType/SourceType.
 
-## Implementation Notes: Effect System
+## Заметки по реализации: система эффектов
 
-Current technical status:
+Текущий технический статус:
 
-- Effect definitions are persisted as item-owned records in DAL and are exposed through API item DTO mapping.
-- Seed includes potion effect definitions for healing, ability override, and strike power bonus.
-- Current persisted effect parameters include:
-	- type,
-	- duration rounds,
-	- magnitude,
-	- min/max value bounds,
-	- chance percent,
-	- target type,
-	- priority,
-	- optional next effect definition id.
+- Определения эффектов сохраняются как записи, принадлежащие предмету, в DAL и выставляются через маппинг DTO предмета в API.
+- Seed включает определения эффектов зелий для лечения, переопределения способности и бонуса силы удара.
+- Текущие сохраняемые параметры эффекта включают:
+	- тип,
+	- длительность в раундах,
+	- величину,
+	- границы минимального/максимального значения,
+	- процент шанса,
+	- тип цели,
+	- приоритет,
+	- опциональный id следующего определения эффекта.
 
-Scope boundary for current phase:
+Границы объёма для текущей фазы:
 
-- Implemented: definition model, storage mapping, seed data, runtime active-effect lifecycle, per-effect handlers (`HealHp`, `OverrideAbilityToMax`, `StrikePowerBonus`), stacking execution rules, fight lifecycle hook dispatch.
-- Pending: equipment effect types and initialization at fight start; `LifetimeType` and `SourceType` fields on `ActiveEffect`; removal of `ConditionType` from definition and active effect models.
+- Реализовано: модель определения, маппинг хранения, seed-данные, рантайм-жизненный цикл активных эффектов, обработчики по каждому эффекту (`HealHp`, `OverrideAbilityToMax`, `StrikePowerBonus`), правила выполнения стекования, диспетчеризация хуков жизненного цикла боя.
+- В ожидании: типы эффектов экипировки и их инициализация в начале боя; поля `LifetimeType` и `SourceType` у `ActiveEffect`; удаление `ConditionType` из моделей определения и активного эффекта.
 
-## Runtime Contract: Fight Effect Hooks
+## Рантайм-контракт: хуки эффектов боя
 
-This section describes implementation-level direction for runtime effect execution.
+Этот раздел описывает направление реализации на уровне рантайма для выполнения эффектов.
 
-### Goal
+### Цель
 
-- Use one unified fight-effect execution scheme for all effect types.
-- Keep effect-specific behavior inside dedicated handlers.
-- Keep fight service focused on phase progression, not on effect-specific branching.
+- Использовать одну унифицированную схему выполнения боевых эффектов для всех типов эффектов.
+- Держать специфичное для эффекта поведение внутри выделенных обработчиков.
+- Держать сервис боя сфокусированным на продвижении по фазам, а не на ветвлении по конкретным эффектам.
 
-### Hook-Based Phase Contract
+### Контракт фаз на основе хуков
 
-Runtime effect processing is planned around fixed hooks in fight lifecycle:
+Рантайм-обработка эффектов спланирована вокруг фиксированных хуков в жизненном цикле боя:
 
 1. `RoundStart`
-	- normalize active round-based effects,
-	- apply stack/merge rules for equal round-based effect types,
-	- decrement/update duration lifecycle for round-based effects.
-	- Persistent equipment effects are not normalized or decremented at round start.
+	- нормализовать активные пораундовые эффекты,
+	- применить правила стека/объединения для равных типов пораундовых эффектов,
+	- уменьшить/обновить жизненный цикл длительности пораундовых эффектов.
+	- Постоянные эффекты экипировки не нормализуются и не уменьшаются в начале раунда.
 2. `BeforeInitiative`
-	- apply pre-roll effect influence (for example heal or characteristic override activation).
+	- применить влияние эффектов до броска (например, лечение или активация переопределения характеристики).
 3. `AfterInitiativeRoll`
-	- react to roll results before strike confirmation.
+	- реагировать на результаты броска до подтверждения удара.
 4. `OnStrikeConfirmed`
-	- process defense-window effects on confirmed incoming strike.
+	- обработать эффекты окна защиты при подтверждённом входящем ударе.
 5. `BeforeDamageCommit`
-	- apply strike power and pre-commit damage adjustments.
+	- применить корректировки силы удара и урона до фиксации.
 6. `AfterDamageCommit`
-	- apply post-hit effects and state updates tied to committed damage.
+	- применить пост-ударные эффекты и обновления состояния, привязанные к зафиксированному урону.
 7. `RoundProjection`
-	- build final effective round values for API response after all recalculations.
+	- построить финальные эффективные значения раунда для ответа API после всех пересчётов.
 8. `Finalize`
-	- process fight-end effects when result is finalized.
+	- обработать эффекты конца боя при финализации результата.
 
-### Handler Behavior Rules
+### Правила поведения обработчиков
 
-- Each effect handler participates in the same hook contract.
-- Hooks that are irrelevant for a handler are expected to be no-op.
-- A handler may be active in multiple hooks during the same round.
-- Deterministic execution order is required on every hook pass.
+- Каждый обработчик эффекта участвует в одном и том же контракте хуков.
+- Хуки, не относящиеся к обработчику, должны быть no-op.
+- Обработчик может быть активен в нескольких хуках в течение одного раунда.
+- На каждом проходе хука требуется детерминированный порядок выполнения.
 
-### Stacking And Merge Direction
+### Направление стекования и объединения
 
-- Equal effect types from round-based sources are composed by effect-specific stack policy.
-- Persistent equipment effects do not participate in stack merge; each contributes independently in the relevant hook.
-- Merge behavior (for example summing magnitude) belongs to the effect handler/strategy for that effect type.
+- Равные типы эффектов из пораундовых источников объединяются политикой стекования, специфичной для эффекта.
+- Постоянные эффекты экипировки не участвуют в объединении стека; каждый вносит вклад независимо в соответствующем хуке.
+- Поведение объединения (например, суммирование величины) относится к обработчику/стратегии для этого типа эффекта.
 
-### Equipment Effect Initialization
+### Инициализация эффектов экипировки
 
-- Persistent effects from equipped weapon and shield are initialized into fight state at fight start, before the first round.
-- `ActiveEffect` is extended with `LifetimeType` (`RoundBased` | `Persistent`) and `SourceType` (`Potion` | `Equipment` | `Skill`) to distinguish consumable and equipment effects.
-- `LifetimeType` drives decrement and cleanup logic: persistent effects are skipped.
+- Постоянные эффекты от экипированного оружия и щита инициализируются в состояние боя в начале боя, до первого раунда.
+- `ActiveEffect` расширяется полями `LifetimeType` (`RoundBased` | `Persistent`) и `SourceType` (`Potion` | `Equipment` | `Skill`) для различения эффектов расходуемых предметов и экипировки.
+- `LifetimeType` управляет логикой уменьшения и очистки: постоянные эффекты пропускаются.
 
-## Change Policy
+## Политика изменений
 
-Update this file when project boundaries, module responsibilities, or important flows change.
+Обновлять этот файл при изменении границ проекта, зон ответственности модулей или важных потоков.

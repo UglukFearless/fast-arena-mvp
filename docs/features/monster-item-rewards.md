@@ -1,69 +1,69 @@
-# Monster Item Rewards
+# Награды предметами с монстров
 
-## Purpose
+## Назначение
 
-Add additional item rewards for victory in monster fights during travel.
+Добавить дополнительные награды предметами за победу в боях с монстрами во время путешествия.
 
-## Domain References
+## Ссылки на предметную область
 
 - `docs/domain/combat.md`
 - `docs/domain/items.md`
 
-## Scope
+## Объём
 
-- Applies only to victory in `MONSTER_FIGHT` activity actions.
-- Gold reward remains part of the reward flow.
-- Item rewards are defined per monster kind (`MonsterMold`).
-- Item rewards may be absent for some monster kinds.
+- Применяется только к победе в действиях активности `MONSTER_FIGHT`.
+- Награда золотом остаётся частью потока наград.
+- Награды предметами определяются по типу монстра (`MonsterMold`).
+- Награды предметами могут отсутствовать для некоторых типов монстров.
 
-## Acceptance Criteria
+## Критерии приёмки
 
-- Monster-fight reward generation keeps existing gold calculation.
-- Monster-fight reward generation may append additional item rewards configured for the defeated monster kind.
-- Item reward configuration supports one record per independent drop roll.
-- Each reward record contains: monster kind, item, chance percent, amount.
-- Multiple records with the same item are allowed for the same monster kind.
-- Before granting rewards to hero inventory, only stackable dropped items are grouped by item identity and amounts are summed.
-- Non-stackable dropped items are not grouped and are granted as separate item instances.
-- Reward DTO returned by monster-fight endpoints includes all dropped items.
-- Finalization grants dropped items to the hero inventory using existing give-item flow.
-- Initial runtime seed defines a starting reward table for existing monster kinds.
-- Fight UI shows received reward items on the fight screen, including item image.
-- Fight UI reward panel displays grouped rows only for stackable items; non-stackable items are displayed as separate rows.
+- Генерация награды за бой с монстром сохраняет существующий расчёт золота.
+- Генерация награды за бой с монстром может добавлять дополнительные награды предметами, настроенные для побеждённого типа монстра.
+- Конфигурация награды предметами поддерживает одну запись на независимый бросок дропа.
+- Каждая запись награды содержит: тип монстра, предмет, процент шанса, количество.
+- Для одного и того же типа монстра допускаются несколько записей с одним и тем же предметом.
+- Перед выдачей наград в инвентарь героя только стекуемые выпавшие предметы группируются по идентичности предмета, а количества суммируются.
+- Нестекуемые выпавшие предметы не группируются и выдаются как отдельные экземпляры предметов.
+- DTO награды, возвращаемый эндпоинтами боя с монстром, включает все выпавшие предметы.
+- Финализация выдаёт выпавшие предметы в инвентарь героя через существующий поток выдачи предметов.
+- Начальный рантайм-seed определяет стартовую таблицу наград для существующих типов монстров.
+- UI боя показывает полученные предметы-награды на экране боя, включая изображение предмета.
+- Панель наград в UI боя отображает сгруппированные строки только для стекуемых предметов; нестекуемые предметы отображаются как отдельные строки.
 
-## Architecture Contract
+## Архитектурный контракт
 
-- Store monster item reward entries in DAL as a relation from `MonsterMold` to `Item` with `ChancePercent` and `Amount`.
-- Do not introduce EF migrations. Update schema in `ApplicationContext` and rely on manual database recreation when needed.
-- Load reward entries together with monster mold data needed for reward generation.
-- Keep reward generation in `MonsterFightService` so the public fight contract stays unchanged.
-- Reuse existing `MonsterFightReward -> GivenItem -> GiveItemsToHeroAsync` flow.
+- Хранить записи наград предметами с монстров в DAL как связь от `MonsterMold` к `Item` с полями `ChancePercent` и `Amount`.
+- Не вводить EF-миграции. Обновлять схему в `ApplicationContext` и полагаться на ручное пересоздание базы данных при необходимости.
+- Загружать записи наград вместе с данными типа монстра, необходимыми для генерации наград.
+- Держать генерацию наград в `MonsterFightService`, чтобы публичный контракт боя оставался неизменным.
+- Переиспользовать существующий поток `MonsterFightReward -> GivenItem -> GiveItemsToHeroAsync`.
 
-## Data Notes
+## Заметки по данным
 
-- The technical model intentionally uses independent reward rows instead of quantity ranges.
-- This supports guaranteed drops and extra rare copies without extra rule parsing.
-- Duplicate drops are consolidated only for stackable items in the final reward projection before hero grant and UI display.
+- Техническая модель намеренно использует независимые строки наград вместо диапазонов количества.
+- Это поддерживает гарантированные дропы и дополнительные редкие копии без разбора дополнительных правил.
+- Дублирующиеся дропы объединяются только для стекуемых предметов в финальной проекции награды перед выдачей герою и отображением в UI.
 
-## Backend Steps
+## Шаги для backend
 
-1. Add DAL/entity and mapping support for monster reward entries.
-2. Extend monster mold loading to include reward entries and referenced items.
-3. Update monster-fight reward generation to append rolled item rewards.
-4. Seed initial reward entries for existing monster kinds.
-5. Add focused tests for reward generation and reward persistence flow.
+1. Добавить поддержку DAL/сущности и маппинга для записей наград с монстров.
+2. Расширить загрузку типа монстра, включив записи наград и связанные предметы.
+3. Обновить генерацию награды за бой с монстром, добавив брошенные награды предметами.
+4. Засеять начальные записи наград для существующих типов монстров.
+5. Добавить точечные тесты на генерацию наград и поток сохранения наград.
 
-## Known Technical Debt
+## Известный технический долг
 
-- `MonsterFightRewardTests` currently tests `AggregateStackableItems` via reflection into a private method of `MonsterFightService`. This is fragile and couples the test to implementation details. When refactoring the service, extract the aggregation logic into a proper testable unit and replace the reflection-based test.
+- `MonsterFightRewardTests` в текущий момент тестирует `AggregateStackableItems` через рефлексию к приватному методу `MonsterFightService`. Это хрупко и связывает тест с деталями реализации. При рефакторинге сервиса вынести логику агрегации в полноценно тестируемую единицу и заменить тест на рефлексии.
 
-## Frontend Steps
+## Шаги для frontend
 
-1. Reuse existing fight reward panel.
-2. Render reward items as structured entries instead of plain HTML string.
-3. Show item image, name, and amount for each received reward item.
+1. Переиспользовать существующую панель наград боя.
+2. Отображать предметы наград как структурированные записи вместо простой HTML-строки.
+3. Показывать изображение, название и количество для каждого полученного предмета-награды.
 
-## Rejected Path
+## Отклонённый вариант
 
-- Quantity ranges per reward row were rejected for now.
-- Independent rows are easier to balance, test, and reason about for MVP.
+- Диапазоны количества для строки награды пока отклонены.
+- Независимые строки проще балансировать, тестировать и осмыслять для MVP.

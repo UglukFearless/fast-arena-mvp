@@ -1,29 +1,29 @@
-# AI Commands
+# Команды для AI
 
-## Purpose
+## Назначение
 
-This file lists common commands for local work and validation.
+Этот файл перечисляет основные команды для локальной работы и проверки.
 
-## Run With Docker Compose
+## Запуск через Docker Compose
 
-From repository root:
+Из корня репозитория:
 
 ```bash
 docker compose up --build
 ```
 
-## Run Backend Locally
+## Запуск backend локально
 
-From repository root:
+Из корня репозитория:
 
 ```bash
 cd backend/src/FastArena.WebHost
 dotnet run
 ```
 
-## Run Frontend Locally
+## Запуск frontend локально
 
-From repository root:
+Из корня репозитория:
 
 ```bash
 cd frontend
@@ -31,17 +31,17 @@ npm install
 npm run serve
 ```
 
-## MVP Database Reset Policy
+## Политика сброса базы данных в MVP
 
-- Database reset/recreate is performed manually by the developer when needed.
-- The agent should not run destructive database reset commands automatically.
+- Сброс/пересоздание базы данных выполняется разработчиком вручную при необходимости.
+- Агенту не следует автоматически выполнять деструктивные команды сброса базы данных.
 
-## Recommended Checks Before Finalizing Changes
+## Рекомендуемые проверки перед завершением изменений
 
-- Ensure changed files match the requested scope.
-- Ensure no accidental edits outside the task.
-- Prefer smallest safe diff that solves the requirement.
+- Убедиться, что изменённые файлы соответствуют запрошенному объёму.
+- Убедиться, что нет случайных правок за пределами задачи.
+- Предпочитать минимальный безопасный diff, решающий требуемую задачу.
 
-## Maintenance
+## Поддержка
 
-Update commands when runtime or project scripts change.
+Обновлять команды при изменении рантайма или скриптов проекта.

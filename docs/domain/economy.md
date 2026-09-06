@@ -1,19 +1,19 @@
-# Economy
+# Экономика
 
-## Inventory Visibility Rules (Current MVP)
+## Правила видимости инвентаря (текущий MVP)
 
-- Dead owned hero inventory is available only in read-only mode.
-- Inventory of a foreign hero is not available.
+- Инвентарь погибшего собственного героя доступен только в режиме только для чтения.
+- Инвентарь чужого героя недоступен.
 
-## Shop
+## Магазин
 
-- Heroes can buy and sell items at the shop.
-- Purchases are paid with gold; selling items adds gold to the shop balance.
-- A transaction bundles sell and buy selections into a single confirmed deal.
-- The hero's gold balance changes by the net result of the transaction.
-- Items that are not stackable occupy individual cells and cannot be accumulated.
-- Equipped items are excluded from the shop selling list.
+- Герои могут покупать и продавать предметы в магазине.
+- Покупки оплачиваются золотом; продажа предметов добавляет золото на баланс магазина.
+- Транзакция объединяет выбор на продажу и на покупку в одну подтверждённую сделку.
+- Баланс золота героя меняется на чистый результат транзакции.
+- Нестекуемые предметы занимают отдельные ячейки и не могут накапливаться.
+- Экипированные предметы исключены из списка предметов на продажу в магазине.
 
-## Change Policy
+## Политика изменений
 
-Update this file when inventory rules, shop behavior, or transaction logic change.
+Обновлять этот файл при изменении правил инвентаря, поведения магазина или логики транзакций.

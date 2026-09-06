@@ -1,27 +1,27 @@
-# Code Style
+# Стиль кода
 
-## Purpose
+## Назначение
 
-This document stores project-specific code style decisions that are important for readability and team consistency.
+Этот документ хранит специфичные для проекта решения по стилю кода, важные для читаемости и согласованности в команде.
 
-It is intentionally manual and incremental. Add rules when they become important in real work.
+Он намеренно ведётся вручную и пополняется постепенно. Добавляйте правила, когда они становятся важны в реальной работе.
 
-## Principles
+## Принципы
 
-- Readability is more important than brevity.
-- Visual structure should match execution structure.
-- Team conventions are more important than personal habits inside this repository.
-- If a style rule improves clarity in this codebase, prefer the explicit form.
+- Читаемость важнее краткости.
+- Визуальная структура должна соответствовать структуре выполнения.
+- Командные соглашения важнее личных привычек внутри этого репозитория.
+- Если правило стиля повышает ясность в этой кодовой базе, предпочитать явную форму.
 
-## Current Rules
+## Текущие правила
 
-### Single-Line `if`
+### Однострочный `if`
 
-- Do not write ordinary `if` statements as a single-line statement like `if (condition) return value;`.
-- In normal flow, use the full block form with braces.
-- Exception: Use if (condition) without braces only for early exits spanning two lines.
+- Не писать обычные `if`-выражения в виде однострочника вроде `if (condition) return value;`.
+- В обычном потоке использовать полную блочную форму с фигурными скобками.
+- Исключение: использовать `if (condition)` без фигурных скобок только для ранних выходов, занимающих две строки.
 
-Preferred:
+Предпочтительно:
 
 ```ts
 if (Condition) {
@@ -35,32 +35,32 @@ if (isInvalid)
     return null;
 ```
 
-Avoid:
+Избегать:
 
 ```ts
 if (isInvalid) return null;
 ```
 
-### Comment Language
+### Язык комментариев
 
-- Comments inside code must be written in English.
-- Project documentation may be written in Russian.
+- Комментарии внутри кода должны быть написаны на английском.
+- Документация проекта может быть написана на русском.
 
-### Frontend Component Size
+### Размер frontend-компонентов
 
-- Avoid oversized Vue components that mix layout, interaction logic, and rendering details in one file.
-- When a component grows and starts handling multiple distinct UI blocks, split it into smaller focused components.
-- Keep balance: split for clarity, but do not fragment trivial markup into many micro-components.
+- Избегать разросшихся Vue-компонентов, смешивающих в одном файле разметку, логику взаимодействия и детали рендеринга.
+- Когда компонент растёт и начинает обрабатывать несколько разных UI-блоков, разбивать его на более мелкие сфокусированные компоненты.
+- Соблюдать баланс: разбивать ради ясности, но не дробить тривиальную разметку на множество микро-компонентов.
 
-## How To Extend This File
+## Как расширять этот файл
 
-When adding a new rule, prefer this format:
+При добавлении нового правила предпочтителен такой формат:
 
-1. Rule name
-2. Short rationale
-3. Preferred form
-4. Optional exception
+1. Название правила
+2. Краткое обоснование
+3. Предпочтительная форма
+4. Опциональное исключение
 
-## Change Policy
+## Политика изменений
 
-Update this file when repeated style remarks appear during review or implementation.
+Обновлять этот файл при появлении повторяющихся замечаний по стилю во время ревью или реализации.

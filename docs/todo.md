@@ -1,40 +1,40 @@
 # Todo
 
-## Purpose
+## Назначение
 
-This document tracks short-horizon tasks. It should stay compact and operational.
+Этот документ отслеживает задачи ближайшего горизонта. Он должен оставаться компактным и операционным.
 
-## Current Priorities
+## Текущие приоритеты
 
-### Gameplay
+### Геймплей
 
-- [ ] Create armor system.
+- [ ] Создать систему брони.
 
-### Completed Goals
+### Завершённые цели
 
-- **Hero Inventory** — shop, buy/sell, inventory in HeroInfo. Done.
-- **Item Effects, Pockets, Combat Usage** — potions, pocket equipment, USE_ITEM action, effect indicators in fight UI. Done. See [`docs/features/item-effects.md`](features/item-effects.md).
-- **Monster Item Rewards** — per-monster drop table, seeding, structured reward panel. Done. See [`docs/features/monster-item-rewards.md`](features/monster-item-rewards.md).
+- **Инвентарь героя** — магазин, покупка/продажа, инвентарь в HeroInfo. Готово.
+- **Эффекты предметов, карманы, использование в бою** — зелья, экипировка кармана, действие USE_ITEM, индикаторы эффектов в UI боя. Готово. См. [`docs/features/item-effects.md`](features/item-effects.md).
+- **Награды предметами с монстров** — таблица дропа по монстру, сидирование, структурированная панель наград. Готово. См. [`docs/features/monster-item-rewards.md`](features/monster-item-rewards.md).
 
-### Completed Goals (continued)
+### Завершённые цели (продолжение)
 
-- **Weapon And Shield Usage In Combat (backend)** — equipment effect pipeline, persistent effect lifecycle, shield block phase, weapon damage modifier, shop expanded to WEAPON/SHIELD, equip/unequip via `HeroEquipmentService`, seed bindings, backend tests. Done. See [`docs/features/weapon-usage.md`](features/weapon-usage.md).
-- **Weapon And Shield Usage In Combat (frontend)** — equip/unequip UI, slot pre-validation, shield block display, equipment panel in fight window, active effects panel, pocket items source moved to hero. Done. See [`docs/features/weapon-usage.md`](features/weapon-usage.md).
+- **Использование оружия и щита в бою (backend)** — пайплайн эффектов экипировки, жизненный цикл постоянного эффекта, фаза блока щитом, модификатор урона оружия, магазин расширен на WEAPON/SHIELD, экипировка/снятие через `HeroEquipmentService`, seed-привязки, backend-тесты. Готово. См. [`docs/features/weapon-usage.md`](features/weapon-usage.md).
+- **Использование оружия и щита в бою (frontend)** — UI экипировки/снятия, предвалидация слотов, отображение блока щитом, панель экипировки в окне боя, панель активных эффектов, источник предметов кармана перенесён на героя. Готово. См. [`docs/features/weapon-usage.md`](features/weapon-usage.md).
 
-### Technical Debt
+### Технический долг
 
-- `ItemDto.AllowedSlots` — currently the concept of "two-handed weapon" is implicit: an item is two-handed if and only if its `AllowedSlots` contains both `RIGHT_HAND` and `LEFT_HAND`. This is a structural assumption baked into both the backend service (`HeroEquipmentService.IsTwoHandedWeapon`) and the frontend slot-resolution logic. If slot rules become more complex (e.g., ambidextrous items, multi-slot armor), this implicit convention will break. Consider introducing an explicit `WeaponHandedness` enum or a dedicated `IsTwoHanded` domain property on `Item` that is resolved once at data definition time.
+- `ItemDto.AllowedSlots` — на данный момент понятие «двуручное оружие» неявное: предмет двуручный тогда и только тогда, когда его `AllowedSlots` содержит одновременно `RIGHT_HAND` и `LEFT_HAND`. Это структурное допущение зашито и в backend-сервис (`HeroEquipmentService.IsTwoHandedWeapon`), и в логику разрешения слотов на frontend. Если правила слотов усложнятся (например, амбидекстральные предметы, многослотовая броня), это неявное соглашение сломается. Стоит рассмотреть введение явного enum `WeaponHandedness` или отдельного доменного свойства `IsTwoHanded` у `Item`, разрешаемого один раз на этапе определения данных.
 
-- `MonsterFightRewardTests` — `AggregateStackableItems` is tested via reflection into a private service method. Revisit during service refactoring: extract the logic to a proper testable unit and replace the reflection-based test. See [`docs/features/monster-item-rewards.md`](features/monster-item-rewards.md).
-- `MonsterFightServiceLifecycleTests` — private methods of `MonsterFightService` are tested via reflection. This is a fragile testability vulnerability and couples tests to implementation details. Rework `MonsterFightService` by extracting fight lifecycle functionality into dedicated methods/units and cover behavior through stable test seams instead of reflection.
+- `MonsterFightRewardTests` — `AggregateStackableItems` тестируется через рефлексию к приватному методу сервиса. Пересмотреть при рефакторинге сервиса: вынести логику в полноценно тестируемую единицу и заменить тест на рефлексии. См. [`docs/features/monster-item-rewards.md`](features/monster-item-rewards.md).
+- `MonsterFightServiceLifecycleTests` — приватные методы `MonsterFightService` тестируются через рефлексию. Это хрупкая уязвимость тестируемости, связывающая тесты с деталями реализации. Переработать `MonsterFightService`, вынеся функциональность жизненного цикла боя в выделенные методы/единицы, и покрывать поведение через стабильные тестовые швы вместо рефлексии.
 
-## Task Format
+## Формат задачи
 
-When adding new tasks, prefer this structure:
+При добавлении новых задач предпочтителен такой формат:
 
-- `[ ] task`
-- optional note or link to related file/feature
+- `[ ] задача`
+- опциональная заметка или ссылка на связанный файл/фичу
 
-## Change Policy
+## Политика изменений
 
-Update this file frequently. Keep it compact — move details to feature docs.
+Обновлять этот файл часто. Держать его компактным — детали переносить в документацию фич.

@@ -1,184 +1,184 @@
-# Combat
+# Бой
 
-## Purpose
+## Назначение
 
-This page describes the currently implemented round-based combat model in domain terms.
+Эта страница описывает текущую реализованную раундовую модель боя в терминах предметной области.
 
-## Participants
+## Участники
 
-- Combat is a duel between two participants (hero and opponent).
-- Each participant has at least two combat-relevant characteristics:
+- Бой — это дуэль между двумя участниками (герой и противник).
+- У каждого участника есть как минимум две боевые характеристики:
 	- HP
-	- Ability
+	- Способность (Ability)
 
-## Core Combat Principle
+## Основной принцип боя
 
-- Combat consists of consecutive rounds of the same structure.
-- Combat continues until one participant dies.
-- Death condition: HP is less than or equal to 0.
+- Бой состоит из последовательных раундов одинаковой структуры.
+- Бой продолжается, пока один из участников не погибнет.
+- Условие смерти: HP меньше или равно 0.
 
-## Characteristics And Derived Advantage
+## Характеристики и производное преимущество
 
-### Ability (Current Formula)
+### Способность (текущая формула)
 
-- In current implementation, Ability is derived by integer division of current HP by 10.
-- Formula: `Ability = floor(currentHP / 10)`.
-- Ability is recalculated each round based on current health, meaning a damaged participant has reduced advantage.
+- В текущей реализации Способность вычисляется целочисленным делением текущего HP на 10.
+- Формула: `Ability = floor(currentHP / 10)`.
+- Способность пересчитывается каждый раунд на основе текущего здоровья, то есть повреждённый участник имеет сниженное преимущество.
 
-### Relative Advantage
+### Относительное преимущество
 
-- Advantage is computed from Ability difference between attacker and defender.
-- Formula base: `floor((A1 - A2) / 3)`.
-- The result keeps its sign and is clamped to the range `[-3, +3]`.
-- Positive value means A1 has advantage over A2; negative value means A2 has advantage.
+- Преимущество вычисляется из разницы Способностей атакующего и защищающегося.
+- Базовая формула: `floor((A1 - A2) / 3)`.
+- Результат сохраняет знак и ограничивается диапазоном `[-3, +3]`.
+- Положительное значение означает, что A1 имеет преимущество над A2; отрицательное — что преимущество у A2.
 
-Examples:
+Примеры:
 
-- Ability 10 vs 7 gives advantage `+1`.
-- Ability 13 vs 6 gives advantage `+2`.
+- Способность 10 против 7 даёт преимущество `+1`.
+- Способность 13 против 6 даёт преимущество `+2`.
 
-## Round Phases
+## Фазы раунда
 
-### Phase 1: Initiative Roll
+### Фаза 1: Бросок инициативы
 
-- Both participants roll a six-sided die (`d6`).
-- Roll difference defines who claims the strike and with what base strike power.
-- Example: hero rolls 5, opponent rolls 3 -> hero claims strike with base power 2.
+- Оба участника бросают шестигранный кубик (`d6`).
+- Разница бросков определяет, кто наносит удар и с какой базовой силой удара.
+- Пример: герой бросает 5, противник бросает 3 -> герой наносит удар с базовой силой 2.
 
-### Phase 2: Advantage Mitigation
+### Фаза 2: Смягчение преимуществом
 
-- Defender advantage is subtracted from the base strike power.
-- If resulting strike power is less than 1, the round is treated as a draw (no strike).
+- Преимущество защищающегося вычитается из базовой силы удара.
+- Если итоговая сила удара меньше 1, раунд считается ничьей (удара не происходит).
 
-### Phase 3: Hit Zone Roll
+### Фаза 3: Бросок зоны попадания
 
-- If strike power is 1 or more, hit zone is determined.
-- Current MVP uses one legacy damage map.
-- Legacy hit zone flow is two-step:
-	- First roll identifies broad zone set.
-	- For body result, second roll identifies concrete sub-zone.
+- Если сила удара 1 или больше, определяется зона попадания.
+- Текущий MVP использует одну устаревшую («legacy») карту урона.
+- Устаревший поток определения зоны попадания состоит из двух шагов:
+	- Первый бросок определяет широкий набор зон.
+	- Для результата «тело» второй бросок определяет конкретную подзону.
 
-### Hit Zone Maps (Future)
+### Карты зон попадания (в будущем)
 
-- Long-term direction: introduce different hit zone maps for different creature types.
-- Current MVP limitation: one shared legacy map is used for all participants.
+- Долгосрочное направление: ввести разные карты зон попадания для разных типов существ.
+- Текущее ограничение MVP: для всех участников используется одна общая устаревшая карта.
 
-### Phase 4: Damage Calculation
+### Фаза 4: Расчёт урона
 
-- Each hit zone has a damage price per 1 strike power.
-- If the target has armor protecting the hit zone, armor first reduces the incoming strike power.
-- Remaining strike power is then used for damage calculation.
-- Damage formula:
+- У каждой зоны попадания есть цена урона за 1 единицу силы удара.
+- Если у цели есть броня, защищающая зону попадания, броня сначала снижает входящую силу удара.
+- Оставшаяся сила удара затем используется для расчёта урона.
+- Формула урона:
 	- `Damage = ZoneUnitDamage * RemainingStrikePower`
-- Example: head has unit damage 20 HP.
-	- Strike power 1 -> 20 HP damage.
-	- Strike power 2 -> 40 HP damage.
-- If armor protection is greater than or equal to strike power, the target receives no damage and armor absorbs the entire strike.
-- Example: head unit damage is 20 HP, incoming strike power is 3, helmet protection is 2 -> armor reduces strike power to 1 -> target receives 20 HP damage.
-- Armor protection is consumed sequentially across all strikes in a round. Once consumed, armor breaks and provides no further protection.
-- Source of truth for armor mechanics: [Items](items.md).
+- Пример: у головы юнит-урон 20 HP.
+	- Сила удара 1 -> урон 20 HP.
+	- Сила удара 2 -> урон 40 HP.
+- Если защита брони больше или равна силе удара, цель не получает урона, и броня полностью поглощает удар.
+- Пример: юнит-урон головы 20 HP, входящая сила удара 3, защита шлема 2 -> броня снижает силу удара до 1 -> цель получает 20 HP урона.
+- Защита брони расходуется последовательно по всем ударам в раунде. После полного расхода броня ломается и больше не даёт защиты.
+- Источник истины по механике брони: [Предметы](items.md).
 
-### Phase 5: State Update And End Check
+### Фаза 5: Обновление состояния и проверка окончания
 
-- Calculated damage is subtracted from target HP.
-- System checks death condition for both participants.
-- If nobody died, next round starts.
+- Рассчитанный урон вычитается из HP цели.
+- Система проверяет условие смерти для обоих участников.
+- Если никто не погиб, начинается следующий раунд.
 
-## Combat Items And Equipment
+## Боевые предметы и экипировка
 
-- Combat design includes equipment and usable items that may affect:
-	- combat characteristics,
-	- outgoing damage,
-	- incoming damage.
-- Weapon damage modifiers are applied after a strike is confirmed and do not affect hit eligibility.
-- Armor protection is evaluated after a strike is confirmed and applies to protected zones only.
-- Source of truth for item categories and behavior flags: [Items](items.md).
-- Current implementation status for combat item mechanics is tracked in [Items](items.md).
+- Боевой дизайн включает экипировку и расходуемые предметы, которые могут влиять на:
+	- боевые характеристики,
+	- исходящий урон,
+	- входящий урон.
+- Модификаторы урона оружия применяются после подтверждения удара и не влияют на то, состоится ли попадание.
+- Защита брони оценивается после подтверждения удара и применяется только к защищённым зонам.
+- Источник истины по категориям предметов и флагам поведения: [Предметы](items.md).
+- Текущий статус реализации механик боевых предметов отслеживается в [Предметы](items.md).
 
-## Round Lifecycle For Effect Processing
+## Жизненный цикл раунда для обработки эффектов
 
-This section defines business phases where active effects may influence a round.
-The phase names are domain-oriented and describe gameplay semantics.
-Phases or rules marked **[Planned]** are intentionally kept as navigation markers for upcoming behavior.
+Этот раздел определяет бизнес-фазы, на которых активные эффекты могут влиять на раунд.
+Названия фаз ориентированы на предметную область и описывают игровую семантику.
+Фазы или правила, отмеченные **[Запланировано]**, намеренно оставлены как навигационные маркеры для будущего поведения.
 
-Equipment effects (from equipped weapon or shield) are active from the start of the fight and remain active throughout all rounds without per-round activation or expiry.
+Эффекты экипировки (от надетого оружия или щита) активны с начала боя и остаются активными на протяжении всех раундов без активации или истечения по раундам.
 
-### Phase A: Round Start
+### Фаза A: Начало раунда
 
-- Available hero actions while both participants are alive:
-	- attack,
-	- use combat item.
-- Once HP reaches 0, combat round action is no longer available and combat goes to finalization.
-- Active effects are normalized at round start according to their stacking rules. This applies to round-based effects only; equipment effects are not subject to round-start normalization.
-- If item usage is chosen:
-	- item effects start influencing the round before initiative,
-	- consumed item is removed from pocket,
-	- hero enters passive mode for this round (hero does not attack).
+- Доступные действия героя, пока оба участника живы:
+	- атака,
+	- использование боевого предмета.
+- Как только HP достигает 0, действие боевого раунда становится недоступным, и бой переходит к финализации.
+- Активные эффекты нормализуются в начале раунда согласно правилам их стекования. Это применимо только к пораундовым эффектам; эффекты экипировки не подлежат нормализации в начале раунда.
+- Если выбрано использование предмета:
+	- эффекты предмета начинают влиять на раунд до броска инициативы,
+	- использованный предмет удаляется из кармана,
+	- герой переходит в пассивный режим на этот раунд (герой не атакует).
 
-### Phase B: Strike Claim
+### Фаза B: Заявка на удар
 
-- Resolve initiative rolls (`d6` each) and base strike power by difference.
-- Determine effective Ability for both sides: use override value if an active effect requires it, otherwise `floor(currentHP / 10)`.
-- Apply Ability-derived advantage mitigation.
-- If hero is in passive mode this round due to item usage: hero's roll is used only for defense; a higher hero roll does not result in a strike.
-- If resulting strike power is less than 1 (or hero is passive and opponent does not hit), the round ends as a draw.
+- Разрешаются броски инициативы (`d6` у каждого) и базовая сила удара по разнице.
+- Определяется эффективная Способность для обеих сторон: используется переопределённое значение, если этого требует активный эффект, иначе `floor(currentHP / 10)`.
+- Применяется смягчение преимуществом, производным от Способности.
+- Если герой в этом раунде в пассивном режиме из-за использования предмета: бросок героя используется только для защиты; более высокий бросок героя не приводит к удару.
+- Если итоговая сила удара меньше 1 (или герой пассивен, а противник не попадает), раунд заканчивается ничьей.
 
-### Phase C: Confirmed Incoming Strike (Defense Window) **[Planned]**
+### Фаза C: Подтверждённый входящий удар (окно защиты) **[Запланировано]**
 
-- Reached only when strike power >= 1.
-- Evaluate shield full-block probability.
-- If shield fully blocks:
-	- consume one successful shield use,
-	- skip phases D–F,
-	- continue to Phase G.
+- Достигается только при силе удара >= 1.
+- Оценивается вероятность полного блока щитом.
+- Если щит полностью блокирует:
+	- расходуется одно успешное использование щита,
+	- фазы D–F пропускаются,
+	- переход сразу к фазе G.
 
-### Phase D: Hit Zone Resolution
+### Фаза D: Определение зоны попадания
 
-- Determine hit zone using current legacy two-step map.
+- Зона попадания определяется по текущей устаревшей двухшаговой карте.
 
-### Phase E: Power-Level Damage Modifiers **[Planned]**
+### Фаза E: Модификаторы урона на уровне силы удара **[Запланировано]**
 
-- Apply strike-power-level modifiers:
-	- active strike power bonus from usable items (attacker side),
-	- weapon strike power modifier (attacker side),
-	- armor strike power absorption with durability (defender side, zone-specific).
-- If resulting strike power drops below 1, HP damage is not applied.
+- Применяются модификаторы на уровне силы удара:
+	- бонус к активной силе удара от расходуемых предметов (сторона атакующего),
+	- модификатор силы удара от оружия (сторона атакующего),
+	- поглощение силы удара бронёй с учётом прочности (сторона защищающегося, по конкретной зоне).
+- Если итоговая сила удара падает ниже 1, урон по HP не применяется.
 
-### Phase F: Unit-Damage Modifiers And Final Damage **[Planned]**
+### Фаза F: Модификаторы юнит-урона и финальный урон **[Запланировано]**
 
-- Determine base zone unit damage.
-- Apply per-power unit-damage modifiers:
-	- armor flat absorption per strike power unit (zone unit damage floor is 1),
-	- weapon flat bonus/penalty per strike power unit.
-- Final damage is clamped to non-negative.
+- Определяется базовый юнит-урон зоны.
+- Применяются модификаторы юнит-урона на единицу силы удара:
+	- плоское поглощение бронёй на единицу силы удара (юнит-урон зоны не опускается ниже 1),
+	- плоский бонус/штраф оружия на единицу силы удара.
+- Итоговый урон ограничивается снизу нулём.
 
-### Phase G: Commit And Round End
+### Фаза G: Фиксация и конец раунда
 
-- Apply final damage to target HP.
-- Recalculate base Ability for both participants from updated HP.
-- Apply post-hit and end-of-round effects that are tied to this phase.
-- Produce final round projection for UI from effective values, including active overrides.
-- Check death condition and decide whether combat continues.
+- Финальный урон применяется к HP цели.
+- Базовая Способность обоих участников пересчитывается по обновлённому HP.
+- Применяются пост-ударные эффекты и эффекты конца раунда, привязанные к этой фазе.
+- Формируется финальная проекция раунда для UI на основе эффективных значений, включая активные переопределения.
+- Проверяется условие смерти и принимается решение о продолжении боя.
 
-### Fight Finalization
+### Финализация боя
 
-- If one participant is dead, the fight enters finalization.
-- Finalization resolves fight outcome, rewards/penalties, and history-relevant result.
+- Если один из участников погиб, бой переходит к финализации.
+- Финализация разрешает исход боя, награды/штрафы и результат, значимый для истории.
 
-## Fight Result
+## Результат боя
 
-- A fight always produces a result that is meaningful for progression and history.
-- Fight results are used for player feedback, statistics, and hero history.
+- Бой всегда даёт результат, значимый для прогрессии и истории.
+- Результаты боёв используются для обратной связи игроку, статистики и истории героя.
 
-## Fight Rewards And Penalties
+## Награды и штрафы за бой
 
-- Rewards: experience, gold, and monster trophies.
-- Gold is used for economy flows (shop transactions and future item usage).
-- A victory over a monster may also grant item trophies associated with that monster kind.
-- Item trophies are additional to gold, not a replacement for it.
-- Current hard penalty: permanent death.
-- Additional debuffs may be added later.
+- Награды: опыт, золото и трофеи с монстров.
+- Золото используется в экономических потоках (транзакции в магазине и будущее использование предметов).
+- Победа над монстром также может дать трофейные предметы, связанные с этим типом монстра.
+- Трофейные предметы дополняют золото, а не заменяют его.
+- Текущий жёсткий штраф: перманентная смерть.
+- В будущем могут быть добавлены дополнительные дебаффы.
 
-## Change Policy
+## Политика изменений
 
-Update this file when combat mechanics, monsters, or fight outcome rules change.
+Обновлять этот файл при изменении боевой механики, монстров или правил исхода боя.

@@ -1,17 +1,17 @@
-# Domain
+# Предметная область
 
-## Index
+## Индекс
 
-| Topic | File |
+| Тема | Файл |
 |---|---|
-| Product idea, core loop, domain rules | [domain/overview.md](domain/overview.md) |
-| Hero: characteristics, progression, ownership | [domain/hero.md](domain/hero.md) |
-| Combat: monster, fight, rewards and penalties | [domain/combat.md](domain/combat.md) |
-| Items: types and behavioral flags | [domain/items.md](domain/items.md) |
-| Effects: types, stacking, application timing | [domain/effects.md](domain/effects.md) |
-| Economy: inventory, shop, transactions | [domain/economy.md](domain/economy.md) |
+| Идея продукта, основной игровой цикл, правила предметной области | [domain/overview.md](domain/overview.md) |
+| Герой: характеристики, прогрессия, владение | [domain/hero.md](domain/hero.md) |
+| Бой: монстр, схватка, награды и штрафы | [domain/combat.md](domain/combat.md) |
+| Предметы: типы и флаги поведения | [domain/items.md](domain/items.md) |
+| Эффекты: типы, стекование, момент применения | [domain/effects.md](domain/effects.md) |
+| Экономика: инвентарь, магазин, транзакции | [domain/economy.md](domain/economy.md) |
 
-## Change Policy
+## Политика изменений
 
-Update the relevant sub-page when business rules, core terms, or gameplay meaning change.
-Update this index only when sub-pages are added or removed.
+Обновлять соответствующую подстраницу при изменении бизнес-правил, ключевых терминов или игрового смысла.
+Обновлять этот индекс только при добавлении или удалении подстраниц.

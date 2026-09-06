@@ -1,27 +1,27 @@
-# Domain Gaps
+# Пробелы в предметной области
 
-## Purpose
+## Назначение
 
-This file defines how to handle situations where domain knowledge is missing or ambiguous during implementation.
+Этот файл определяет, как поступать в ситуациях, когда знания о предметной области отсутствуют или неоднозначны во время реализации.
 
-## When Domain Information Is Insufficient
+## Когда информации о предметной области недостаточно
 
-If the current task or existing documentation does not fully explain the business meaning of an entity, rule, or behavior:
+Если текущая задача или существующая документация не полностью объясняет бизнес-смысл сущности, правила или поведения:
 
-1. **Ask clarifying questions before implementing.** Do not invent rules or fill gaps with assumptions.
-2. **Be specific.** Ask about the exact aspect that is unclear — a rule, an entity relationship, an edge case.
-3. **After getting the answer, propose to update the relevant domain sub-page.** Point to the specific file in `docs/domain/`.
+1. **Задавать уточняющие вопросы до реализации.** Не придумывать правила и не заполнять пробелы предположениями.
+2. **Быть конкретным.** Спрашивать про конкретный неясный аспект — правило, связь между сущностями, граничный случай.
+3. **После получения ответа предложить обновить соответствующую подстраницу предметной области.** Указать на конкретный файл в `docs/domain/`.
 
-## Domain Sub-Pages
+## Подстраницы предметной области
 
-| Topic | File |
+| Тема | Файл |
 |---|---|
-| Product idea, core loop, domain rules | [../domain/overview.md](../domain/overview.md) |
-| Hero: characteristics, progression, ownership | [../domain/hero.md](../domain/hero.md) |
-| Combat: monster, fight, rewards and penalties | [../domain/combat.md](../domain/combat.md) |
-| Items: types and behavioral flags | [../domain/items.md](../domain/items.md) |
-| Economy: inventory, shop, transactions | [../domain/economy.md](../domain/economy.md) |
+| Идея продукта, основной игровой цикл, правила предметной области | [../domain/overview.md](../domain/overview.md) |
+| Герой: характеристики, прогрессия, владение | [../domain/hero.md](../domain/hero.md) |
+| Бой: монстр, схватка, награды и штрафы | [../domain/combat.md](../domain/combat.md) |
+| Предметы: типы и флаги поведения | [../domain/items.md](../domain/items.md) |
+| Экономика: инвентарь, магазин, транзакции | [../domain/economy.md](../domain/economy.md) |
 
-## Maintenance
+## Поддержка
 
-Update this file when the policy for handling domain ambiguity changes.
+Обновлять этот файл при изменении политики обработки неоднозначностей предметной области.

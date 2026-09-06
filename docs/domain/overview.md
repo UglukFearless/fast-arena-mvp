@@ -1,36 +1,36 @@
-# Domain Overview
+# Обзор предметной области
 
-## Purpose
+## Назначение
 
-Fast Arena MVP is a browser game prototype about short combat runs, hero growth, and lightweight progression. This document covers the product idea, core gameplay loop, and cross-cutting domain rules.
+Fast Arena MVP — прототип браузерной игры про короткие боевые вылазки, рост героя и лёгкую прогрессию. Этот документ описывает идею продукта, основной игровой цикл и сквозные правила предметной области.
 
-## Product Idea
+## Идея продукта
 
-- The player manages a hero.
-- The hero enters short adventures or fights.
-- Fights produce results that affect hero progression.
-- The project explores the domain and gameplay loop more than production-grade infrastructure.
+- Игрок управляет героем.
+- Герой отправляется в короткие приключения или бои.
+- Бои дают результаты, влияющие на прогрессию героя.
+- Проект больше исследует предметную область и игровой цикл, чем инфраструктуру продакшен-уровня.
 
-## User Account
+## Учётная запись пользователя
 
-- Represents authentication and ownership of game progress.
-- Connects a user to one or more heroes.
+- Представляет аутентификацию и владение игровым прогрессом.
+- Связывает пользователя с одним или несколькими героями.
 
-## Core Domain Loop
+## Основной игровой цикл
 
-1. A user enters the game and authenticates.
-2. A hero is created or selected.
-3. The hero performs a combat activity.
-4. The system resolves the fight and stores the result.
-5. The player sees updated hero state and statistics.
+1. Пользователь входит в игру и проходит аутентификацию.
+2. Герой создаётся или выбирается.
+3. Герой выполняет боевую активность.
+4. Система разрешает бой и сохраняет результат.
+5. Игрок видит обновлённое состояние героя и статистику.
 
-## Domain Rules
+## Правила предметной области
 
-- A fight must always produce a valid result.
-- Hero progression must be derived from gameplay outcomes rather than arbitrary updates.
-- Visual identity matters: portraits are part of hero and monster representation.
-- Statistics should be explainable from stored fight history.
+- Бой всегда должен давать корректный результат.
+- Прогрессия героя должна вытекать из игровых результатов, а не из произвольных обновлений.
+- Визуальная идентичность важна: портреты — часть представления героя и монстра.
+- Статистика должна быть объяснима на основе сохранённой истории боёв.
 
-## Change Policy
+## Политика изменений
 
-Update this file when core product intent, the domain loop, or cross-cutting rules change.
+Обновлять этот файл при изменении основного замысла продукта, игрового цикла или сквозных правил.
