@@ -4,12 +4,9 @@
 
 | Раздел или документ | Содержание |
 |---|---|
-| [domain.md](domain.md) | Предметная область: правила игры, термины, бизнес-смысл |
-| [architecture.md](architecture.md) | Устройство кода: модули, потоки данных, хранение |
+| [domain/index.md](domain/index.md) | Предметная область: правила игры, термины, бизнес-смысл |
+| [tech/architecture.md](tech/architecture.md) | Устройство кода: модули, потоки данных, хранение |
 | [code-style.md](code-style.md) | Правила оформления кода |
 | [documentation-rules.md](documentation-rules.md) | Правила ведения документации |
-| [roadmap.md](roadmap.md) | Долгосрочные направления развития |
-| [decisions.md](decisions.md) | Журнал технических решений |
-| [todo.md](todo.md) | Текущие задачи |
-| [features/](features/) | Планирование фич: один документ на фичу |
+| [work-tracking/index.md](work-tracking/index.md) | Учёт работы: предложения, изменения, roadmap, направления |
 | [ai/index.md](ai/index.md) | Работа агента: цикл, ограничения, ловушки |
