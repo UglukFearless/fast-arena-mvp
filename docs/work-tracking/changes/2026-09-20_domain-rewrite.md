@@ -14,13 +14,18 @@
 - directions.md открывается утверждением о статусе содержимого; каждое направление — подзаголовок и абзац прозы.
 - Боевой потенциал участника называется боеспособностью. Прежнее имя величины — способность.
 - Числа, меняемые ради баланса, лежат в domain/balance.md. Коэффициент, неотделимый от правила, остаётся в тексте правила.
+- game-loop.md описывает игру на уровне понятий и связей между ними.
+- Восстановление состояния героя описывается в документах героя и предметов.
+- Ссылка на документ раздела ставится до того, как документ написан.
 
 ## План
 
 - [x] domain/index.md
 - [x] domain/directions.md; правки work-tracking/index.md
-- [ ] domain/combat.md; domain/balance.md
-- [ ] domain/game-loop.md вместо overview.md
+- [x] domain/combat.md; domain/balance.md
+- [x] domain/game-loop.md вместо overview.md
+- [ ] domain/adventure.md
+- [ ] domain/leaderboard.md
 - [ ] domain/progression.md
 - [ ] domain/monster.md
 - [ ] domain/hero.md
