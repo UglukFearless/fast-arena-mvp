@@ -17,6 +17,7 @@
 - game-loop.md описывает игру на уровне понятий и связей между ними.
 - Восстановление состояния героя описывается в документах героя и предметов.
 - Ссылка на документ раздела ставится до того, как документ написан.
+- Типы эпизодов описываются разделами adventure.md, пока тип один. С появлением второго типа они выносятся в отдельные документы.
 
 ## План
 
@@ -24,7 +25,7 @@
 - [x] domain/directions.md; правки work-tracking/index.md
 - [x] domain/combat.md; domain/balance.md
 - [x] domain/game-loop.md вместо overview.md
-- [ ] domain/adventure.md
+- [x] domain/adventure.md
 - [ ] domain/leaderboard.md
 - [ ] domain/progression.md
 - [ ] domain/monster.md
