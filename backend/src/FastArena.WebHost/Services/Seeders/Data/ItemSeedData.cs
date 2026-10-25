@@ -348,7 +348,7 @@ public static class ItemSeedData
         new()
         {
             Id = EctoplasmId,
-            Name = "Экзоплазма",
+            Name = "Эктоплазма",
             Description = "Будем называть эту субстанцию именно так, но лучше её не нюхать.",
             BaseCost = 30,
             ItemImage = "/assets/items/posion_green.png",
