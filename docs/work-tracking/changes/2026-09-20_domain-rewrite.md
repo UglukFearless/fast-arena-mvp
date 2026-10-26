@@ -31,7 +31,7 @@
 - [x] domain/monster.md
 - [x] domain/items.md
 - [x] domain/inventory.md
-- [ ] domain/effects.md
+- [x] domain/effects.md
 - [ ] domain/economy.md
 - [ ] Смежные документы: docs/index.md, ai/pitfalls.md, ссылки на фазы в 2026-08-02_armor-system.md, tech/effects-runtime.md
 - [ ] Дефекты кода, найденные при переписывании, — предложения по команде оператора

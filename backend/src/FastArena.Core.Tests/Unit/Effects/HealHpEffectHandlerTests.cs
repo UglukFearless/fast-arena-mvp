@@ -22,16 +22,16 @@ public class HealHpEffectHandlerTests
     }
 
     [Fact]
-    public void Stack_AveragesMagnitudeAndDuration()
+    public void Stack_UsesCeilingForMagnitudeAndDuration()
     {
         var handler = new HealHpEffectHandler();
-        var existing = EffectTestData.CreateActiveEffect(EffectType.HEAL_HP, remainingRounds: 3, magnitude: 60);
-        var newDefinition = EffectTestData.CreateEffectDefinition(EffectType.HEAL_HP, durationRounds: 5, magnitude: 20);
+        var existing = EffectTestData.CreateActiveEffect(EffectType.HEAL_HP, remainingRounds: 2, magnitude: 60);
+        var newDefinition = EffectTestData.CreateEffectDefinition(EffectType.HEAL_HP, durationRounds: 3, magnitude: 21);
 
         var merged = handler.Stack(existing, newDefinition);
 
-        Assert.Equal(40, merged.Magnitude);
-        Assert.Equal(4, merged.RemainingRounds);
+        Assert.Equal(41, merged.Magnitude);
+        Assert.Equal(3, merged.RemainingRounds);
         Assert.Equal(2, merged.StackCount);
     }
 }

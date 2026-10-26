@@ -21,11 +21,11 @@ public class StrikePowerBonusEffectHandlerTests
     }
 
     [Fact]
-    public void Stack_UsesCeilingForMagnitudeAndAverageForDuration()
+    public void Stack_UsesCeilingForMagnitudeAndDuration()
     {
         var handler = new StrikePowerBonusEffectHandler();
         var existing = EffectTestData.CreateActiveEffect(EffectType.STRIKE_POWER_BONUS, remainingRounds: 3, magnitude: 2);
-        var newDefinition = EffectTestData.CreateEffectDefinition(EffectType.STRIKE_POWER_BONUS, durationRounds: 3, magnitude: 3);
+        var newDefinition = EffectTestData.CreateEffectDefinition(EffectType.STRIKE_POWER_BONUS, durationRounds: 2, magnitude: 3);
 
         var merged = handler.Stack(existing, newDefinition);
 

@@ -10,7 +10,7 @@ namespace FastArena.Core.Services.Effects;
 /// Handler for STRIKE_POWER_BONUS effect.
 /// Applies strike power bonus at OnBeforeDamageCommit (before damage calc).
 /// Adds merged magnitude to the strike power bonus context value.
-/// Stacking rule: sum magnitudes ÷ average duration, ceiling.
+/// Stacking rule: average magnitude and duration, ceiling.
 /// </summary>
 public class StrikePowerBonusEffectHandler : IEffectHandler
 {
@@ -33,7 +33,7 @@ public class StrikePowerBonusEffectHandler : IEffectHandler
     {
         var nextCount = existing.StackCount + 1;
         var mergedMagnitude = (int)Math.Ceiling(((existing.Magnitude * existing.StackCount) + newDefinition.Magnitude) / (double)nextCount);
-        var mergedDuration = (int)Math.Round(((existing.RemainingRounds * existing.StackCount) + newDefinition.DurationRounds) / (double)nextCount);
+        var mergedDuration = (int)Math.Ceiling(((existing.RemainingRounds * existing.StackCount) + newDefinition.DurationRounds) / (double)nextCount);
         
         existing.Magnitude = mergedMagnitude;
         existing.RemainingRounds = mergedDuration;

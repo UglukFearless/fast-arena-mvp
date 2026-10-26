@@ -9,7 +9,7 @@ namespace FastArena.Core.Services.Effects;
 /// <summary>
 /// Handler for HEAL_HP effect.
 /// Applies heal at OnRoundStart (before initiative).
-/// Stacking rule: sum magnitudes ÷ average duration, standard round.
+/// Stacking rule: average magnitude and duration, ceiling.
 /// </summary>
 public class HealHpEffectHandler : IEffectHandler
 {
@@ -32,8 +32,8 @@ public class HealHpEffectHandler : IEffectHandler
     public ActiveEffect Stack(ActiveEffect existing, EffectDefinition newDefinition)
     {
         var nextCount = existing.StackCount + 1;
-        var mergedMagnitude = (int)Math.Round(((existing.Magnitude * existing.StackCount) + newDefinition.Magnitude) / (double)nextCount);
-        var mergedDuration = (int)Math.Round(((existing.RemainingRounds * existing.StackCount) + newDefinition.DurationRounds) / (double)nextCount);
+        var mergedMagnitude = (int)Math.Ceiling(((existing.Magnitude * existing.StackCount) + newDefinition.Magnitude) / (double)nextCount);
+        var mergedDuration = (int)Math.Ceiling(((existing.RemainingRounds * existing.StackCount) + newDefinition.DurationRounds) / (double)nextCount);
         
         existing.Magnitude = mergedMagnitude;
         existing.RemainingRounds = mergedDuration;
