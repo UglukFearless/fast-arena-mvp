@@ -200,17 +200,21 @@ public class ShopService : IShopService
     }
 
     /// <summary>
-    /// Calculate sell price with +50% markup from base cost.
-    /// Uses standard rounding: 0.5 rounds up to 1.
+    /// Shop's selling price: +50% over base cost.
+    /// Halves are rounded away from zero, as in ordinary arithmetic.
     /// </summary>
     private int CalculateSellPrice(int baseCost)
     {
-        return (int)Math.Round(baseCost * 1.5);
+        return (int)Math.Round(baseCost * 1.5m, MidpointRounding.AwayFromZero);
     }
 
+    /// <summary>
+    /// Shop's buying price: half of base cost.
+    /// Halves are rounded away from zero, as in ordinary arithmetic.
+    /// </summary>
     private int CalculateBuyPrice(int baseCost)
     {
-        return (int)Math.Round(baseCost * 0.5);
+        return (int)Math.Round(baseCost * 0.5m, MidpointRounding.AwayFromZero);
     }
 
     private static bool IsShopItemType(ItemType itemType)
