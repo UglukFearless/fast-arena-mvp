@@ -1328,7 +1328,7 @@ export interface StatisticDataRowDto {
 export enum Parameter {
     WINS = 0,
     GOLD = 1,
-    LEVEL = 2,
+    EXPERIENCE = 2,
 }
 
 export enum HeroAliveParam {

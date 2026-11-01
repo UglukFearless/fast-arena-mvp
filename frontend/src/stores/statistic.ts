@@ -57,15 +57,6 @@ export const useStatisticStore = defineStore('statistic', {
         async init() {
             await this.fetchData();
         },
-        async resetAndFetch() {
-            this.data = null;
-            this.parameter = defaultStatisticFiltersState.parameter;
-            this.aliveParam = defaultStatisticFiltersState.aliveParam;
-            this.ownerParam = defaultStatisticFiltersState.ownerParam;
-            this.desc = defaultStatisticFiltersState.desc;
-
-            await this.fetchData();
-        },
         async update() {
             await this.fetchData();
         },

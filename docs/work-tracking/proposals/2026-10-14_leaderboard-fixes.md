@@ -2,6 +2,8 @@
 
 ## Изменения
 
+- [Исправления таблицы рекордов](../changes/2026-11-02_leaderboard-fixes.md)
+
 ## Описание
 
 Реализация таблицы рекордов расходится с [domain/leaderboard.md](../../domain/leaderboard.md):

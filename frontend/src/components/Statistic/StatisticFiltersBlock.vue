@@ -23,7 +23,7 @@ const filters: StatisticFilter[] = [
     new StatisticFilter('parameter', 'Параметр:', statisticStore.parameter as Parameter, [
         { value: Parameter.WINS, label: 'Количество побед' },
         { value: Parameter.GOLD, label: 'Богатство' },
-        { value: Parameter.LEVEL, label: 'Опыт' },
+        { value: Parameter.EXPERIENCE, label: 'Опыт' },
     ]),
     new StatisticFilter('aliveParam', 'Жив/мёртв:', statisticStore.aliveParam as HeroAliveParam, [
         { value: HeroAliveParam.ALL, label: 'Все' },

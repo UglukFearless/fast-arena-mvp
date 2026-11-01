@@ -15,5 +15,5 @@ import { useStatisticStore } from '@/stores/statistic';
 
 const statisticStore = useStatisticStore();
 
-statisticStore.resetAndFetch();
+statisticStore.init();
 </script>

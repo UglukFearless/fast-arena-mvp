@@ -30,7 +30,7 @@ public class StatisticService : IStatisticService
     {
         Parameter.WINS => "Количество побед",
         Parameter.GOLD => "Самый богатый",
-        Parameter.LEVEL => "Самый опытный",
+        Parameter.EXPERIENCE => "Самый опытный",
         _ => throw new NotImplementedException(),
     };
 
@@ -38,7 +38,7 @@ public class StatisticService : IStatisticService
     {
         Parameter.WINS => "Победы",
         Parameter.GOLD => "Золото",
-        Parameter.LEVEL => "Уровень",
+        Parameter.EXPERIENCE => "Опыт",
         _ => throw new NotImplementedException(),
     };
 
@@ -46,7 +46,7 @@ public class StatisticService : IStatisticService
     {
         Parameter.WINS => "w",
         Parameter.GOLD => "g",
-        Parameter.LEVEL => "lvl",
+        Parameter.EXPERIENCE => "xp",
         _ => throw new NotImplementedException(),
     };
 
@@ -67,11 +67,11 @@ public class StatisticService : IStatisticService
 
         if (filter.Desc)
         {
-            rows = rows.OrderByDescending(r => r.Value).ToList();
+            rows = rows.OrderByDescending(r => r.Value).ThenByDescending(r => r.IsAlive).ToList();
         } 
         else
         {
-            rows = rows.OrderBy(r => r.Value).ToList();
+            rows = rows.OrderBy(r => r.Value).ThenByDescending(r => r.IsAlive).ToList();
         }
 
         return rows;
@@ -89,7 +89,7 @@ public class StatisticService : IStatisticService
         };
     }
 
-    private int GetValueForHero(Hero h, Parameter parameter)
+    private long GetValueForHero(Hero h, Parameter parameter)
     {
         switch (parameter)
         {
@@ -98,8 +98,8 @@ public class StatisticService : IStatisticService
             case Parameter.GOLD:
                 var goldItem = h.Items?.FirstOrDefault(ic => ic.Item?.Type == ItemType.MONEY);
                 return goldItem == null ? 0 : goldItem.Amount;
-            case Parameter.LEVEL:
-                return h.Level;
+            case Parameter.EXPERIENCE:
+                return h.Experience;
             default:
                 throw new Exception("Unknown statistic main parameter! " + parameter);
         }
