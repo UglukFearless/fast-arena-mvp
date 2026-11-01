@@ -169,6 +169,197 @@ public class MonsterFightUseItemIntegrationTests
             || currentState.ActVariants.Contains(HeroActVariant.FINALIZE));
     }
 
+    [Fact]
+    public async Task CalcRoundAsync_PersistentItemEffect_DoesNotStackWithRoundEffect()
+    {
+        var userId = Guid.NewGuid();
+        var heroId = Guid.NewGuid();
+        var roundItemCellId = Guid.NewGuid();
+        var persistentItemCellId = Guid.NewGuid();
+
+        var roundDefinition = new EffectDefinition
+        {
+            Id = Guid.NewGuid(),
+            ItemId = Guid.NewGuid(),
+            Type = EffectType.HEAL_HP,
+            DurationRounds = 3,
+            LifetimeType = EffectLifetimeType.RoundBased,
+            SourceType = EffectSourceType.Potion,
+            Magnitude = 30,
+            MinValue = 0,
+            MaxValue = 0,
+            ChancePercent = 100,
+            TargetType = EffectTargetType.SELF,
+            Priority = 1,
+        };
+
+        var persistentDefinition = new EffectDefinition
+        {
+            Id = Guid.NewGuid(),
+            ItemId = Guid.NewGuid(),
+            Type = EffectType.HEAL_HP,
+            DurationRounds = 0,
+            LifetimeType = EffectLifetimeType.Persistent,
+            SourceType = EffectSourceType.Potion,
+            Magnitude = 10,
+            MinValue = 0,
+            MaxValue = 0,
+            ChancePercent = 100,
+            TargetType = EffectTargetType.SELF,
+            Priority = 1,
+        };
+
+        var roundPotion = CreatePotion(roundDefinition);
+        var persistentPotion = CreatePotion(persistentDefinition);
+
+        var roundItemCell = new HeroItemCell
+        {
+            Id = roundItemCellId,
+            HeroId = heroId,
+            ItemId = roundPotion.Id,
+            Amount = 1,
+            Item = roundPotion,
+        };
+
+        var persistentItemCell = new HeroItemCell
+        {
+            Id = persistentItemCellId,
+            HeroId = heroId,
+            ItemId = persistentPotion.Id,
+            Amount = 1,
+            Item = persistentPotion,
+        };
+
+        var hero = new Hero
+        {
+            Id = heroId,
+            Name = "Stacking Hero",
+            Sex = HeroSex.NONE,
+            Level = 1,
+            Experience = 0,
+            MaxHealth = 10000,
+            UserId = userId,
+            EquippedSlots = new List<HeroEquippedSlot>
+            {
+                new HeroEquippedSlot
+                {
+                    HeroId = heroId,
+                    Slot = EquipmentSlotType.POCKET_1,
+                    HeroItemCellId = roundItemCellId,
+                    HeroItemCell = roundItemCell,
+                },
+                new HeroEquippedSlot
+                {
+                    HeroId = heroId,
+                    Slot = EquipmentSlotType.POCKET_2,
+                    HeroItemCellId = persistentItemCellId,
+                    HeroItemCell = persistentItemCell,
+                },
+            },
+        };
+
+        var user = new User
+        {
+            Id = userId,
+            Login = "stacking-user",
+            PasswordHash = "hash",
+            SelectedHeroId = heroId,
+        };
+
+        var monster = new Monster
+        {
+            Id = Guid.NewGuid(),
+            Name = "Training Monster",
+            Level = 1,
+            MaxHealth = 10000,
+            MonsterMoldId = Guid.NewGuid(),
+            Mold = null!,
+            Portrait = null!,
+        };
+
+        var action = new ActivityActionCase
+        {
+            Type = ActivityActionType.MONSTER_FIGHT,
+            Data = new MonsterFightData
+            {
+                Monster = monster,
+            },
+        };
+
+        var initState = (MonsterFightActionState)await action.BuildInitStateAsync(hero, action);
+
+        var session = new ActivitySession
+        {
+            Id = Guid.NewGuid(),
+            HeroId = heroId,
+            ActivityId = Guid.NewGuid(),
+            CurrentAction = action,
+            Actions = new List<ActivityActionCase> { action },
+        };
+        session.State[0] = initState;
+
+        var monsterFightService = new MonsterFightService(
+            new FakeUserService(user),
+            new FakeActivityStateService(session),
+            new FakeHeroService(hero, roundItemCell),
+            new FakeMonsterFightResultService(),
+            new FakeHeroProgressService(),
+            new FakeActivityService(session.ActivityId),
+            new FakeItemService(),
+            new FakeActivitySessionService(),
+            new EffectHandlerRegistry(new IEffectHandler[]
+            {
+                new HealHpEffectHandler(),
+                new OverrideAbilityToMaxEffectHandler(),
+                new StrikePowerBonusEffectHandler(),
+            }));
+
+        await monsterFightService.CalcRoundAsync(CreateUseItemPayload(roundItemCellId), userId);
+        var roundResult = await monsterFightService.CalcRoundAsync(CreateUseItemPayload(persistentItemCellId), userId);
+
+        var healEffects = roundResult.State!.ActiveEffects
+            .Where(e => e.Type == EffectType.HEAL_HP)
+            .ToList();
+
+        Assert.Equal(2, healEffects.Count);
+        Assert.Single(healEffects, e => e.LifetimeType == EffectLifetimeType.RoundBased);
+
+        var persistentEffect = Assert.Single(
+            healEffects,
+            e => e.LifetimeType == EffectLifetimeType.Persistent);
+
+        Assert.Equal(persistentDefinition.Magnitude, persistentEffect.Magnitude);
+        Assert.Equal(1, persistentEffect.StackCount);
+    }
+
+    private static Item CreatePotion(EffectDefinition definition)
+    {
+        return new Item
+        {
+            Id = definition.ItemId,
+            Name = "Test Potion",
+            Description = "Integration test item",
+            BaseCost = 1,
+            ItemImage = "potion.png",
+            CanBeEquipped = true,
+            CanBeFolded = false,
+            Type = ItemType.POTION,
+            Effects = new List<EffectDefinition> { definition },
+        };
+    }
+
+    private static MonsterFightActionPayload CreateUseItemPayload(Guid itemCellId)
+    {
+        return new MonsterFightActionPayload
+        {
+            ActVariant = HeroActVariant.USE_ITEM,
+            ActionData = new MonsterFightActionData
+            {
+                UsedPocketItemCellId = itemCellId,
+            },
+        };
+    }
+
     private sealed class FakeUserService : IUserService
     {
         private readonly User _user;

@@ -564,7 +564,7 @@ public class MonsterFightService : IMonsterFightService
 
     private int CalculateDamage(MonsterFightActionState state, HitZone hitZone)
     {
-        var unitDamage = _damageMap[hitZone] + state.UnitDamageModifier;
+        var unitDamage = Math.Max(1, _damageMap[hitZone] + state.UnitDamageModifier);
         var damage = state.StrikeStrength * unitDamage;
         return Math.Max(0, damage);
     }
@@ -639,10 +639,12 @@ public class MonsterFightService : IMonsterFightService
         var effects = consumedItem.Item?.Effects ?? new List<EffectDefinition>();
         foreach (var definition in effects.OrderBy(e => e.Priority))
         {
-            var existing = state.ActiveEffects.FirstOrDefault(e =>
-                e.Type == definition.Type &&
-                e.LifetimeType == EffectLifetimeType.RoundBased &&
-                e.RemainingRounds > 0);
+            var existing = definition.LifetimeType == EffectLifetimeType.RoundBased
+                ? state.ActiveEffects.FirstOrDefault(e =>
+                    e.Type == definition.Type &&
+                    e.LifetimeType == EffectLifetimeType.RoundBased &&
+                    e.RemainingRounds > 0)
+                : null;
             if (existing == null)
             {
                 state.ActiveEffects.Add(new ActiveEffect
