@@ -9,19 +9,19 @@ public class MonsterService : IMonsterService
 {
     private readonly IMonsterMoldStorage _monsterMoldStorage;
     private readonly Random _random = new Random();
-    private readonly Dictionary<int, string[]> _nameModificatorsMap = new() {
-        { -10, new string[] {"Остервене́лый", "Остервене́лая", "Остервене́лое" } },
-        { -8, new string[] {"Свирепый", "Свирепая", "Свирепое" } },
-        { -6, new string[] {"Жирный", "Жирная", "Жирное" } },
-        { -4, new string[] {"Злющий", "Злющая", "Злющее" } },
-        { -2, new string[] {"Дерзкий", "Дерзкая", "Дерзкое" } },
-        { 0, new string[] {"", "", "" } },
-        { 2, new string[] {"", "", "" } },
-        { 6, new string[] {"Тощий", "Тощая", "Тощее" } },
-        { 8, new string[] {"Хилый", "Хилая", "Хилое" } },
-        { 4, new string[] {"Вялый", "Вялая", "Вялое" } },
-        { 10, new string[] {"Всратый", "Всратая", "Всратое" } },
-        { int.MaxValue, new string[] {"Жалкий", "Жалкая", "Жалкое" } },
+    private static readonly (int From, int To, string[] Forms)[] _epithetRanges =
+    {
+        (int.MinValue, -10, new[] { "Остервене́лый", "Остервене́лая", "Остервене́лое" }),
+        (-9, -8, new[] { "Свирепый", "Свирепая", "Свирепое" }),
+        (-7, -6, new[] { "Жирный", "Жирная", "Жирное" }),
+        (-5, -4, new[] { "Злющий", "Злющая", "Злющее" }),
+        (-3, -2, new[] { "Дерзкий", "Дерзкая", "Дерзкое" }),
+        (-1, 2, new[] { string.Empty, string.Empty, string.Empty }),
+        (3, 4, new[] { "Вялый", "Вялая", "Вялое" }),
+        (5, 6, new[] { "Тощий", "Тощая", "Тощее" }),
+        (7, 8, new[] { "Хилый", "Хилая", "Хилое" }),
+        (9, 10, new[] { "Всратый", "Всратая", "Всратое" }),
+        (11, int.MaxValue, new[] { "Жалкий", "Жалкая", "Жалкое" }),
     };
 
     public MonsterService(IMonsterMoldStorage monsterMoldStorage)
@@ -47,21 +47,21 @@ public class MonsterService : IMonsterService
     private string ComposeMonsterName(string name, MonsterSex sex, int level, int rankLevel)
     {
         var normalizedRank = rankLevel >= 12 ? rankLevel : 12;
-        var diff = normalizedRank - level;
+        var difference = normalizedRank - level;
+        var epithet = GetEpithetForms(difference)[(int)sex];
 
-        var p1 = int.MinValue;
-        
-        foreach(var modificator in _nameModificatorsMap)
+        return epithet.Length == 0 ? name : epithet + ' ' + name;
+    }
+
+    private static string[] GetEpithetForms(int difference)
+    {
+        foreach (var range in _epithetRanges)
         {
-            if (diff > p1 && diff <= modificator.Key)
-            {
-                return modificator.Value[(int)sex] + ' ' + name;
-            }
-
-            p1 = modificator.Key;
+            if (difference >= range.From && difference <= range.To)
+                return range.Forms;
         }
 
-        throw new NotImplementedException();
+        throw new InvalidOperationException($"No epithet range covers rank difference {difference}.");
     }
 
     private int CalcHealht(int level, int baseHealth, int healthPerLevel)
