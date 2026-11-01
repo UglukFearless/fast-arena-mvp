@@ -18,8 +18,8 @@
 
 | `EffectType` | Хук | Действие | `Stack` |
 |---|---|---|---|
-| `HEAL_HP` | `OnRoundStart` | Прибавляет `Magnitude` к HP героя, не выше максимума; пересчитывает способность | По правилу домена |
-| `OVERRIDE_ABILITY_TO_MAX` | `OnStrikeClaimed`, `OnRoundEnd` | Ставит способность героя в `MaxHealth / 10` | По правилу домена |
+| `HEAL_HP` | `OnRoundStart` | Прибавляет `Magnitude` к HP героя, не выше максимума; пересчитывает боеспособность | По правилу домена |
+| `OVERRIDE_ABILITY_TO_MAX` | `OnStrikeClaimed`, `OnRoundEnd` | Ставит боеспособность героя в `MaxHealth / 10` | По правилу домена |
 | `STRIKE_POWER_BONUS` | `OnBeforeDamageCommit` | Прибавляет `Magnitude` к силе удара | По правилу домена |
 | `UNIT_DAMAGE_DELTA` | `OnBeforeDamageCommit` | Прибавляет `Magnitude` к модификатору юнит-урона | Не меняет эффект |
 | `INCOMING_STRIKE_FULL_BLOCK` | `OnIncomingStrikeConfirmed` | Если удар ещё не заблокирован и `Magnitude > 0`, с вероятностью `ChancePercent` блокирует удар и уменьшает `Magnitude` — остаток блоков | Не меняет эффект |
@@ -35,12 +35,12 @@
 3. При действии `USE_ITEM` активируются эффекты израсходованного предмета. Если активен эффект `RoundBased` того же типа, вызывается `Stack` его обработчика; иначе добавляется новый `ActiveEffect`.
 4. `OnRoundStart`.
 5. Броски инициативы.
-6. `OnStrikeClaimed` — до расчёта преимущества по способности.
+6. `OnStrikeClaimed` — до расчёта преимущества по боеспособности.
 7. Расчёт стороны и силы удара.
 8. `OnIncomingStrikeConfirmed` — только при ударе монстра с силой больше 0. Выставленный `StrikeBlocked` превращает раунд в ничью.
 9. Определение зоны попадания.
 10. `OnBeforeDamageCommit` — только при ударе героя. Сила удара меньше 1 после хука превращает раунд в ничью.
-11. Урон, новое HP, пересчёт способности по HP.
+11. Урон, новое HP, пересчёт боеспособности по HP.
 12. `OnRoundEnd`.
 13. `RemainingRounds` эффектов `RoundBased` уменьшается на 1.
 
