@@ -78,7 +78,7 @@ public class ActivitySessionService : IActivitySessionService
             Actions = activityCase.Actions,
         };
 
-        session.State[0] = await session.CurrentAction.BuildInitStateAsync(hero, session.CurrentAction);
+        session.State[0] = await session.CurrentAction.BuildInitStateAsync(hero, session.CurrentAction, null);
 
         await _activityStateService.CreateStateAsync(session);
 
@@ -109,9 +109,12 @@ public class ActivitySessionService : IActivitySessionService
         var nextIndex = GetCurrentActionIndex(activitySession) + 1;
         var nextAction = activitySession.Actions.ToList()[nextIndex];
         var hero = await _heroService.GetAsync(activitySession.HeroId);
+        var previousState = activitySession.State.MaxBy(state => state.Key).Value;
+
         activitySession.CurrentAction = nextAction;
+        activitySession.State.Clear();
         activitySession.State[0] = await activitySession.CurrentAction.BuildInitStateAsync(
-                hero, activitySession.CurrentAction);
+                hero, activitySession.CurrentAction, previousState);
 
         await _activityStateService.UpdateStateAsync(activitySession);
 

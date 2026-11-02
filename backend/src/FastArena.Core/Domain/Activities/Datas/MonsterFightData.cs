@@ -11,23 +11,39 @@ public class MonsterFightData : ActivityActionCaseData
     public required Monster Monster { get; set; }
     public MonsterFightReward? Reward { get; set; }
 
-    public override async Task<ActivityActionState> BuildInitStateAsync(Hero hero, ActivityActionCase activityActionCase)
+    public override async Task<ActivityActionState> BuildInitStateAsync(
+        Hero hero,
+        ActivityActionCase activityActionCase,
+        ActivityActionState? previousState)
     {
+        var previousFightState = previousState as MonsterFightActionState;
+        var heroHealth = previousFightState?.HeroHealth ?? hero.MaxHealth;
+
         var state = new MonsterFightActionState()
         {
-            HeroHealth = hero.MaxHealth,
-            HeroAbility = (int)hero.MaxHealth / 10,
+            HeroHealth = heroHealth,
+            HeroAbility = heroHealth / 10,
             HeroDiceRoll = null,
             MonsterHealth = Monster.MaxHealth,
             MonsterAbility = (int)Monster.MaxHealth / 10,
             MonsterDiceRoll = null,
             Result = null,
             ActVariants = GetInitHeroActVariantsAsync(hero),
-            ActiveEffects = new List<ActiveEffect>(),
+            ActiveEffects = GetCarriedEquipmentEffects(previousFightState),
             PocketItems = GetPocketItems(hero),
         };
 
         return await Task.FromResult(state);
+    }
+
+    private static List<ActiveEffect> GetCarriedEquipmentEffects(MonsterFightActionState? previousFightState)
+    {
+        if (previousFightState == null)
+            return new List<ActiveEffect>();
+
+        return previousFightState.ActiveEffects
+            .Where(e => e.SourceType == EffectSourceType.Equipment)
+            .ToList();
     }
 
     private HashSet<HeroActVariant> GetInitHeroActVariantsAsync(Hero hero)

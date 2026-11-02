@@ -6,7 +6,9 @@
 
 `ActiveEffect` — эффект, действующий в бою. Создаётся копированием полей определения и дополняется счётчиком оставшихся раундов `RemainingRounds` (начальное значение — `DurationRounds`), числом объединённых активаций `StackCount` и изображением источника `SourceImageUrl`. Активные эффекты лежат в `MonsterFightActionState.ActiveEffects` — в состоянии боя внутри сессии активности.
 
-`LifetimeType` задаёт истечение: `RoundBased` отсчитывает раунды, `Persistent` действует до конца боя. `SourceType` задаёт происхождение: `Potion`, `Equipment`, `Skill`.
+`LifetimeType` задаёт истечение: `RoundBased` отсчитывает раунды, `Persistent` действует, пока действует его источник. `SourceType` задаёт происхождение: `Potion`, `Equipment`, `Skill`.
+
+Эффекты с `SourceType = Equipment` переходят в следующий эпизод приключения вместе с остатком заряда — [adventure.md](../domain/adventure.md#эпизод).
 
 Поля `TargetType`, `MinValue`, `MaxValue` и `NextEffectDefinitionId` хранятся и отдаются в API, но рантайм их не читает. Эффекты действуют только в пользу героя: поля монстра обработчики не меняют.
 

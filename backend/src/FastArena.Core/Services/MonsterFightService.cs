@@ -794,10 +794,12 @@ public class MonsterFightService : IMonsterFightService
     private async Task DoFinalize(MonsterFight fight, Guid activityId)
     {
         var lastState = GetTheLastState(fight);
-        if (
-            lastState.Value.HeroHealth > 0 && 
-            lastState.Value.MonsterHealth <= 0 && 
-            lastState.Value.Result?.ResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO)
+        var isVictory =
+            lastState.Value.HeroHealth > 0 &&
+            lastState.Value.MonsterHealth <= 0 &&
+            lastState.Value.Result?.ResultType == MonsterFightActionStateResultType.STRIKE_BY_HERO;
+
+        if (isVictory)
         {
             await _monsterFightResultService.AddWinResultAsync(fight);
             if (fight.Reward != null)
@@ -807,6 +809,7 @@ public class MonsterFightService : IMonsterFightService
             }
             var exp = await _heroProgressService.CalcExperienceForFightAsync(fight);
             await _heroService.IncreaseExperienceAsync(exp, fight.Hero.Id);
+            await CarryLevelUpHealthAsync(fight, lastState.Value);
         } 
         else
         {
@@ -816,7 +819,7 @@ public class MonsterFightService : IMonsterFightService
 
         var activitySession = await _activityStateService.GetAsync(activityId);
 
-        if (activitySession != null && await _activitySessionService.HasNextAsync(activitySession))
+        if (isVictory && activitySession != null && await _activitySessionService.HasNextAsync(activitySession))
         {
             await _activitySessionService.GoNextAsync(activitySession);
         } 
@@ -824,6 +827,15 @@ public class MonsterFightService : IMonsterFightService
         {
             await _activityStateService.CleanTheStateAsync(activityId);
         }
+    }
+
+    private async Task CarryLevelUpHealthAsync(MonsterFight fight, MonsterFightActionState lastState)
+    {
+        var hero = await _heroService.GetAsync(fight.Hero.Id);
+        var healthGrowth = hero.MaxHealth - fight.Hero.MaxHealth;
+
+        if (healthGrowth > 0)
+            lastState.HeroHealth += healthGrowth;
     }
 
     private void ValidateActVariant(HeroActVariant heroActVariant, MonsterFightActionState lastState)

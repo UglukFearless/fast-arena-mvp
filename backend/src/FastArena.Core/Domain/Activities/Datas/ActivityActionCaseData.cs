@@ -5,5 +5,8 @@ namespace FastArena.Core.Domain.Activities.Datas;
 
 public abstract class ActivityActionCaseData 
 {
-    public abstract Task<ActivityActionState> BuildInitStateAsync(Hero hero, ActivityActionCase activityActionCase);
+    public abstract Task<ActivityActionState> BuildInitStateAsync(
+        Hero hero,
+        ActivityActionCase activityActionCase,
+        ActivityActionState? previousState);
 }

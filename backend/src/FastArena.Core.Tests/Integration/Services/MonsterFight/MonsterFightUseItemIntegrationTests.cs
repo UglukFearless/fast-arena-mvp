@@ -111,7 +111,7 @@ public class MonsterFightUseItemIntegrationTests
             },
         };
 
-        var initState = (MonsterFightActionState)await action.BuildInitStateAsync(hero, action);
+        var initState = (MonsterFightActionState)await action.BuildInitStateAsync(hero, action, null);
 
         var session = new ActivitySession
         {
@@ -286,7 +286,7 @@ public class MonsterFightUseItemIntegrationTests
             },
         };
 
-        var initState = (MonsterFightActionState)await action.BuildInitStateAsync(hero, action);
+        var initState = (MonsterFightActionState)await action.BuildInitStateAsync(hero, action, null);
 
         var session = new ActivitySession
         {
@@ -330,6 +330,104 @@ public class MonsterFightUseItemIntegrationTests
 
         Assert.Equal(persistentDefinition.Magnitude, persistentEffect.Magnitude);
         Assert.Equal(1, persistentEffect.StackCount);
+    }
+
+    [Fact]
+    public async Task CalcRoundAsync_FinalizeAfterHeroDeath_EndsAdventureInsteadOfGoingNext()
+    {
+        var userId = Guid.NewGuid();
+        var heroId = Guid.NewGuid();
+
+        var hero = new Hero
+        {
+            Id = heroId,
+            Name = "Doomed Hero",
+            Sex = HeroSex.NONE,
+            Level = 1,
+            Experience = 0,
+            MaxHealth = 100,
+            UserId = userId,
+        };
+
+        var user = new User
+        {
+            Id = userId,
+            Login = "doomed-user",
+            PasswordHash = "hash",
+            SelectedHeroId = heroId,
+        };
+
+        var firstCase = CreateMonsterFightCase();
+        var secondCase = CreateMonsterFightCase();
+
+        var session = new ActivitySession
+        {
+            Id = Guid.NewGuid(),
+            HeroId = heroId,
+            ActivityId = Guid.NewGuid(),
+            CurrentAction = firstCase,
+            Actions = new List<ActivityActionCase> { firstCase, secondCase },
+        };
+        session.State[0] = new MonsterFightActionState
+        {
+            HeroHealth = 0,
+            MonsterHealth = 50,
+            ActVariants = new HashSet<HeroActVariant> { HeroActVariant.FINALIZE },
+            Result = new MonsterFightActionStateResult
+            {
+                ResultType = MonsterFightActionStateResultType.STRIKE_BY_MONSTER,
+                ResultText = "Monster killed the hero.",
+            },
+        };
+
+        var activityStateService = new FakeActivityStateService(session);
+        var activitySessionService = new FakeActivitySessionService(hasNext: true);
+
+        var monsterFightService = new MonsterFightService(
+            new FakeUserService(user),
+            activityStateService,
+            new FakeHeroService(hero, null!),
+            new FakeMonsterFightResultService(),
+            new FakeHeroProgressService(),
+            new FakeActivityService(session.ActivityId),
+            new FakeItemService(),
+            activitySessionService,
+            new EffectHandlerRegistry(new IEffectHandler[]
+            {
+                new HealHpEffectHandler(),
+                new OverrideAbilityToMaxEffectHandler(),
+                new StrikePowerBonusEffectHandler(),
+            }));
+
+        var roundResult = await monsterFightService.CalcRoundAsync(
+            new MonsterFightActionPayload { ActVariant = HeroActVariant.FINALIZE },
+            userId);
+
+        Assert.True(roundResult.ShoudGoNext);
+        Assert.False(activitySessionService.GoNextCalled);
+        Assert.True(activityStateService.CleanCalled);
+        Assert.Same(firstCase, session.CurrentAction);
+    }
+
+    private static ActivityActionCase CreateMonsterFightCase()
+    {
+        return new ActivityActionCase
+        {
+            Type = ActivityActionType.MONSTER_FIGHT,
+            Data = new MonsterFightData
+            {
+                Monster = new Monster
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Training Monster",
+                    Level = 1,
+                    MaxHealth = 100,
+                    MonsterMoldId = Guid.NewGuid(),
+                    Mold = null!,
+                    Portrait = null!,
+                },
+            },
+        };
     }
 
     private static Item CreatePotion(EffectDefinition definition)
@@ -499,6 +597,8 @@ public class MonsterFightUseItemIntegrationTests
             _session = session;
         }
 
+        public bool CleanCalled { get; private set; }
+
         public Task<bool> IsBusyAsync(Guid userId)
         {
             return Task.FromResult(true);
@@ -539,6 +639,7 @@ public class MonsterFightUseItemIntegrationTests
 
         public Task CleanTheStateAsync(Guid id)
         {
+            CleanCalled = true;
             return Task.CompletedTask;
         }
 
@@ -552,13 +653,20 @@ public class MonsterFightUseItemIntegrationTests
     private sealed class FakeMonsterFightResultService : IMonsterFightResultService
     {
         public Task<MonsterFightResult> AddWinResultAsync(MonsterFight fight)
-        {
-            throw new NotImplementedException();
-        }
+            => Task.FromResult(CreateResult(fight, MonsterFightResultType.VICTORY));
 
         public Task<MonsterFightResult> AddLoseResultAsync(MonsterFight fight)
+            => Task.FromResult(CreateResult(fight, MonsterFightResultType.DEFEAT));
+
+        private static MonsterFightResult CreateResult(MonsterFight fight, MonsterFightResultType type)
         {
-            throw new NotImplementedException();
+            return new MonsterFightResult
+            {
+                Id = Guid.NewGuid(),
+                HeroId = fight.Hero.Id,
+                Type = type,
+                Monster = fight.Monster,
+            };
         }
     }
 
@@ -635,6 +743,15 @@ public class MonsterFightUseItemIntegrationTests
 
     private sealed class FakeActivitySessionService : IActivitySessionService
     {
+        private readonly bool _hasNext;
+
+        public FakeActivitySessionService(bool hasNext = false)
+        {
+            _hasNext = hasNext;
+        }
+
+        public bool GoNextCalled { get; private set; }
+
         public Task<ActivitySession> StartActivityAsync(Guid activityId, Guid userId)
         {
             throw new NotImplementedException();
@@ -647,11 +764,12 @@ public class MonsterFightUseItemIntegrationTests
 
         public Task<bool> HasNextAsync(ActivitySession activitySession)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(_hasNext);
         }
 
         public Task<ActivitySession> GoNextAsync(ActivitySession activitySession)
         {
+            GoNextCalled = true;
             return Task.FromResult(activitySession);
         }
     }

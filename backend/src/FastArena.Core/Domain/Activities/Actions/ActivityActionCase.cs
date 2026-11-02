@@ -7,8 +7,11 @@ public class ActivityActionCase
 {
     public ActivityActionType Type { get; set; }
     public required ActivityActionCaseData Data { get; set; }
-    public async Task<ActivityActionState> BuildInitStateAsync(Hero hero, ActivityActionCase activityActionCase)
+    public async Task<ActivityActionState> BuildInitStateAsync(
+        Hero hero,
+        ActivityActionCase activityActionCase,
+        ActivityActionState? previousState)
     {
-        return await Data.BuildInitStateAsync(hero, activityActionCase);
+        return await Data.BuildInitStateAsync(hero, activityActionCase, previousState);
     }
 }
