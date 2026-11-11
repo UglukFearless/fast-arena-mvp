@@ -1,4 +1,4 @@
-using FastArena.Core.Domain;
+﻿using FastArena.Core.Domain;
 using FastArena.Core.Domain.Activities;
 using FastArena.Core.Domain.Activities.Actions;
 using FastArena.Core.Domain.Activities.Datas;
@@ -47,7 +47,6 @@ public class MonsterFightUseItemIntegrationTests
             Description = "Integration test item",
             BaseCost = 1,
             ItemImage = "potion.png",
-            CanBeEquipped = true,
             CanBeFolded = true,
             Type = ItemType.POTION,
             Effects = new List<EffectDefinition> { healDefinition },
@@ -71,12 +70,13 @@ public class MonsterFightUseItemIntegrationTests
             Experience = 0,
             MaxHealth = 100,
             UserId = userId,
-            EquippedSlots = new List<HeroEquippedSlot>
+            Slots = new List<HeroSlot>
             {
-                new HeroEquippedSlot
+                new HeroSlot
                 {
+                    Id = Guid.NewGuid(),
                     HeroId = heroId,
-                    Slot = EquipmentSlotType.POCKET_1,
+                    SlotKey = "POCKET",
                     HeroItemCellId = heroItemCellId,
                     HeroItemCell = heroItemCell,
                 },
@@ -239,19 +239,21 @@ public class MonsterFightUseItemIntegrationTests
             Experience = 0,
             MaxHealth = 10000,
             UserId = userId,
-            EquippedSlots = new List<HeroEquippedSlot>
+            Slots = new List<HeroSlot>
             {
-                new HeroEquippedSlot
+                new HeroSlot
                 {
+                    Id = Guid.NewGuid(),
                     HeroId = heroId,
-                    Slot = EquipmentSlotType.POCKET_1,
+                    SlotKey = "POCKET",
                     HeroItemCellId = roundItemCellId,
                     HeroItemCell = roundItemCell,
                 },
-                new HeroEquippedSlot
+                new HeroSlot
                 {
+                    Id = Guid.NewGuid(),
                     HeroId = heroId,
-                    Slot = EquipmentSlotType.POCKET_2,
+                    SlotKey = "POCKET",
                     HeroItemCellId = persistentItemCellId,
                     HeroItemCell = persistentItemCell,
                 },
@@ -439,7 +441,6 @@ public class MonsterFightUseItemIntegrationTests
             Description = "Integration test item",
             BaseCost = 1,
             ItemImage = "potion.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.POTION,
             Effects = new List<EffectDefinition> { definition },
@@ -551,12 +552,12 @@ public class MonsterFightUseItemIntegrationTests
 
         public Task<HeroItemCell> ConsumePocketItemForFightAsync(Guid heroId, Guid heroItemCellId)
         {
-            if (_hero.EquippedSlots == null)
+            if (_hero.Slots == null)
             {
                 throw new InvalidOperationException("Hero has no slots.");
             }
 
-            var slot = _hero.EquippedSlots.FirstOrDefault(s => s.HeroItemCellId == heroItemCellId);
+            var slot = _hero.Slots.FirstOrDefault(s => s.HeroItemCellId == heroItemCellId);
             if (slot?.HeroItemCell == null)
             {
                 throw new InvalidOperationException("Pocket item not found.");
@@ -734,7 +735,6 @@ public class MonsterFightUseItemIntegrationTests
                 Description = "Coin",
                 BaseCost = 1,
                 ItemImage = "coin.png",
-                CanBeEquipped = false,
                 CanBeFolded = true,
                 Type = ItemType.MONEY,
             });

@@ -15,7 +15,7 @@ export class AccountClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     registration(registrationModel: RegistrationModel): Promise<AuthResultDto> {
@@ -100,7 +100,7 @@ export class ActivityClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     get(): Promise<ActivityDto[]> {
@@ -144,7 +144,7 @@ export class ActivitySessionClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     start(activityId: string | undefined): Promise<ActivitySessionDto> {
@@ -225,7 +225,7 @@ export class HealthClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     ping(): Promise<string> {
@@ -302,7 +302,7 @@ export class HeroClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     create(model: HeroCreationModel): Promise<HeroDto> {
@@ -532,7 +532,7 @@ export class HeroEquipmentClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     equip(model: HeroEquipModel): Promise<FileResponse> {
@@ -627,7 +627,7 @@ export class MonsterFightClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     get(): Promise<MonsterFightDto> {
@@ -708,7 +708,7 @@ export class PortraitClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     getAllForHeroes(): Promise<PortraitDto[]> {
@@ -752,7 +752,7 @@ export class ShopClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     getShopCatalog(): Promise<ShopCatalogDto> {
@@ -871,7 +871,7 @@ export class StatisticClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     get(parameter: Parameter | undefined, aliveParam: HeroAliveParam | undefined, ownerParam: HeroOwnerParam | undefined, desc: boolean | undefined): Promise<StatisticDataDto> {
@@ -931,7 +931,7 @@ export class UserClient {
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
         this.http = http ? http : window as any;
-        this.baseUrl = baseUrl ?? "http://localhost:8100";
+        this.baseUrl = baseUrl ?? "http://localhost";
     }
 
     getInfo(): Promise<UserInfoDto> {
@@ -1060,11 +1060,10 @@ export interface ItemDto {
     description: string;
     baseCost: number;
     itemImage: string;
-    canBeEquipped: boolean;
     canBeFolded: boolean;
     type: ItemType;
     effects: EffectDefinitionDto[] | undefined;
-    allowedSlots: EquipmentSlotType[] | undefined;
+    occupiedSlots: string[] | undefined;
 }
 
 export enum ItemType {
@@ -1117,16 +1116,9 @@ export enum EffectTargetType {
     CONTEXT_VALUE = 3,
 }
 
-export enum EquipmentSlotType {
-    POCKET_1 = 0,
-    POCKET_2 = 1,
-    POCKET_3 = 2,
-    RIGHT_HAND = 3,
-    LEFT_HAND = 4,
-}
-
 export interface HeroPocketSlotDto {
-    slot: EquipmentSlotType;
+    id: string;
+    slotKey: string;
     item: HeroItemCellDto | undefined;
 }
 
@@ -1183,7 +1175,7 @@ export interface HeroEquipModel {
 }
 
 export interface HeroUnequipModel {
-    slot: EquipmentSlotType;
+    heroItemCellId: string;
 }
 
 export interface MonsterFightDto {

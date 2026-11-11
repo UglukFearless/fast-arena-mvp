@@ -1,4 +1,4 @@
-﻿
+
 using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.Items;
 using FastArena.WebApi.Dtos;
@@ -18,12 +18,11 @@ internal static class ItemProfile
             Name = item.Name,
             Description = item.Description,
             ItemImage = item.ItemImage,
-            CanBeEquipped = item.CanBeEquipped,
             CanBeFolded = item.CanBeFolded,
             BaseCost = item.BaseCost,
             Type = item.Type,
             Effects = item.Effects != null ? EffectDefinitionProfile.Map(item.Effects) : null,
-            AllowedSlots = item.AllowedSlots?.Select(s => s.Slot).Distinct().ToList(),
+            OccupiedSlots = item.OccupiedSlots?.Select(s => s.SlotKey).ToList(),
         };
 
         return dto;

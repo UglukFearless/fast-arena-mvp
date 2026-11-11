@@ -19,7 +19,7 @@ public class HeroInfoService : IHeroInfoService
         var hero = await _heroService.GetAsync(heroId);
 
         var isInventoryVisible = hero.UserId == requestingUserId;
-        var equippedCellIds = hero.EquippedSlots?
+        var equippedCellIds = hero.Slots?
             .Where(s => s.HeroItemCellId.HasValue)
             .Select(s => s.HeroItemCellId!.Value)
             .ToHashSet()
@@ -36,50 +36,24 @@ public class HeroInfoService : IHeroInfoService
                 ? hero.Items?.Where(i => !equippedCellIds.Contains(i.Id)).ToList() ?? new List<HeroItemCell>()
                 : new List<HeroItemCell>(),
             PocketSlots = isInventoryVisible
-                ? GetFixedPocketSlots(hero)
-                : new List<HeroEquippedSlot>(),
+                ? OrderInventorySlots(hero.Slots)
+                : new List<HeroSlot>(),
         };
     }
 
-    private static List<HeroEquippedSlot> GetFixedPocketSlots(Hero hero)
+    private static List<HeroSlot> OrderInventorySlots(List<HeroSlot>? slots)
     {
-        var slotsByType = hero.EquippedSlots?
-            .Where(s => IsInventorySlot(s.Slot))
-            .ToDictionary(s => s.Slot)
-            ?? new Dictionary<EquipmentSlotType, HeroEquippedSlot>();
-
-        var inventorySlotOrder = new[]
-        {
-            EquipmentSlotType.POCKET_1,
-            EquipmentSlotType.POCKET_2,
-            EquipmentSlotType.POCKET_3,
-            EquipmentSlotType.RIGHT_HAND,
-            EquipmentSlotType.LEFT_HAND,
-        };
-
-        return inventorySlotOrder.Select(slot =>
-        {
-            if (slotsByType.TryGetValue(slot, out var existed))
-            {
-                return existed;
-            }
-
-            return new HeroEquippedSlot
-            {
-                HeroId = hero.Id,
-                Slot = slot,
-                HeroItemCellId = null,
-                HeroItemCell = null,
-            };
-        }).ToList();
+        return (slots ?? new List<HeroSlot>())
+            .OrderBy(s => InventorySlotOrder(s.SlotKey))
+            .ThenBy(s => s.Id)
+            .ToList();
     }
 
-    private static bool IsInventorySlot(EquipmentSlotType slot)
+    private static int InventorySlotOrder(string slotKey) => slotKey switch
     {
-        return slot == EquipmentSlotType.POCKET_1
-            || slot == EquipmentSlotType.POCKET_2
-            || slot == EquipmentSlotType.POCKET_3
-            || slot == EquipmentSlotType.RIGHT_HAND
-            || slot == EquipmentSlotType.LEFT_HAND;
-    }
+        SlotKeys.Pocket => 0,
+        SlotKeys.RightHand => 1,
+        SlotKeys.LeftHand => 2,
+        _ => 3,
+    };
 }

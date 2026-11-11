@@ -40,52 +40,56 @@ public class HeroEquipmentService : IHeroEquipmentService
             throw new ActionDeniedException("Selected item is missing.");
         }
 
-        var item = heroItemCell.Item;
-        var allowedSlots = ResolveAllowedSlots(item);
-        if (allowedSlots.Count == 0)
+        var requiredKeys = ResolveRequiredSlotKeys(heroItemCell.Item);
+        if (requiredKeys.Count == 0)
         {
             throw new ActionDeniedException("Selected item cannot be equipped.");
         }
 
-        var isTwoHandedWeapon = IsTwoHandedWeapon(item);
-        var hasTwoHandedWeaponEquipped = HasTwoHandedWeaponEquipped(hero);
+        var eligibleSlots = hero.Slots?
+            .Where(s => requiredKeys.Contains(s.SlotKey))
+            .ToList()
+            ?? new List<HeroSlot>();
 
-        if (isTwoHandedWeapon && IsAnyHandOccupied(hero))
+        if (eligibleSlots.Count == 0)
         {
-            throw new ActionDeniedException("Two-handed weapon requires both hands to be free.");
+            throw new ActionDeniedException("Hero has no slots for this item.");
         }
 
-        if (!isTwoHandedWeapon && hasTwoHandedWeaponEquipped && IsHandItemType(item.Type))
+        var slotsToOccupy = new List<HeroSlot>();
+
+        foreach (var group in requiredKeys.GroupBy(key => key))
         {
-            throw new ActionDeniedException("Cannot equip hand item while a two-handed weapon is equipped.");
+            var groupFreeSlots = eligibleSlots
+                .Where(s => s.SlotKey == group.Key && !s.HeroItemCellId.HasValue)
+                .OrderBy(s => s.Id)
+                .ToList();
+
+            if (groupFreeSlots.Count < group.Count())
+            {
+                throw new ActionDeniedException($"No free slot for '{group.Key}'.");
+            }
+
+            slotsToOccupy.AddRange(groupFreeSlots.Take(group.Count()));
         }
 
-        var occupiedSlots = hero.EquippedSlots?
-            .Where(s => s.HeroItemCellId.HasValue)
-            .Select(s => s.Slot)
-            .ToHashSet()
-            ?? new HashSet<EquipmentSlotType>();
-
-        var freeSlot = allowedSlots.FirstOrDefault(slot => !occupiedSlots.Contains(slot));
-        if (occupiedSlots.Contains(freeSlot) || !allowedSlots.Contains(freeSlot))
-        {
-            throw new ActionDeniedException("All compatible slots are occupied.");
-        }
-
-        await _heroEquipmentStorage.EquipItemToSlotAsync(hero.Id, heroItemCellId, freeSlot);
+        await _heroEquipmentStorage.EquipItemAsync(
+            hero.Id,
+            heroItemCellId,
+            slotsToOccupy.Select(s => s.Id).ToList());
     }
 
-    public async Task UnequipAsync(Guid userId, EquipmentSlotType slot)
+    public async Task UnequipAsync(Guid userId, Guid heroItemCellId)
     {
         var hero = await EnsureHeroCanManageEquipmentAsync(userId);
 
-        var slotState = hero.EquippedSlots?.FirstOrDefault(s => s.Slot == slot);
-        if (slotState == null || !slotState.HeroItemCellId.HasValue)
+        var isEquipped = hero.Slots?.Any(s => s.HeroItemCellId == heroItemCellId) == true;
+        if (!isEquipped)
         {
-            throw new ActionDeniedException("Selected equipment slot is already empty.");
+            throw new ActionDeniedException("Selected item is not equipped.");
         }
 
-        await _heroEquipmentStorage.UnequipItemFromSlotAsync(hero.Id, slot);
+        await _heroEquipmentStorage.UnequipItemAsync(hero.Id, heroItemCellId);
     }
 
     private async Task<Hero> EnsureHeroCanManageEquipmentAsync(Guid userId)
@@ -112,71 +116,11 @@ public class HeroEquipmentService : IHeroEquipmentService
         return hero;
     }
 
-    private static List<EquipmentSlotType> ResolveAllowedSlots(Item item)
+    private static List<string> ResolveRequiredSlotKeys(Item item)
     {
-        var allowedSlots = item.AllowedSlots?
-            .Select(s => s.Slot)
-            .Distinct()
+        return item.OccupiedSlots?
+            .Select(s => s.SlotKey)
             .ToList()
-            ?? new List<EquipmentSlotType>();
-
-        return allowedSlots;
-    }
-
-    private static bool IsTwoHandedWeapon(Item item)
-    {
-        if (item.Type != ItemType.WEAPON)
-        {
-            return false;
-        }
-
-        var slots = item.AllowedSlots?
-            .Select(s => s.Slot)
-            .Distinct()
-            .ToHashSet()
-            ?? new HashSet<EquipmentSlotType>();
-
-        return slots.Contains(EquipmentSlotType.RIGHT_HAND) && slots.Contains(EquipmentSlotType.LEFT_HAND);
-    }
-
-    private static bool HasTwoHandedWeaponEquipped(Hero hero)
-    {
-        var heroItemsByCellId = hero.Items?
-            .Where(i => i.Item != null)
-            .ToDictionary(i => i.Id)
-            ?? new Dictionary<Guid, HeroItemCell>();
-
-        var equippedItemIds = hero.EquippedSlots?
-            .Where(s => s.HeroItemCellId.HasValue)
-            .Select(s => s.HeroItemCellId!.Value)
-            .ToList()
-            ?? new List<Guid>();
-
-        foreach (var cellId in equippedItemIds)
-        {
-            if (!heroItemsByCellId.TryGetValue(cellId, out var cell) || cell.Item == null)
-            {
-                continue;
-            }
-
-            if (IsTwoHandedWeapon(cell.Item))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool IsAnyHandOccupied(Hero hero)
-    {
-        return hero.EquippedSlots?.Any(s =>
-            s.HeroItemCellId.HasValue &&
-            (s.Slot == EquipmentSlotType.RIGHT_HAND || s.Slot == EquipmentSlotType.LEFT_HAND)) == true;
-    }
-
-    private static bool IsHandItemType(ItemType itemType)
-    {
-        return itemType == ItemType.WEAPON || itemType == ItemType.SHIELD;
+            ?? new List<string>();
     }
 }

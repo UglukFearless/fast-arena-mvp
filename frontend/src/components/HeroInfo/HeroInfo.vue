@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <section class="hero-info">
         <div class="hero-info__header">
             <button class="hero-info__back" @click="router.back()">← Назад</button>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { EquipmentSlotType, HeroClient, HeroInfoDto } from '@/api/clients';
+import { HeroClient, HeroInfoDto } from '@/api/clients';
 import { ApiSettings } from '@/utils/constants';
 import authFetch from '@/utils/http-helper';
 import { computed, ref, watch } from 'vue';
@@ -70,61 +70,13 @@ async function reloadHeroInfo() {
     await loadHeroInfo(heroId.value);
 }
 
-async function onItemEquipped(payload: { heroItemCellId: string; slot: EquipmentSlotType }) {
-    const current = heroInfo.value;
-    if (!current) {
-        return;
-    }
-
-    const itemIndex = current.items.findIndex(i => i.id === payload.heroItemCellId);
-    if (itemIndex < 0) {
-        await reloadHeroInfo();
-        return;
-    }
-
-    const pickedItem = current.items[itemIndex];
-    const isTwoHanded = pickedItem.item?.allowedSlots?.includes(EquipmentSlotType.RIGHT_HAND)
-        && pickedItem.item?.allowedSlots?.includes(EquipmentSlotType.LEFT_HAND);
-
-    // Two-handed weapons occupy both slots simultaneously — reload to get authoritative state.
-    if (isTwoHanded) {
-        await reloadHeroInfo();
-        return;
-    }
-
-    let targetPocket = current.pockets.find(p => p.slot === payload.slot);
-    if (!targetPocket) {
-        // Slot may not exist yet in the array if it was never occupied before.
-        targetPocket = { slot: payload.slot, item: undefined };
-        current.pockets.push(targetPocket);
-    }
-
-    if (targetPocket.item) {
-        await reloadHeroInfo();
-        return;
-    }
-
-    current.items.splice(itemIndex, 1);
-    targetPocket.item = pickedItem;
+async function onItemEquipped() {
+    await reloadHeroInfo();
 }
 
-async function onItemUnequipped(payload: { slot: EquipmentSlotType }) {
-    const current = heroInfo.value;
-    if (!current) {
-        return;
-    }
-
-    const pocket = current.pockets.find(p => p.slot === payload.slot);
-    if (!pocket?.item) {
-        await reloadHeroInfo();
-        return;
-    }
-
-    const removedItem = pocket.item;
-    pocket.item = undefined;
-    current.items.push(removedItem);
-}
-</script>
+async function onItemUnequipped() {
+    await reloadHeroInfo();
+}</script>
 
 <style lang="scss" scoped>
 .hero-info {

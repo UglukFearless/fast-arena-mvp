@@ -8,6 +8,7 @@ public static class SeederServiceExtensions
         services.AddScoped<MonsterSeeder>();
         services.AddScoped<EntityLinker>();
         services.AddScoped<ItemSeeder>();
+        services.AddScoped<SlotSeeder>();
         services.AddScoped<MonsterRewardSeeder>();
         services.AddScoped<SeederRunner>();
         return services;

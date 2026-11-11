@@ -42,3 +42,7 @@ Vue 3 и TypeScript, сборка Vue CLI (`vue-cli-service`), стили на S
 Клиенты API создаются с адресом `ApiSettings.BaseUrl` и `authFetch`; без `authFetch` создаётся только клиент регистрации и входа. Хранилища создают клиент на каждый вызов, компоненты — один раз при создании. Обращения к API выполняют действия хранилищ Pinia; исключения — компоненты `HeroInfo`, `HeroInventory` и `ShopPage`, которые вызывают клиентов напрямую.
 
 Два места формируют запросы вручную, минуя классы клиентов: хранилище `shop` — через `authFetch.fetch`, проверка токена в `auth-service` — через `fetch`. Изменение этих эндпоинтов перегенерация клиента не покрывает.
+
+## Генерация клиента
+
+`clients.ts` порождает `FastArena.ApiClientGenerator` из OpenAPI-документа запущенного backend. Параметры вызова, по порядку: путь к файлу клиента, язык (`ts` или `sharp`), хост и порт. Хост и порт необязательны: по умолчанию берутся `localhost` и `80`, адрес приложения из `APP_HTTP_PORT` файла `.env.example`. Документ запрашивается по `http://<host>:<port>/swagger/FastArenaAPI/swagger.json`: имя документа задаёт `document.DocumentName` в `SwaggerConfig`.

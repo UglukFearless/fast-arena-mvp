@@ -1,4 +1,4 @@
-using FastArena.Core.Domain.Items;
+﻿using FastArena.Core.Domain.Items;
 using FastArena.Core.Exceptions;
 using FastArena.Core.Interfaces.App;
 using FastArena.Core.Interfaces.Storages;
@@ -61,7 +61,7 @@ public class ShopService : IShopService
     public async Task<List<ShopHeroItem>> GetHeroItemsAsync(Guid userId)
     {
         var hero = await EnsureShopAccessibleAsync(userId);
-        var equippedCellIds = hero.EquippedSlots?
+        var equippedCellIds = hero.Slots?
             .Where(s => s.HeroItemCellId.HasValue)
             .Select(s => s.HeroItemCellId!.Value)
             .ToHashSet()
@@ -114,7 +114,7 @@ public class ShopService : IShopService
             .Where(i => i.Item != null)
             .ToDictionary(i => i.Id)
             ?? new Dictionary<Guid, Domain.Heroes.HeroItemCell>();
-        var equippedCellIds = hero.EquippedSlots?
+        var equippedCellIds = hero.Slots?
             .Where(s => s.HeroItemCellId.HasValue)
             .Select(s => s.HeroItemCellId!.Value)
             .ToHashSet()

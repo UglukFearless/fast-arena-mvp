@@ -1,4 +1,4 @@
-﻿using FastArena.Core.Domain.Items;
+using FastArena.Core.Domain.Items;
 using FastArena.Dal.Entities;
 
 namespace FastArena.Dal.Profiles;
@@ -16,12 +16,11 @@ internal static class ItemProfiles
             Name = dal.Name,
             Description = dal.Description,
             ItemImage = dal.ItemImage,
-            CanBeEquipped = dal.CanBeEquipped,
             CanBeFolded = dal.CanBeFolded,
             BaseCost = dal.BaseCost,
             Type = dal.Type,
             Effects = dal.Effects != null ? EffectDefinitionProfiles.Map(dal.Effects.ToList()) : null,
-            AllowedSlots = dal.AllowedSlots != null ? ItemAllowedSlotProfiles.Map(dal.AllowedSlots.ToList()) : null,
+            OccupiedSlots = dal.OccupiedSlots != null ? ItemSlotProfiles.Map(dal.OccupiedSlots.ToList()) : null,
         };
 
         return item;

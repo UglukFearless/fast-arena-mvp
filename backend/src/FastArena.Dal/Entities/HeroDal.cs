@@ -29,6 +29,7 @@ public class HeroDal
     public PortraitDal? Portrait { get; set; }
 
     public ICollection<HeroItemCellDal> Items { get; set; } = new List<HeroItemCellDal>();
-    public ICollection<HeroEquippedSlotDal> EquippedSlots { get; set; } = new List<HeroEquippedSlotDal>();
+
+    public ICollection<HeroSlotDal> Slots { get; set; } = new List<HeroSlotDal>();
     public ICollection<MonsterFightResultDal> Results { get; set; } = new List<MonsterFightResultDal>();
 }

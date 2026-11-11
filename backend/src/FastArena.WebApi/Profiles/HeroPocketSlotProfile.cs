@@ -1,26 +1,26 @@
 using FastArena.Core.Domain.Heroes;
-using FastArena.WebApi.Dtos;
 
 namespace FastArena.WebApi.Profiles;
 
 public static class HeroPocketSlotProfile
 {
-    public static HeroPocketSlotDto Map(HeroEquippedSlot slot)
+    public static Dtos.HeroPocketSlotDto Map(HeroSlot slot)
     {
         if (slot == null)
         {
             return null;
         }
 
-        return new HeroPocketSlotDto
+        return new Dtos.HeroPocketSlotDto
         {
-            Slot = slot.Slot,
+            Id = slot.Id,
+            SlotKey = slot.SlotKey,
             Item = slot.HeroItemCell != null ? HeroItemCellProfile.Map(slot.HeroItemCell, true) : null,
         };
     }
 
-    public static List<HeroPocketSlotDto> Map(List<HeroEquippedSlot> slots)
+    public static List<Dtos.HeroPocketSlotDto> MapList(List<HeroSlot> slots)
     {
-        return slots?.ConvertAll(Map) ?? new List<HeroPocketSlotDto>();
+        return slots?.ConvertAll(Map) ?? new List<Dtos.HeroPocketSlotDto>();
     }
 }

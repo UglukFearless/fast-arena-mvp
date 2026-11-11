@@ -59,11 +59,9 @@ public class MonsterFightData : ActivityActionCaseData
 
     private static List<HeroItemCell> GetPocketItems(Hero hero)
     {
-        return hero.EquippedSlots?
+        return hero.Slots?
             .Where(s => s.HeroItemCell != null &&
-                (s.Slot == EquipmentSlotType.POCKET_1 ||
-                 s.Slot == EquipmentSlotType.POCKET_2 ||
-                 s.Slot == EquipmentSlotType.POCKET_3))
+                SlotKeys.IsPocket(s.SlotKey))
             .Select(s => s.HeroItemCell!)
             .ToList() ?? new List<HeroItemCell>();
     }

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <section class="hero-inventory">
         <div class="hero-inventory__header">
             <h3 class="hero-inventory__title">Инвентарь</h3>
@@ -17,7 +17,9 @@
             <div class="hero-inventory__layout">
                 <div class="hero-inventory__slots">
                     <HeroInventoryEquipment
+                        title="Оружие"
                         :equipment-slots="equipmentSlots"
+                        :shared-slot-ids="sharedSlotIds"
                         :is-read-only="isReadOnly"
                         :is-acting="isActing"
                         :active-pocket-slot="activePocketSlot"
@@ -33,14 +35,24 @@
                     />
                 </div>
 
-                <HeroInventoryBackpack
-                    :inventory-items="inventoryItems"
+                <HeroInventoryEquipment
+                    class="hero-inventory__body"
+                    title="Доспехи"
+                    :equipment-slots="bodySlots"
                     :is-read-only="isReadOnly"
                     :is-acting="isActing"
-                    :active-inventory-cell-id="activeInventoryCellId"
-                    @item-click="onInventoryItemClick"
+                    :active-pocket-slot="activePocketSlot"
+                    @slot-click="onPocketClick"
                 />
             </div>
+
+            <HeroInventoryBackpack
+                :inventory-items="inventoryItems"
+                :is-read-only="isReadOnly"
+                :is-acting="isActing"
+                :active-inventory-cell-id="activeInventoryCellId"
+                @item-click="onInventoryItemClick"
+            />
 
             <div class="hero-inventory__money">
                 <img
@@ -59,7 +71,8 @@
 </template>
 
 <script setup lang="ts">
-import { ApiException, EquipmentSlotType, HeroAliveState, HeroEquipmentClient, HeroInfoDto, HeroItemCellDto, HeroPocketSlotDto, ItemType } from '@/api/clients';
+import { isBodySlot, isHandSlot, isPocketSlot } from '@/utils/slot-keys';
+import { ApiException, HeroAliveState, HeroEquipmentClient, HeroInfoDto, HeroItemCellDto, HeroPocketSlotDto, ItemType } from '@/api/clients';
 import HeroInventoryBackpack from '@/components/HeroInfo/HeroInventoryBackpack.vue';
 import HeroInventoryEquipment from '@/components/HeroInfo/HeroInventoryEquipment.vue';
 import HeroInventoryPockets from '@/components/HeroInfo/HeroInventoryPockets.vue';
@@ -80,30 +93,35 @@ const heroEquipmentClient = new HeroEquipmentClient(ApiSettings.BaseUrl, authFet
 const isReadOnly = computed(() => props.hero.isAlive === HeroAliveState.DEAD);
 const isActing = ref(false);
 const activeInventoryCellId = ref<string | null>(null);
-const activePocketSlot = ref<EquipmentSlotType | null>(null);
+const activePocketSlot = ref<string | null>(null);
 const actionMessage = ref('');
 const actionMessageIsError = ref(false);
 
-const consumableSlotTypes: EquipmentSlotType[] = [
-    EquipmentSlotType.POCKET_1,
-    EquipmentSlotType.POCKET_2,
-    EquipmentSlotType.POCKET_3,
-];
-
-const equipmentSlotTypes: EquipmentSlotType[] = [
-    EquipmentSlotType.RIGHT_HAND,
-    EquipmentSlotType.LEFT_HAND,
-];
-
 const consumablePockets = computed(() => {
-    return props.hero.pockets.filter(p => consumableSlotTypes.includes(p.slot));
+    return props.hero.pockets.filter(p => isPocketSlot(p.slotKey));
 });
 
 const equipmentSlots = computed<HeroPocketSlotDto[]>(() => {
-    return equipmentSlotTypes.map(slot => {
-        const existingSlot = props.hero.pockets.find(p => p.slot === slot);
-        return existingSlot || { slot, item: undefined };
-    });
+    return props.hero.pockets.filter(p => isHandSlot(p.slotKey));
+});
+
+const sharedSlotIds = computed<string[]>(() => {
+    const byItem = new Map<string, string[]>();
+    for (const slot of props.hero.pockets) {
+        if (slot.item) {
+            const ids = byItem.get(slot.item.id) ?? [];
+            ids.push(slot.id);
+            byItem.set(slot.item.id, ids);
+        }
+    }
+
+    return [...byItem.values()]
+        .filter(ids => ids.length > 1)
+        .flatMap(ids => ids.slice(1));
+});
+
+const bodySlots = computed<HeroPocketSlotDto[]>(() => {
+    return props.hero.pockets.filter(p => isBodySlot(p.slotKey));
 });
 
 const inventoryItems = computed(() => {
@@ -121,7 +139,7 @@ function setActionMessage(message: string, isError: boolean) {
 }
 async function onInventoryItemClick(item: HeroItemCellDto) {
     const slotResolution = resolveTargetSlot(item);
-    if (!slotResolution.canEquip || slotResolution.slot == null) {
+    if (!slotResolution.canEquip) {
         setActionMessage(slotResolution.message, true);
         return;
     }
@@ -133,10 +151,7 @@ async function onInventoryItemClick(item: HeroItemCellDto) {
 
     try {
         await heroEquipmentClient.equip({ heroItemCellId: item.id });
-        emit('equipped', {
-            heroItemCellId: item.id,
-            slot: slotResolution.slot,
-        });
+        emit('equipped', { heroItemCellId: item.id });
     } catch (error) {
         setActionMessage(getErrorMessage(error, 'Не удалось экипировать предмет.'), true);
     } finally {
@@ -145,119 +160,13 @@ async function onInventoryItemClick(item: HeroItemCellDto) {
     }
 }
 
-function resolveTargetSlot(itemCell: HeroItemCellDto): { canEquip: boolean; slot: EquipmentSlotType | null; message: string } {
-    const itemType = itemCell.item.type;
-
-    if (itemType === ItemType.POTION) {
-        const targetPocket = consumablePockets.value.find(p => !p.item);
-        if (!targetPocket) {
-            return {
-                canEquip: false,
-                slot: null,
-                message: 'Все карманы заняты.',
-            };
-        }
-
-        return {
-            canEquip: true,
-            slot: targetPocket.slot,
-            message: '',
-        };
+function resolveTargetSlot(itemCell: HeroItemCellDto): { canEquip: boolean; message: string } {
+    if (!itemCell.item.occupiedSlots?.length) {
+        return { canEquip: false, message: 'Этот предмет нельзя экипировать.' };
     }
 
-    const rightHandSlot = getEquipmentSlot(EquipmentSlotType.RIGHT_HAND);
-    const leftHandSlot = getEquipmentSlot(EquipmentSlotType.LEFT_HAND);
-    const isRightHandOccupied = !!rightHandSlot?.item;
-    const isLeftHandOccupied = !!leftHandSlot?.item;
-    const hasTwoHandedWeapon = hasTwoHandedWeaponEquipped();
-
-    if (itemType === ItemType.SHIELD) {
-        if (hasTwoHandedWeapon) {
-            return {
-                canEquip: false,
-                slot: null,
-                message: 'Нельзя экипировать щит с двуручным оружием.',
-            };
-        }
-
-        if (isLeftHandOccupied) {
-            return {
-                canEquip: false,
-                slot: null,
-                message: 'Левая рука уже занята.',
-            };
-        }
-
-        return {
-            canEquip: true,
-            slot: EquipmentSlotType.LEFT_HAND,
-            message: '',
-        };
-    }
-
-    if (itemType === ItemType.WEAPON) {
-        if (isTwoHandedWeapon(itemCell)) {
-            if (isRightHandOccupied || isLeftHandOccupied) {
-                return {
-                    canEquip: false,
-                    slot: null,
-                    message: 'Двуручное оружие требует обе свободные руки.',
-                };
-            }
-
-            return {
-                canEquip: true,
-                slot: EquipmentSlotType.RIGHT_HAND,
-                message: '',
-            };
-        }
-
-        if (hasTwoHandedWeapon || isRightHandOccupied) {
-            return {
-                canEquip: false,
-                slot: null,
-                message: 'Правая рука уже занята.',
-            };
-        }
-
-        return {
-            canEquip: true,
-            slot: EquipmentSlotType.RIGHT_HAND,
-            message: '',
-        };
-    }
-
-    return {
-        canEquip: false,
-        slot: null,
-        message: 'Этот предмет нельзя экипировать из рюкзака.',
-    };
+    return { canEquip: true, message: '' };
 }
-
-function getEquipmentSlot(slotType: EquipmentSlotType) {
-    return equipmentSlots.value.find(slot => slot.slot === slotType);
-}
-
-function hasTwoHandedWeaponEquipped() {
-    const rightHandItem = getEquipmentSlot(EquipmentSlotType.RIGHT_HAND)?.item;
-    if (!rightHandItem || rightHandItem.item.type !== ItemType.WEAPON) {
-        return false;
-    }
-
-    return isTwoHandedWeapon(rightHandItem);
-}
-
-function isTwoHandedWeapon(itemCell: HeroItemCellDto) {
-    if (!itemCell.item || itemCell.item.type !== ItemType.WEAPON) {
-        return false;
-    }
-
-    const slots = itemCell.item.allowedSlots;
-    return Array.isArray(slots)
-        && slots.includes(EquipmentSlotType.RIGHT_HAND)
-        && slots.includes(EquipmentSlotType.LEFT_HAND);
-}
-
 async function onPocketClick(pocket: HeroPocketSlotDto) {
     if (!pocket.item || isReadOnly.value || isActing.value) {
         return;
@@ -265,14 +174,12 @@ async function onPocketClick(pocket: HeroPocketSlotDto) {
 
     isActing.value = true;
     activeInventoryCellId.value = null;
-    activePocketSlot.value = pocket.slot;
+    activePocketSlot.value = pocket.slotKey;
     setActionMessage('', false);
 
     try {
-        await heroEquipmentClient.unequip({ slot: pocket.slot });
-        emit('unequipped', {
-            slot: pocket.slot,
-        });
+        await heroEquipmentClient.unequip({ heroItemCellId: pocket.item.id });
+        emit('unequipped', { heroItemCellId: pocket.item.id });
     } catch (error) {
         setActionMessage(getErrorMessage(error, 'Не удалось снять предмет.'), true);
     } finally {
@@ -305,6 +212,11 @@ function getErrorMessage(error: unknown, fallback: string) {
         align-items: flex-start;
         gap: 20px;
         flex-wrap: wrap;
+    }
+
+    &__body {
+        flex: 1 1 560px;
+        min-width: 0;
     }
 
     &__slots {

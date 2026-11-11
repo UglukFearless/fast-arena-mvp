@@ -48,7 +48,7 @@ public class HeroEquipmentController : ControllerBase
         try
         {
             var userId = AuthProvider.GetCurrentUserIdFromAccessor(_httpContextAccessor);
-            await _heroEquipmentService.UnequipAsync(userId, model.Slot);
+            await _heroEquipmentService.UnequipAsync(userId, model.HeroItemCellId);
             return Ok();
         }
         catch (EntityNotFoundException ex)

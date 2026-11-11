@@ -1,5 +1,6 @@
-import { ActiveEffectDto, EquipmentSlotType, HeroActVariant, HeroItemCellDto, MonsterFightActionStateDto, MonsterFightActionStateResult, MonsterFightClient, MonsterFightDoActionDataDto, MonsterFightDto } from "@/api/clients";
+﻿import { ActiveEffectDto, HeroActVariant, HeroItemCellDto, MonsterFightActionStateDto, MonsterFightActionStateResult, MonsterFightClient, MonsterFightDoActionDataDto, MonsterFightDto } from "@/api/clients";
 import { ApiSettings } from "@/utils/constants";
+import { isHandSlot, isPocketSlot } from "@/utils/slot-keys";
 import authFetch from "@/utils/http-helper";
 import { defineStore } from "pinia";
 import { useActivitySessionStore } from "./activity-session";
@@ -89,12 +90,11 @@ export const useMonsterFight = defineStore('monster-fight', {
         },
         heroEquipmentSlots(state) {
             return state.monsterFight?.hero.equippedSlots
-                .filter(s => s.slot === EquipmentSlotType.RIGHT_HAND || s.slot === EquipmentSlotType.LEFT_HAND) ?? [];
+                .filter(s => isHandSlot(s.slotKey)) ?? [];
         },
         pocketItems(state): HeroItemCellDto[] {
-            const pocketSlots = [EquipmentSlotType.POCKET_1, EquipmentSlotType.POCKET_2, EquipmentSlotType.POCKET_3];
             return state.monsterFight?.hero.equippedSlots
-                .filter(s => pocketSlots.includes(s.slot) && s.item != null)
+                .filter(s => isPocketSlot(s.slotKey) && s.item != null)
                 .map(s => s.item!) ?? [];
         },
     },

@@ -46,13 +46,6 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<ItemDal>()
             .HasMany(i => i.HeroItems);
 
-        modelBuilder.Entity<ItemDal>()
-            .HasMany(i => i.AllowedSlots)
-            .WithOne(s => s.Item)
-            .HasForeignKey(s => s.ItemId);
-
-        modelBuilder.Entity<ItemAllowedSlotDal>()
-            .HasKey(x => new { x.ItemId, x.Slot });
 
         modelBuilder.Entity<ItemDal>()
             .HasMany(i => i.Effects)
@@ -64,6 +57,30 @@ public class ApplicationContext : DbContext
 
         modelBuilder.Entity<EffectDefinitionDal>()
             .HasIndex(e => new { e.ItemId, e.Type });
+
+        modelBuilder.Entity<ItemDal>()
+            .HasMany(i => i.OccupiedSlots)
+            .WithOne(s => s.Item)
+            .HasForeignKey(s => s.ItemId);
+
+        modelBuilder.Entity<ItemSlotDal>()
+            .HasIndex(s => s.ItemId);
+
+        modelBuilder.Entity<BodyMapDal>()
+            .HasMany(m => m.Zones)
+            .WithOne(z => z.BodyMap)
+            .HasForeignKey(z => z.BodyMapId);
+
+        modelBuilder.Entity<BodyZoneDal>()
+            .HasIndex(z => z.BodyMapId);
+
+        modelBuilder.Entity<SlotLayoutEntryDal>()
+            .HasKey(e => new { e.SlotLayoutId, e.SlotKey });
+
+        modelBuilder.Entity<SlotLayoutDal>()
+            .HasMany(l => l.Entries)
+            .WithOne(e => e.SlotLayout)
+            .HasForeignKey(e => e.SlotLayoutId);
 
         modelBuilder.Entity<HeroItemCellDal>()
             .HasOne(ic => ic.Hero)
@@ -78,22 +95,20 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<HeroItemCellDal>()
             .HasIndex(ic => ic.HeroId);
 
-        modelBuilder.Entity<HeroEquippedSlotDal>()
-            .HasKey(es => new { es.HeroId, es.Slot });
 
-        modelBuilder.Entity<HeroEquippedSlotDal>()
-            .HasOne(es => es.Hero)
-            .WithMany(h => h.EquippedSlots)
-            .HasForeignKey(es => es.HeroId);
+        modelBuilder.Entity<HeroSlotDal>()
+            .HasOne(s => s.Hero)
+            .WithMany(h => h.Slots)
+            .HasForeignKey(s => s.HeroId);
 
-        modelBuilder.Entity<HeroEquippedSlotDal>()
-            .HasOne(es => es.HeroItemCell)
-            .WithMany(ic => ic.EquippedSlots)
-            .HasForeignKey(es => es.HeroItemCellId)
+        modelBuilder.Entity<HeroSlotDal>()
+            .HasIndex(s => s.HeroId);
+
+        modelBuilder.Entity<HeroSlotDal>()
+            .HasOne(s => s.HeroItemCell)
+            .WithMany()
+            .HasForeignKey(s => s.HeroItemCellId)
             .OnDelete(DeleteBehavior.SetNull);
-
-        modelBuilder.Entity<HeroEquippedSlotDal>()
-            .HasIndex(es => es.HeroItemCellId);
 
         modelBuilder.Entity<MonsterMoldDal>()
             .HasOne(mm => mm.Portrait);
@@ -134,9 +149,13 @@ public class ApplicationContext : DbContext
     public DbSet<PortraitTagDal> PortraitTags { get; set; }
     public DbSet<ItemDal> Items { get; set; }
     public DbSet<EffectDefinitionDal> EffectDefinitions { get; set; }
-    public DbSet<ItemAllowedSlotDal> ItemAllowedSlots { get; set; }
+    public DbSet<ItemSlotDal> ItemSlots { get; set; }
+    public DbSet<BodyMapDal> BodyMaps { get; set; }
+    public DbSet<BodyZoneDal> BodyZones { get; set; }
+    public DbSet<SlotLayoutDal> SlotLayouts { get; set; }
+    public DbSet<SlotLayoutEntryDal> SlotLayoutEntries { get; set; }
     public DbSet<HeroItemCellDal> HeroItemCells { get; set; }
-    public DbSet<HeroEquippedSlotDal> HeroEquippedSlots { get; set; }
+    public DbSet<HeroSlotDal> HeroSlots { get; set; }
     public DbSet<MonsterMoldDal> MonsterMolds { get; set; }
     public DbSet<MonsterRewardEntryDal> MonsterRewardEntries { get; set; }
     public DbSet<MonsterFightResultDal> MonsterFightResults { get; set; }

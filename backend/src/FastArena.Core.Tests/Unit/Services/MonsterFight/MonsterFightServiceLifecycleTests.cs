@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FastArena.Core.Domain.Activities.Actions;
 using FastArena.Core.Domain.Effects;
 using FastArena.Core.Domain.Heroes;
@@ -147,7 +147,6 @@ public class MonsterFightServiceLifecycleTests
             Description = "",
             BaseCost = 1,
             ItemImage = "sword.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.WEAPON,
             Effects = new List<EffectDefinition> { swordEffect },
@@ -163,12 +162,13 @@ public class MonsterFightServiceLifecycleTests
         };
 
         var hero = EffectTestData.CreateHero();
-        hero.EquippedSlots = new List<HeroEquippedSlot>
+        hero.Slots = new List<HeroSlot>
         {
-            new HeroEquippedSlot
+            new HeroSlot
             {
+                Id = Guid.NewGuid(),
                 HeroId = hero.Id,
-                Slot = EquipmentSlotType.RIGHT_HAND,
+                SlotKey = "HAND_RIGHT",
                 HeroItemCellId = cell.Id,
                 HeroItemCell = cell,
             },
@@ -201,7 +201,7 @@ public class MonsterFightServiceLifecycleTests
     public void InitializeEquipmentEffects_DoesNotDuplicateWhenEquipmentEffectsAlreadyPresent()
     {
         var hero = EffectTestData.CreateHero();
-        hero.EquippedSlots = new List<HeroEquippedSlot>();
+        hero.Slots = new List<HeroSlot>();
 
         var existing = EffectTestData.CreateActiveEffect(EffectType.STRIKE_POWER_BONUS, remainingRounds: 0, magnitude: 1);
         existing.LifetimeType = EffectLifetimeType.Persistent;

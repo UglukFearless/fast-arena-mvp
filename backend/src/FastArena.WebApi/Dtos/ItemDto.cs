@@ -1,4 +1,4 @@
-﻿
+
 using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.Items;
 
@@ -11,9 +11,8 @@ public class ItemDto
     public required string Description { get; set; }
     public int BaseCost { get; set; }
     public required string ItemImage { get; set; }
-    public bool CanBeEquipped { get; set; }
     public bool CanBeFolded { get; set; }
     public ItemType Type { get; set; }
     public List<EffectDefinitionDto>? Effects { get; set; }
-    public List<EquipmentSlotType>? AllowedSlots { get; set; }
+    public List<string>? OccupiedSlots { get; set; }
 }

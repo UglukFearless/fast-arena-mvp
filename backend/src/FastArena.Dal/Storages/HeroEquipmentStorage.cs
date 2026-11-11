@@ -15,7 +15,7 @@ public class HeroEquipmentStorage : IHeroEquipmentStorage
         _context = context;
     }
 
-    public async Task EquipItemToSlotAsync(Guid heroId, Guid heroItemCellId, EquipmentSlotType slot)
+    public async Task EquipItemAsync(Guid heroId, Guid heroItemCellId, IReadOnlyList<Guid> slotIds)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -27,7 +27,7 @@ public class HeroEquipmentStorage : IHeroEquipmentStorage
             throw new InvalidOperationException("Hero item is missing during equip application.");
         }
 
-        var hasItemAlreadyEquipped = await _context.HeroEquippedSlots
+        var hasItemAlreadyEquipped = await _context.HeroSlots
             .AnyAsync(s => s.HeroId == heroId && s.HeroItemCellId == heroItemCellId);
 
         if (hasItemAlreadyEquipped)
@@ -35,24 +35,16 @@ public class HeroEquipmentStorage : IHeroEquipmentStorage
             throw new InvalidOperationException("Hero item is already equipped.");
         }
 
-        var slotRow = await _context.HeroEquippedSlots
-            .FirstOrDefaultAsync(s => s.HeroId == heroId && s.Slot == slot);
+        var slotRows = await _context.HeroSlots
+            .Where(s => s.HeroId == heroId && slotIds.Contains(s.Id))
+            .ToListAsync();
 
-        if (slotRow != null && slotRow.HeroItemCellId.HasValue)
+        if (slotRows.Count != slotIds.Count || slotRows.Any(s => s.HeroItemCellId.HasValue))
         {
-            throw new InvalidOperationException("Target equipment slot is already occupied.");
+            throw new InvalidOperationException("Target equipment slot is already occupied or missing.");
         }
 
-        if (slotRow == null)
-        {
-            _context.HeroEquippedSlots.Add(new HeroEquippedSlotDal
-            {
-                HeroId = heroId,
-                Slot = slot,
-                HeroItemCellId = heroItemCellId,
-            });
-        }
-        else
+        foreach (var slotRow in slotRows)
         {
             slotRow.HeroItemCellId = heroItemCellId;
         }
@@ -61,38 +53,39 @@ public class HeroEquipmentStorage : IHeroEquipmentStorage
         await transaction.CommitAsync();
     }
 
-    public async Task UnequipItemFromSlotAsync(Guid heroId, EquipmentSlotType slot)
+    public async Task UnequipItemAsync(Guid heroId, Guid heroItemCellId)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
-        var slotRow = await _context.HeroEquippedSlots
-            .FirstOrDefaultAsync(s => s.HeroId == heroId && s.Slot == slot);
+        var slotRows = await _context.HeroSlots
+            .Where(s => s.HeroId == heroId && s.HeroItemCellId == heroItemCellId)
+            .ToListAsync();
 
-        if (slotRow == null || !slotRow.HeroItemCellId.HasValue)
+        if (slotRows.Count == 0)
         {
-            throw new InvalidOperationException("Target equipment slot is already empty.");
+            throw new InvalidOperationException("Target equipment is already empty.");
         }
 
-        _context.HeroEquippedSlots.Remove(slotRow);
+        foreach (var slotRow in slotRows)
+        {
+            slotRow.HeroItemCellId = null;
+        }
 
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();
     }
-
     public async Task<HeroItemCell> ConsumePocketItemAsync(Guid heroId, Guid heroItemCellId)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
-        var slotRow = await _context.HeroEquippedSlots
+        var slotRow = await _context.HeroSlots
             .Include(s => s.HeroItemCell)
             .ThenInclude(ic => ic!.Item)
             .ThenInclude(i => i!.Effects)
             .FirstOrDefaultAsync(s =>
                 s.HeroId == heroId &&
                 s.HeroItemCellId == heroItemCellId &&
-                (s.Slot == EquipmentSlotType.POCKET_1 ||
-                 s.Slot == EquipmentSlotType.POCKET_2 ||
-                 s.Slot == EquipmentSlotType.POCKET_3));
+                SlotKeys.IsPocket(s.SlotKey));
 
         if (slotRow == null || slotRow.HeroItemCell == null)
         {
@@ -101,11 +94,20 @@ public class HeroEquipmentStorage : IHeroEquipmentStorage
 
         var consumedSnapshot = HeroItemCellProfiles.Map(slotRow.HeroItemCell, true);
 
-        slotRow.HeroItemCell.Amount -= 1;
-        if (slotRow.HeroItemCell.Amount <= 0)
+        var itemCell = slotRow.HeroItemCell;
+        var occupiedSlotsOfCell = await _context.HeroSlots
+            .Where(s => s.HeroId == heroId && s.HeroItemCellId == itemCell.Id)
+            .ToListAsync();
+
+        itemCell.Amount -= 1;
+        if (itemCell.Amount <= 0)
         {
-            _context.HeroItemCells.Remove(slotRow.HeroItemCell);
-            slotRow.HeroItemCellId = null;
+            foreach (var slotOfCell in occupiedSlotsOfCell)
+            {
+                slotOfCell.HeroItemCellId = null;
+            }
+
+            _context.HeroItemCells.Remove(itemCell);
         }
 
         await _context.SaveChangesAsync();

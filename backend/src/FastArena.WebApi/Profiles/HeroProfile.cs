@@ -1,4 +1,4 @@
-﻿using FastArena.Core.Domain.Heroes;
+using FastArena.Core.Domain.Heroes;
 using FastArena.WebApi.Dtos;
 
 namespace FastArena.WebApi.Profiles;
@@ -24,7 +24,7 @@ internal class HeroProfile
             IsAlive = hero.IsAlive,
             UserId = hero.UserId,
             Items = deep ? HeroItemCellProfile.Map(hero.Items, true) : new List<HeroItemCellDto>(),
-            EquippedSlots = deep ? HeroPocketSlotProfile.Map(hero.EquippedSlots) : new List<HeroPocketSlotDto>(),
+            EquippedSlots = deep ? HeroPocketSlotProfile.MapList(hero.Slots) : new List<HeroPocketSlotDto>(),
             Results = deep ? MonsterFightProfile.Map(hero.Results, true) : new List<MonsterFightResultDto>(),
         };
     }

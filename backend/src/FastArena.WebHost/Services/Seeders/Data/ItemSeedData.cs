@@ -1,4 +1,4 @@
-using FastArena.Core.Domain.Effects;
+﻿using FastArena.Core.Domain.Effects;
 using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.Items;
 using FastArena.Dal.Entities;
@@ -41,7 +41,6 @@ public static class ItemSeedData
             Description = "Это золото, дурачок, ты точно знаешь, зачем оно нужно!",
             BaseCost = 1,
             ItemImage = "/assets/items/coin.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.MONEY,
         },
@@ -52,7 +51,6 @@ public static class ItemSeedData
             Description = "От этого точно станет лучше, если не схватить по рылу пока будешь пить. Восстанавливает 60 очков здоровья.",
             BaseCost = 15,
             ItemImage = "/assets/items/posion_red.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.POTION,
             Effects = new List<EffectDefinitionDal>
@@ -80,7 +78,6 @@ public static class ItemSeedData
             Description = "Наркотик восстанавливает мастерство до максимума на 3 хода. А ещё с него знатно прёт!",
             BaseCost = 20,
             ItemImage = "/assets/items/posion_violet.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.POTION,
             Effects = new List<EffectDefinitionDal>
@@ -108,7 +105,6 @@ public static class ItemSeedData
             Description = "Делает все успешные атаки более смертоносными добавляя 2 единицы силы удара на 4 хода. Ещё орёшь, как дурной и ссышься.",
             BaseCost = 20,
             ItemImage = "/assets/items/posion_black.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.POTION,
             Effects = new List<EffectDefinitionDal>
@@ -136,7 +132,6 @@ public static class ItemSeedData
             Description = "Красивый, но бесполезный - как ты. Может кто купит?",
             BaseCost = 100,
             ItemImage = "/assets/items/brilliant.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -147,7 +142,6 @@ public static class ItemSeedData
             Description = "Не такой грубый, как твой бывший. Добавлять 2 очка урона за каждую единицу силы нанесённого удара.",
             BaseCost = 30,
             ItemImage = "/assets/items/sword_angle.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.WEAPON,
             Effects = new List<EffectDefinitionDal>
@@ -175,7 +169,6 @@ public static class ItemSeedData
             Description = "Легкий и деревянный... и щит. Позволяет с вероятностью 50 процентов полностью заблокировать 2 пропущенных атаки. Ломается.",
             BaseCost = 50,
             ItemImage = "/assets/items/shchit.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.SHIELD,
             Effects = new List<EffectDefinitionDal>
@@ -203,7 +196,6 @@ public static class ItemSeedData
             Description = "Имено такой грубый, как твой бывший. Добавляет 1 единицу силы атаки при успешном ударе.",
             BaseCost = 40,
             ItemImage = "/assets/items/sword_straight.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.WEAPON,
             Effects = new List<EffectDefinitionDal>
@@ -231,7 +223,6 @@ public static class ItemSeedData
             Description = "Не стоит его есть.",
             BaseCost = 5,
             ItemImage = "/assets/items/mushroom.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -242,7 +233,6 @@ public static class ItemSeedData
             Description = "ЧЕРТ опо ЛОХ.",
             BaseCost = 5,
             ItemImage = "/assets/items/flower.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -253,7 +243,6 @@ public static class ItemSeedData
             Description = "Зачем ты его взял?",
             BaseCost = 5,
             ItemImage = "/assets/items/roots.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -264,7 +253,6 @@ public static class ItemSeedData
             Description = "Почётная вещь для любого говноря.",
             BaseCost = 10,
             ItemImage = "/assets/items/kogot.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -275,7 +263,6 @@ public static class ItemSeedData
             Description = "Целенький, без кариеса! Да как так?!",
             BaseCost = 10,
             ItemImage = "/assets/items/teeth.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -286,7 +273,6 @@ public static class ItemSeedData
             Description = "Стоит записать такой шансон трек.",
             BaseCost = 3,
             ItemImage = "/assets/items/gay_feather.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -297,7 +283,6 @@ public static class ItemSeedData
             Description = "Как у твоей бывшей :'(",
             BaseCost = 75,
             ItemImage = "/assets/items/fire_stone.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -308,7 +293,6 @@ public static class ItemSeedData
             Description = "Ещё один... А разве у тебя уже нет двух?",
             BaseCost = 20,
             ItemImage = "/assets/items/horn.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -319,7 +303,6 @@ public static class ItemSeedData
             Description = "Банально? Я скажу - классика.",
             BaseCost = 200,
             ItemImage = "/assets/items/heart.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -330,7 +313,6 @@ public static class ItemSeedData
             Description = "Целый мешочек. Ты откуда и как её вытряс?!",
             BaseCost = 15,
             ItemImage = "/assets/items/powder.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -341,7 +323,6 @@ public static class ItemSeedData
             Description = "Не разбей!",
             BaseCost = 100,
             ItemImage = "/assets/items/ice_thing.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -352,7 +333,6 @@ public static class ItemSeedData
             Description = "Будем называть эту субстанцию именно так, но лучше её не нюхать.",
             BaseCost = 30,
             ItemImage = "/assets/items/posion_green.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -363,7 +343,6 @@ public static class ItemSeedData
             Description = "Часть механизма. Большего и не скажешь - ты ведь не инженер!",
             BaseCost = 30,
             ItemImage = "/assets/items/shesteryonka.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -374,7 +353,6 @@ public static class ItemSeedData
             Description = "Да, это опредённо глаз. Остаётся надеется, что кто-то ещё увидит в нём ценность кроме тебя.",
             BaseCost = 10,
             ItemImage = "/assets/items/eye_ball.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -385,7 +363,6 @@ public static class ItemSeedData
             Description = "Пучок волос из бороды гнома-хуекрада. Учитывая их специфическую диету, среди людей ходит поверие, что такие волосы делают мужчину сильным ;)",
             BaseCost = 5,
             ItemImage = "/assets/items/beard.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
@@ -396,29 +373,22 @@ public static class ItemSeedData
             Description = "Не надо на него ничего давать!",
             BaseCost = 10,
             ItemImage = "/assets/items/big_teeth.png",
-            CanBeEquipped = false,
             CanBeFolded = true,
             Type = ItemType.OTHER,
         },
     };
 
-    public static IReadOnlyList<ItemAllowedSlotDal> AllowedSlots => new List<ItemAllowedSlotDal>
+    public static IReadOnlyList<ItemSlotDal> OccupiedSlots => new List<ItemSlotDal>
     {
-        new() { ItemId = HealingPotionId,    Slot = EquipmentSlotType.POCKET_1 },
-        new() { ItemId = HealingPotionId,    Slot = EquipmentSlotType.POCKET_2 },
-        new() { ItemId = HealingPotionId,    Slot = EquipmentSlotType.POCKET_3 },
+        new() { ItemId = HealingPotionId,    SlotKey = "POCKET" },
 
-        new() { ItemId = PainkillerPotionId, Slot = EquipmentSlotType.POCKET_1 },
-        new() { ItemId = PainkillerPotionId, Slot = EquipmentSlotType.POCKET_2 },
-        new() { ItemId = PainkillerPotionId, Slot = EquipmentSlotType.POCKET_3 },
+        new() { ItemId = PainkillerPotionId, SlotKey = "POCKET" },
 
-        new() { ItemId = FuryPotionId,       Slot = EquipmentSlotType.POCKET_1 },
-        new() { ItemId = FuryPotionId,       Slot = EquipmentSlotType.POCKET_2 },
-        new() { ItemId = FuryPotionId,       Slot = EquipmentSlotType.POCKET_3 },
+        new() { ItemId = FuryPotionId,       SlotKey = "POCKET" },
 
-        new() { ItemId = OneHandSwordId,     Slot = EquipmentSlotType.RIGHT_HAND },
-        new() { ItemId = ShieldId,           Slot = EquipmentSlotType.LEFT_HAND },
-        new() { ItemId = TwoHandSwordId,     Slot = EquipmentSlotType.RIGHT_HAND },
-        new() { ItemId = TwoHandSwordId,     Slot = EquipmentSlotType.LEFT_HAND },
+        new() { ItemId = OneHandSwordId,     SlotKey = "HAND_RIGHT" },
+        new() { ItemId = ShieldId,           SlotKey = "HAND_LEFT" },
+        new() { ItemId = TwoHandSwordId,     SlotKey = "HAND_RIGHT" },
+        new() { ItemId = TwoHandSwordId,     SlotKey = "HAND_LEFT" },
     };
 }

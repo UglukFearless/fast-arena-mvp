@@ -5,12 +5,12 @@
         <div class="hero-inventory-pockets__grid">
             <article
                 v-for="pocket in pockets"
-                :key="pocket.slot"
+                :key="pocket.id"
                 class="hero-inventory-pockets__cell"
                 :class="{
                     'hero-inventory-pockets__cell_placeholder': !pocket.item,
                     'hero-inventory-pockets__cell_clickable': canUnequipPocketItem(pocket),
-                    'hero-inventory-pockets__cell_loading': isActing && activePocketSlot === pocket.slot,
+                    'hero-inventory-pockets__cell_loading': isActing && activePocketSlot === pocket.slotKey,
                 }"
                 @mouseenter="onPocketMouseEnter(pocket)"
                 @mouseleave="onCellMouseLeave()"
@@ -30,7 +30,7 @@
                 </template>
 
                 <template v-else>
-                    <span class="hero-inventory-pockets__slot-label">{{ getPocketTitle(pocket.slot) }}</span>
+                    <span class="hero-inventory-pockets__slot-label">{{ getPocketTitle(pocket) }}</span>
                     <span class="hero-inventory-pockets__slot-state">Пусто</span>
                 </template>
             </article>
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { EquipmentSlotType, HeroPocketSlotDto } from '@/api/clients';
+import { HeroPocketSlotDto } from '@/api/clients';
 import { onUnmounted, PropType, ref } from 'vue';
 
 const props = defineProps({
@@ -56,10 +56,12 @@ const props = defineProps({
         type: Boolean,
     },
     activePocketSlot: {
-        type: Number as PropType<EquipmentSlotType | null>,
+        type: String as PropType<string | null>,
         default: null,
     },
 });
+
+const pocketTitles = new Map<string, string>();
 
 const emit = defineEmits(['pocket-click']);
 
@@ -106,20 +108,11 @@ function onPocketClick(pocket: HeroPocketSlotDto) {
 }
 
 function getPocketTooltipKey(pocket: HeroPocketSlotDto) {
-    return `pocket-${pocket.slot}`;
+    return `pocket-${pocket.id}`;
 }
 
-function getPocketTitle(slot: EquipmentSlotType) {
-    switch (slot) {
-        case EquipmentSlotType.POCKET_1:
-            return 'Карман 1';
-        case EquipmentSlotType.POCKET_2:
-            return 'Карман 2';
-        case EquipmentSlotType.POCKET_3:
-            return 'Карман 3';
-        default:
-            return 'Слот';
-    }
+function getPocketTitle(pocket: HeroPocketSlotDto) {
+    return pocketTitles.get(pocket.id) ?? 'Карман';
 }
 
 onUnmounted(() => {

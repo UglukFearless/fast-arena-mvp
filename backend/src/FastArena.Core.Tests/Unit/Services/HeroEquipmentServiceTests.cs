@@ -1,4 +1,4 @@
-using FastArena.Core.Domain;
+﻿using FastArena.Core.Domain;
 using FastArena.Core.Domain.Activities;
 using FastArena.Core.Domain.Heroes;
 using FastArena.Core.Domain.Items;
@@ -12,19 +12,18 @@ namespace FastArena.Core.Tests;
 
 public class HeroEquipmentServiceTests
 {
-    // ── helpers ──────────────────────────────────────────────────────────────
 
     private static Item CreateWeapon(bool twoHanded = false)
     {
         var slots = twoHanded
-            ? new List<ItemAllowedSlot>
+            ? new List<ItemSlot>
               {
-                  new() { Slot = EquipmentSlotType.RIGHT_HAND },
-                  new() { Slot = EquipmentSlotType.LEFT_HAND },
+                  new() { SlotKey = "HAND_RIGHT" },
+                  new() { SlotKey = "HAND_LEFT" },
               }
-            : new List<ItemAllowedSlot>
+            : new List<ItemSlot>
               {
-                  new() { Slot = EquipmentSlotType.RIGHT_HAND },
+                  new() { SlotKey = "HAND_RIGHT" },
               };
 
         return new Item
@@ -34,10 +33,9 @@ public class HeroEquipmentServiceTests
             Description = string.Empty,
             BaseCost = 10,
             ItemImage = "sword.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.WEAPON,
-            AllowedSlots = slots,
+            OccupiedSlots = slots,
         };
     }
 
@@ -50,12 +48,11 @@ public class HeroEquipmentServiceTests
             Description = string.Empty,
             BaseCost = 10,
             ItemImage = "shield.png",
-            CanBeEquipped = true,
             CanBeFolded = false,
             Type = ItemType.SHIELD,
-            AllowedSlots = new List<ItemAllowedSlot>
+            OccupiedSlots = new List<ItemSlot>
             {
-                new() { Slot = EquipmentSlotType.LEFT_HAND },
+                new() { SlotKey = "HAND_LEFT" },
             },
         };
     }
@@ -75,7 +72,7 @@ public class HeroEquipmentServiceTests
     private static Hero CreateHero(
         Guid userId,
         List<HeroItemCell>? items = null,
-        List<HeroEquippedSlot>? equippedSlots = null)
+        List<HeroSlot>? slots = null)
     {
         var heroId = Guid.NewGuid();
         return new Hero
@@ -89,7 +86,11 @@ public class HeroEquipmentServiceTests
             UserId = userId,
             IsAlive = HeroAliveState.ALIVE,
             Items = items ?? new List<HeroItemCell>(),
-            EquippedSlots = equippedSlots ?? new List<HeroEquippedSlot>(),
+            Slots = slots ?? new List<HeroSlot>
+            {
+                new() { Id = Guid.NewGuid(), SlotKey = "HAND_RIGHT" },
+                new() { Id = Guid.NewGuid(), SlotKey = "HAND_LEFT" },
+            },
         };
     }
 
@@ -114,7 +115,70 @@ public class HeroEquipmentServiceTests
             storage);
     }
 
-    // ── equip: one-handed weapon ──────────────────────────────────────────────
+    [Fact]
+    public async Task EquipAsync_ItemForForeignBody_Throws()
+    {
+        var userId = Guid.NewGuid();
+        var ogreArmor = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = "Ogre Armor",
+            Description = string.Empty,
+            BaseCost = 10,
+            ItemImage = "armor.png",
+            CanBeFolded = false,
+            Type = ItemType.ARMOR,
+            OccupiedSlots = new List<ItemSlot>
+            {
+                new() { SlotKey = "OGRE_BODY_HEAD" },
+            },
+        };
+        var hero = CreateHero(userId);
+        var cell = WrapInCell(ogreArmor, hero.Id);
+        hero.Items!.Add(cell);
+
+        var storage = new FakeEquipmentStorage();
+        var sut = CreateService(hero, userId, storage);
+
+        await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, cell.Id));
+        Assert.False(storage.EquipCalled);
+    }
+
+    [Fact]
+    public async Task EquipAsync_TwoHandedWeapon_SecondHandOccupied_Throws()
+    {
+        var userId = Guid.NewGuid();
+        var heroId = Guid.NewGuid();
+        var sword = CreateWeapon(twoHanded: true);
+        var shield = CreateShield();
+        var shieldCell = WrapInCell(shield, heroId);
+
+        var hero = new Hero
+        {
+            Id = heroId,
+            Name = "Test Hero",
+            Sex = HeroSex.NONE,
+            Level = 1,
+            Experience = 0,
+            MaxHealth = 100,
+            UserId = userId,
+            IsAlive = HeroAliveState.ALIVE,
+            Items = new List<HeroItemCell> { shieldCell },
+            Slots = new List<HeroSlot>
+            {
+                new() { Id = Guid.NewGuid(), SlotKey = "HAND_RIGHT" },
+                new() { Id = Guid.NewGuid(), SlotKey = "HAND_LEFT", HeroItemCellId = shieldCell.Id, HeroItemCell = shieldCell },
+            },
+        };
+        var cell = WrapInCell(sword, heroId);
+        hero.Items.Add(cell);
+
+        var storage = new FakeEquipmentStorage();
+        var sut = CreateService(hero, userId, storage);
+
+        await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, cell.Id));
+        Assert.False(storage.EquipCalled);
+    }
 
     [Fact]
     public async Task EquipAsync_OneHandedWeapon_EquipsToRightHand()
@@ -131,10 +195,96 @@ public class HeroEquipmentServiceTests
         await sut.EquipAsync(userId, cell.Id);
 
         Assert.True(storage.EquipCalled);
-        Assert.Equal(EquipmentSlotType.RIGHT_HAND, storage.LastEquippedSlot);
+        var occupiedSlotId = Assert.Single(storage.LastEquippedSlotIds);
+        Assert.Equal("HAND_RIGHT", hero.Slots!.Single(s => s.Id == occupiedSlotId).SlotKey);
     }
 
-    // ── equip: two-handed weapon ──────────────────────────────────────────────
+    [Fact]
+    public async Task EquipAsync_ItemWithRepeatedKey_OccupiesTwoSlotsOfThatKey()
+    {
+        var userId = Guid.NewGuid();
+        var amulet = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = "Big Amulet",
+            Description = string.Empty,
+            BaseCost = 10,
+            ItemImage = "amulet.png",
+            CanBeFolded = false,
+            Type = ItemType.OTHER,
+            OccupiedSlots = new List<ItemSlot>
+            {
+                new() { SlotKey = "POCKET" },
+                new() { SlotKey = "POCKET" },
+            },
+        };
+
+        var heroId = Guid.NewGuid();
+        var pockets = new List<HeroSlot>
+        {
+            new() { Id = Guid.NewGuid(), SlotKey = "POCKET" },
+            new() { Id = Guid.NewGuid(), SlotKey = "POCKET" },
+            new() { Id = Guid.NewGuid(), SlotKey = "POCKET" },
+        };
+
+        var hero = new Hero
+        {
+            Id = heroId,
+            Name = "Test Hero",
+            Sex = HeroSex.NONE,
+            Level = 1,
+            Experience = 0,
+            MaxHealth = 100,
+            UserId = userId,
+            IsAlive = HeroAliveState.ALIVE,
+            Items = new List<HeroItemCell>(),
+            Slots = pockets,
+        };
+        var cell = WrapInCell(amulet, heroId);
+        hero.Items.Add(cell);
+
+        var storage = new FakeEquipmentStorage();
+        var sut = CreateService(hero, userId, storage);
+
+        await sut.EquipAsync(userId, cell.Id);
+
+        Assert.Equal(2, storage.LastEquippedSlotIds.Count);
+        Assert.All(storage.LastEquippedSlotIds, id => Assert.Equal("POCKET", pockets.Single(p => p.Id == id).SlotKey));
+    }
+
+    [Fact]
+    public async Task EquipAsync_ItemWithRepeatedKey_NotEnoughFreeSlots_Throws()
+    {
+        var userId = Guid.NewGuid();
+        var amulet = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = "Big Amulet",
+            Description = string.Empty,
+            BaseCost = 10,
+            ItemImage = "amulet.png",
+            CanBeFolded = false,
+            Type = ItemType.OTHER,
+            OccupiedSlots = new List<ItemSlot>
+            {
+                new() { SlotKey = "POCKET" },
+                new() { SlotKey = "POCKET" },
+            },
+        };
+
+        var hero = CreateHero(userId, slots: new List<HeroSlot>
+        {
+            new() { Id = Guid.NewGuid(), SlotKey = "POCKET" },
+        });
+        var cell = WrapInCell(amulet, hero.Id);
+        hero.Items!.Add(cell);
+
+        var storage = new FakeEquipmentStorage();
+        var sut = CreateService(hero, userId, storage);
+
+        await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, cell.Id));
+        Assert.False(storage.EquipCalled);
+    }
 
     [Fact]
     public async Task EquipAsync_TwoHandedWeapon_HandsFree_Succeeds()
@@ -174,12 +324,13 @@ public class HeroEquipmentServiceTests
             UserId = userId,
             IsAlive = HeroAliveState.ALIVE,
             Items = new List<HeroItemCell> { existingCell },
-            EquippedSlots = new List<HeroEquippedSlot>
+            Slots = new List<HeroSlot>
             {
                 new()
                 {
-                    HeroId = heroId,
-                    Slot = EquipmentSlotType.RIGHT_HAND,
+                    Id = Guid.NewGuid(),
+            HeroId = heroId,
+                    SlotKey = "HAND_RIGHT",
                     HeroItemCellId = existingCell.Id,
                     HeroItemCell = existingCell,
                 },
@@ -193,8 +344,6 @@ public class HeroEquipmentServiceTests
 
         await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, newCell.Id));
     }
-
-    // ── equip: shield while two-handed weapon is equipped ────────────────────
 
     [Fact]
     public async Task EquipAsync_ShieldWhileTwoHandedEquipped_Throws()
@@ -217,19 +366,21 @@ public class HeroEquipmentServiceTests
             UserId = userId,
             IsAlive = HeroAliveState.ALIVE,
             Items = new List<HeroItemCell> { twoHanderCell },
-            EquippedSlots = new List<HeroEquippedSlot>
+            Slots = new List<HeroSlot>
             {
                 new()
                 {
-                    HeroId = heroId,
-                    Slot = EquipmentSlotType.RIGHT_HAND,
+                    Id = Guid.NewGuid(),
+            HeroId = heroId,
+                    SlotKey = "HAND_RIGHT",
                     HeroItemCellId = twoHanderCell.Id,
                     HeroItemCell = twoHanderCell,
                 },
                 new()
                 {
-                    HeroId = heroId,
-                    Slot = EquipmentSlotType.LEFT_HAND,
+                    Id = Guid.NewGuid(),
+            HeroId = heroId,
+                    SlotKey = "HAND_LEFT",
                     HeroItemCellId = twoHanderCell.Id,
                     HeroItemCell = twoHanderCell,
                 },
@@ -243,8 +394,6 @@ public class HeroEquipmentServiceTests
 
         await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, shieldCell.Id));
     }
-
-    // ── equip: all slots occupied ─────────────────────────────────────────────
 
     [Fact]
     public async Task EquipAsync_AllSlotsOccupied_Throws()
@@ -268,12 +417,13 @@ public class HeroEquipmentServiceTests
             UserId = userId,
             IsAlive = HeroAliveState.ALIVE,
             Items = new List<HeroItemCell> { cell1, cell2 },
-            EquippedSlots = new List<HeroEquippedSlot>
+            Slots = new List<HeroSlot>
             {
                 new()
                 {
-                    HeroId = heroId,
-                    Slot = EquipmentSlotType.RIGHT_HAND,
+                    Id = Guid.NewGuid(),
+            HeroId = heroId,
+                    SlotKey = "HAND_RIGHT",
                     HeroItemCellId = cell1.Id,
                     HeroItemCell = cell1,
                 },
@@ -286,8 +436,6 @@ public class HeroEquipmentServiceTests
         await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, cell2.Id));
     }
 
-    // ── equip: item not owned ─────────────────────────────────────────────────
-
     [Fact]
     public async Task EquipAsync_ItemNotOwned_Throws()
     {
@@ -297,8 +445,6 @@ public class HeroEquipmentServiceTests
 
         await Assert.ThrowsAsync<ActionDeniedException>(() => sut.EquipAsync(userId, Guid.NewGuid()));
     }
-
-    // ── unequip ───────────────────────────────────────────────────────────────
 
     [Fact]
     public async Task UnequipAsync_OccupiedHandSlot_Succeeds()
@@ -320,12 +466,13 @@ public class HeroEquipmentServiceTests
             UserId = userId,
             IsAlive = HeroAliveState.ALIVE,
             Items = new List<HeroItemCell> { cell },
-            EquippedSlots = new List<HeroEquippedSlot>
+            Slots = new List<HeroSlot>
             {
                 new()
                 {
-                    HeroId = heroId,
-                    Slot = EquipmentSlotType.RIGHT_HAND,
+                    Id = Guid.NewGuid(),
+            HeroId = heroId,
+                    SlotKey = "HAND_RIGHT",
                     HeroItemCellId = cell.Id,
                     HeroItemCell = cell,
                 },
@@ -335,7 +482,7 @@ public class HeroEquipmentServiceTests
         var storage = new FakeEquipmentStorage();
         var sut = CreateService(hero, userId, storage);
 
-        await sut.UnequipAsync(userId, EquipmentSlotType.RIGHT_HAND);
+        await sut.UnequipAsync(userId, cell.Id);
 
         Assert.True(storage.UnequipCalled);
     }
@@ -348,10 +495,8 @@ public class HeroEquipmentServiceTests
         var sut = CreateService(hero, userId);
 
         await Assert.ThrowsAsync<ActionDeniedException>(
-            () => sut.UnequipAsync(userId, EquipmentSlotType.RIGHT_HAND));
+            () => sut.UnequipAsync(userId, Guid.NewGuid()));
     }
-
-    // ── fakes ─────────────────────────────────────────────────────────────────
 
     private sealed class FakeUserStorage : IUserStorage
     {
@@ -399,16 +544,16 @@ public class HeroEquipmentServiceTests
     {
         public bool EquipCalled { get; private set; }
         public bool UnequipCalled { get; private set; }
-        public EquipmentSlotType LastEquippedSlot { get; private set; }
+        public IReadOnlyList<Guid> LastEquippedSlotIds { get; private set; } = Array.Empty<Guid>();
 
-        public Task EquipItemToSlotAsync(Guid heroId, Guid heroItemCellId, EquipmentSlotType slot)
+        public Task EquipItemAsync(Guid heroId, Guid heroItemCellId, IReadOnlyList<Guid> slotIds)
         {
             EquipCalled = true;
-            LastEquippedSlot = slot;
+            LastEquippedSlotIds = slotIds;
             return Task.CompletedTask;
         }
 
-        public Task UnequipItemFromSlotAsync(Guid heroId, EquipmentSlotType slot)
+        public Task UnequipItemAsync(Guid heroId, Guid heroItemCellId)
         {
             UnequipCalled = true;
             return Task.CompletedTask;

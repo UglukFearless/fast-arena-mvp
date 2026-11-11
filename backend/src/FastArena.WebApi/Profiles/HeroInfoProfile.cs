@@ -1,4 +1,4 @@
-﻿using FastArena.Core.Models;
+using FastArena.Core.Models;
 using FastArena.WebApi.Dtos;
 
 namespace FastArena.WebApi.Profiles;
@@ -25,7 +25,7 @@ public class HeroInfoProfile
             IsInventoryVisible = info.IsInventoryVisible,
             MoneyAmount = info.MoneyAmount,
             Items = HeroItemCellProfile.Map(info.InventoryItems, true),
-            Pockets = HeroPocketSlotProfile.Map(info.PocketSlots),
+            Pockets = HeroPocketSlotProfile.MapList(info.PocketSlots),
             Results = MonsterFightProfile.Map(info.Hero.Results, true) ?? new List<MonsterFightResultDto>(),
         };
     }

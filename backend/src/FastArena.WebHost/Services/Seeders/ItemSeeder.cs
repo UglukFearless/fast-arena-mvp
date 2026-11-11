@@ -19,7 +19,7 @@ public class ItemSeeder
             return;
 
         _context.Items.AddRange(ItemSeedData.All);
-        _context.ItemAllowedSlots.AddRange(ItemSeedData.AllowedSlots);
+        _context.ItemSlots.AddRange(ItemSeedData.OccupiedSlots);
         await _context.SaveChangesAsync();
     }
 }

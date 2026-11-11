@@ -4,7 +4,7 @@ namespace FastArena.Core.Interfaces.Storages;
 
 public interface IHeroEquipmentStorage
 {
-    Task EquipItemToSlotAsync(Guid heroId, Guid heroItemCellId, EquipmentSlotType slot);
-    Task UnequipItemFromSlotAsync(Guid heroId, EquipmentSlotType slot);
+    Task EquipItemAsync(Guid heroId, Guid heroItemCellId, IReadOnlyList<Guid> slotIds);
+    Task UnequipItemAsync(Guid heroId, Guid heroItemCellId);
     Task<HeroItemCell> ConsumePocketItemAsync(Guid heroId, Guid heroItemCellId);
 }

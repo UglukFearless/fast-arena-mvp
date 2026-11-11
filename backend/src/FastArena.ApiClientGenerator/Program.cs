@@ -1,19 +1,22 @@
-﻿using NJsonSchema.CodeGeneration.TypeScript;
+using NJsonSchema.CodeGeneration.TypeScript;
 using NSwag;
 using NSwag.CodeGeneration.CSharp;
 using NSwag.CodeGeneration.TypeScript;
 
 Console.WriteLine("Generation started.");
 
-if (args.Length < 3)
-    new ArgumentException("Expecting 3 arguments: URL, generatePath, language");
+if (args.Length < 2)
+    throw new ArgumentException("Expecting at least 2 arguments: generatePath, language; optional: host, port");
 
-var url = args[0];
-var generatePath = args[1];
-var language = args[2];
-
+var generatePath = args[0];
+var language = args[1];
+var host = args.Length > 2 ? args[2] : "localhost";
+var port = args.Length > 3 ? args[3] : "80";
 if (language != "ts" && language != "sharp")
-    new ArgumentException("Invalid language parameter; valid values are ts and sharp");
+    throw new ArgumentException("Invalid language parameter; valid values are ts and sharp");
+
+var url = $"http://{host}:{port}/swagger/FastArenaAPI/swagger.json";
+Console.WriteLine($"Source: {url}");
 
 if (language == "ts")
     await GenerateTypeScriptClient(url, generatePath);
@@ -21,7 +24,6 @@ else
     await GenerateCSharpClient(url, generatePath);
 
 Console.WriteLine("Generation finished.");
-Console.ReadKey();
 
 async static Task GenerateTypeScriptClient(string url, string generatePath) =>
     await GenerateClient(

@@ -1,16 +1,17 @@
 <template>
     <section class="hero-inventory-equipment">
-        <h4 class="hero-inventory-equipment__section-title">Экипировка</h4>
+        <h4 class="hero-inventory-equipment__section-title">{{ title }}</h4>
 
         <div class="hero-inventory-equipment__grid">
             <article
                 v-for="slot in equipmentSlots"
-                :key="slot.slot"
+                :key="slot.id"
                 class="hero-inventory-equipment__cell"
                 :class="{
                     'hero-inventory-equipment__cell_placeholder': !slot.item,
                     'hero-inventory-equipment__cell_clickable': canUnequipItem(slot),
-                    'hero-inventory-equipment__cell_loading': isActing && activePocketSlot === slot.slot,
+                    'hero-inventory-equipment__cell_loading': isActing && activePocketSlot === slot.slotKey,
+                    'hero-inventory-equipment__cell_shared': isSharedSlot(slot) && !!slot.item,
                 }"
                 @mouseenter="onSlotMouseEnter(slot)"
                 @mouseleave="onCellMouseLeave()"
@@ -28,9 +29,8 @@
                         {{ slot.item.item.description }}
                     </div>
                 </template>
-
                 <template v-else>
-                    <span class="hero-inventory-equipment__slot-label">{{ getSlotTitle(slot.slot) }}</span>
+                    <span class="hero-inventory-equipment__slot-label">{{ getSlotTitle(slot.slotKey) }}</span>
                     <span class="hero-inventory-equipment__slot-state">Пусто</span>
                 </template>
             </article>
@@ -39,10 +39,14 @@
 </template>
 
 <script setup lang="ts">
-import { EquipmentSlotType, HeroPocketSlotDto } from '@/api/clients';
+import { HeroPocketSlotDto } from '@/api/clients';
 import { onUnmounted, PropType, ref } from 'vue';
 
 const props = defineProps({
+    title: {
+        required: true,
+        type: String,
+    },
     equipmentSlots: {
         required: true,
         type: Array as PropType<HeroPocketSlotDto[]>,
@@ -56,8 +60,12 @@ const props = defineProps({
         type: Boolean,
     },
     activePocketSlot: {
-        type: Number as PropType<EquipmentSlotType | null>,
+        type: String as PropType<string | null>,
         default: null,
+    },
+    sharedSlotIds: {
+        type: Array as PropType<string[]>,
+        default: () => [],
     },
 });
 
@@ -106,18 +114,32 @@ function onSlotClick(slot: HeroPocketSlotDto) {
 }
 
 function getSlotTooltipKey(slot: HeroPocketSlotDto) {
-    return `equipment-${slot.slot}`;
+    return `equipment-${slot.id}`;
 }
 
-function getSlotTitle(slot: EquipmentSlotType) {
-    switch (slot) {
-        case EquipmentSlotType.RIGHT_HAND:
-            return 'Правая рука';
-        case EquipmentSlotType.LEFT_HAND:
-            return 'Левая рука';
-        default:
-            return 'Слот';
-    }
+const slotTitles: Record<string, string> = {
+    HAND_RIGHT: 'Правая рука',
+    HAND_LEFT: 'Левая рука',
+    HEAD: 'Голова',
+    NECK: 'Горло',
+    LEFT_CHEST: 'Левое плечо',
+    RIGHT_CHEST: 'Правое плечо',
+    STOMACH: 'Живот',
+    GROIN: 'Пах',
+    HEART: 'Сердце',
+    LEFT_HAND: 'Левая рука',
+    RIGHT_HAND: 'Правая рука',
+    LEFT_LEG: 'Левая нога',
+    RIGHT_LEG: 'Правая нога',
+};
+
+function isSharedSlot(slot: HeroPocketSlotDto) {
+    return props.sharedSlotIds.includes(slot.id);
+}
+
+function getSlotTitle(slotKey: string) {
+    const zoneName = slotKey.split('_BODY_').pop() ?? slotKey;
+    return slotTitles[zoneName] ?? slotTitles[slotKey] ?? 'Слот';
 }
 
 onUnmounted(() => {
@@ -139,12 +161,23 @@ onUnmounted(() => {
 
     &__grid {
         display: grid;
-        grid-template-columns: repeat(2, 110px);
+        grid-template-columns: repeat(auto-fill, 110px);
         gap: 8px;
 
         @media (max-width: 680px) {
             grid-template-columns: repeat(2, 92px);
         }
+    }
+
+    &__cell_shared &__item-image,
+    &__cell_shared &__item-name {
+        opacity: 0.35;
+    }
+
+    &__shared-note {
+        font-size: 12px;
+        color: #18304a;
+        text-align: center;
     }
 
     &__cell {
@@ -230,3 +263,4 @@ onUnmounted(() => {
     }
 }
 </style>
+

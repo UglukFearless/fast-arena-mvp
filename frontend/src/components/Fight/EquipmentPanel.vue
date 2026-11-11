@@ -1,10 +1,10 @@
-<template>
+﻿<template>
     <div v-if="equipmentSlots.length" class="equipment-panel">
         <div class="equipment-panel__title">Экипировка</div>
         <div class="equipment-panel__grid">
             <article
                 v-for="slot in equipmentSlots"
-                :key="slot.slot"
+                :key="slot.id"
                 class="equipment-panel__slot"
                 :class="{ 'equipment-panel__slot_empty': !slot.item }"
             >
@@ -17,7 +17,7 @@
                     <span class="equipment-panel__name">{{ slot.item.item.name }}</span>
                 </template>
                 <template v-else>
-                    <span class="equipment-panel__empty-label">{{ getEquipmentSlotTitle(slot.slot) }}</span>
+                    <span class="equipment-panel__empty-label">{{ getEquipmentSlotTitle(slot.slotKey) }}</span>
                     <span class="equipment-panel__empty-state">Пусто</span>
                 </template>
             </article>
@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { EquipmentSlotType, HeroPocketSlotDto } from '@/api/clients';
+import { HeroPocketSlotDto } from '@/api/clients';
 import { PropType } from 'vue';
 
 const props = defineProps({
@@ -36,12 +36,12 @@ const props = defineProps({
     },
 });
 
-function getEquipmentSlotTitle(slot: EquipmentSlotType) {
-    if (slot === EquipmentSlotType.RIGHT_HAND) {
+function getEquipmentSlotTitle(slotKey: string) {
+    if (slotKey === 'HAND_RIGHT') {
         return 'Правая рука';
     }
 
-    if (slot === EquipmentSlotType.LEFT_HAND) {
+    if (slotKey === 'HAND_LEFT') {
         return 'Левая рука';
     }
 

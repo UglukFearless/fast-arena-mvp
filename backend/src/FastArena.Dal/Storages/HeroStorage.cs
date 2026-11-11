@@ -19,7 +19,24 @@ public class HeroStorage : IHeroStorage
     public async Task<Hero> CreateAsync(HeroCreationModel model)
     {
         var newHero = HeroProfile.Map(model);
+
+        var bodyMap = await _context.BodyMaps
+            .Include(m => m.Zones)
+            .FirstOrDefaultAsync();
+        var slotLayout = await _context.SlotLayouts
+            .Include(l => l.Entries)
+            .FirstOrDefaultAsync();
+
+        if (bodyMap == null || slotLayout == null)
+            throw new InvalidOperationException("Body map and slot layout are not seeded.");
+
+        var slots = HeroSlots.Create(
+            newHero.Id,
+            BodyMapProfiles.Map(bodyMap, true),
+            SlotLayoutProfiles.Map(slotLayout, true));
+
         _context.Heroes.Add(newHero);
+        _context.HeroSlots.AddRange(HeroSlotProfiles.Map(slots));
         await _context.SaveChangesAsync();
 
         return HeroProfile.Map(newHero);
@@ -44,11 +61,22 @@ public class HeroStorage : IHeroStorage
             .ThenInclude(i => i!.Effects)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
-            .ThenInclude(i => i!.AllowedSlots)
-            .Include(h => h.EquippedSlots)
-            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Slots)
+            .Include(h => h.Slots)
+            .ThenInclude(s => s.HeroItemCell)
             .ThenInclude(ic => ic!.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Slots)
+            .ThenInclude(s => s.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -65,11 +93,22 @@ public class HeroStorage : IHeroStorage
             .ThenInclude(i => i!.Effects)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
-            .ThenInclude(i => i!.AllowedSlots)
-            .Include(h => h.EquippedSlots)
-            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Slots)
+            .Include(h => h.Slots)
+            .ThenInclude(s => s.HeroItemCell)
             .ThenInclude(ic => ic!.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Slots)
+            .ThenInclude(s => s.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -86,11 +125,22 @@ public class HeroStorage : IHeroStorage
             .ThenInclude(i => i!.Effects)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
-            .ThenInclude(i => i!.AllowedSlots)
-            .Include(h => h.EquippedSlots)
-            .ThenInclude(es => es.HeroItemCell)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Slots)
+            .Include(h => h.Slots)
+            .ThenInclude(s => s.HeroItemCell)
             .ThenInclude(ic => ic!.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Slots)
+            .ThenInclude(s => s.HeroItemCell)
+            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
             .Include(h => h.Results)
             .ThenInclude(r => r.Portrait)
             .AsNoTracking()
@@ -248,11 +298,13 @@ public class HeroStorage : IHeroStorage
             .ThenInclude(i => i!.Effects)
             .Include(h => h.Items)
             .ThenInclude(ic => ic.Item)
-            .ThenInclude(i => i!.AllowedSlots)
-            .Include(h => h.EquippedSlots)
-            .ThenInclude(es => es.HeroItemCell)
-            .ThenInclude(ic => ic!.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
             .ThenInclude(i => i!.Effects)
+            .Include(h => h.Items)
+            .ThenInclude(ic => ic.Item)
+            .ThenInclude(i => i!.OccupiedSlots)
             .FirstAsync(h => h.Id == id);
         return hero;
     }

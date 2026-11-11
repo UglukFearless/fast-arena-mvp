@@ -678,10 +678,10 @@ public class MonsterFightService : IMonsterFightService
             return;
         }
 
-        var equippedSlots = hero.EquippedSlots ?? new List<HeroEquippedSlot>();
+        var equippedSlots = hero.Slots ?? new List<HeroSlot>();
         foreach (var slot in equippedSlots)
         {
-            if (!IsCombatEquipmentSlot(slot.Slot))
+            if (!IsCombatEquipmentSlot(slot.SlotKey))
             {
                 continue;
             }
@@ -720,9 +720,9 @@ public class MonsterFightService : IMonsterFightService
         }
     }
 
-    private static bool IsCombatEquipmentSlot(EquipmentSlotType slot)
+    private static bool IsCombatEquipmentSlot(string slotKey)
     {
-        return slot == EquipmentSlotType.RIGHT_HAND || slot == EquipmentSlotType.LEFT_HAND;
+        return SlotKeys.IsHand(slotKey);
     }
 
     private void ApplyRoundStartEffects(MonsterFightActionState state, Hero hero, Monster monster)
